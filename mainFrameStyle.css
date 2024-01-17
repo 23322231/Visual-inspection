@@ -2,8 +2,8 @@ body {
     background-color: #ffffff; /* 莫蘭迪淺藍色系的背景顏色 */
     text-align: center; /* 將文字置中 */
   }
-
-  #welcome-text { /*調整第一行的地方*/
+  /*調整第一行的地方*/
+  #welcome-text { 
     font-size: 50px;
     font-weight: bold;
     margin-top: 50px; /* 與頂部的距離 */
@@ -30,15 +30,37 @@ body {
     border-radius: 5px;
   }
 
-  #color-blind-btn {
-    background-color: #3498db; /* 莫蘭迪淺藍色系的按鈕顏色 */
-    color: #fff; /* 按鈕文字顏色 */
+  /*色盲檢查按鈕*/
+  #color-blind-btn { 
+    background-color: #ffffff; /* 按鈕背景顏色 */
+    border: 5px solid #b2c2e3; /* 按鈕邊框顏色 */
+    color: #b2c2e3; /* 按鈕文字顏色 */
     margin-right: 10px; /* 兩個按鈕之間的距離 */
+    font-size: 150%;
+    width: 120px;
+    height: 120px;
+  }
+  #color-blind-btn:hover {
+    background-color: #cadcea; /* 當滑鼠停在按鈕上時的背景顏色（灰色） */
+  }
+  #color-blind-btn:active {
+    background-color: #b1c9d3; /* 當滑鼠點按鈕時的背景顏色（灰色） */
   }
 
-  #vision-test-btn {
-    background-color: #3498db; /* 莫蘭迪淺藍色系的按鈕顏色 */
-    color: #fff; /* 按鈕文字顏色 */
+  /*視力檢查按鈕*/
+  #vision-test-btn { 
+    background-color: #ffffff; /* 按鈕背景顏色 */
+    border: 5px solid #b2c2e3; /* 按鈕邊框顏色 */
+    color: #b2c2e3; /* 按鈕文字顏色 */
+    font-size: 150%;
+    width: 120px;
+    height: 120px;
+  }
+  #vision-test-btn:hover {
+    background-color: #dae6f2; /* 當滑鼠停在按鈕上時的背景顏色（灰色） */
+  }
+  #vision-test-btn:active {
+    background-color: #b1c9d3; /* 當滑鼠點按鈕時的背景顏色（灰色） */
   }
 
   .quiz-button:hover {
