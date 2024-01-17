@@ -1,0 +1,46 @@
+body {
+    background-color: #ffffff; /* 莫蘭迪淺藍色系的背景顏色 */
+    text-align: center; /* 將文字置中 */
+  }
+
+  #welcome-text { /*調整第一行的地方*/
+    font-size: 50px;
+    font-weight: bold;
+    margin-top: 50px; /* 與頂部的距離 */
+    color:#91a1c5;
+  }
+
+  #main-image {
+    margin-top: 15px; /* 圖片與第一行文字的距離 */
+  }
+
+  #question-text { /*調整下面那一行字的地方*/
+    font-size: 30px;
+    margin-top: 20px; /* 與圖片的距離 */
+    color:#b2c2e3;
+  }
+
+  .quiz-button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-top: 10px; /* 與文字的距離 */
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+  }
+
+  #color-blind-btn {
+    background-color: #3498db; /* 莫蘭迪淺藍色系的按鈕顏色 */
+    color: #fff; /* 按鈕文字顏色 */
+    margin-right: 10px; /* 兩個按鈕之間的距離 */
+  }
+
+  #vision-test-btn {
+    background-color: #3498db; /* 莫蘭迪淺藍色系的按鈕顏色 */
+    color: #fff; /* 按鈕文字顏色 */
+  }
+
+  .quiz-button:hover {
+    background-color: #7f8c8d; /* 當滑鼠停在按鈕上時的背景顏色（灰色） */
+  }
