@@ -23,9 +23,9 @@ const upEvent = hasTouchEvent ? 'touchend' : 'mouseup'
 // 宣告 isMouseActive 為滑鼠點擊的狀態，因為我們需要滑鼠在 mousedown 的狀態時，才會監聽 mousemove 的狀態
 let isMouseActive = false
 
-canvas.addEventListener(downEvent, function(e){
+//canvas.addEventListener(downEvent, function(e){
   isMouseActive = true
-})
+//})
 
 canvas.addEventListener(downEvent, function(e){
   isMouseActive = true  
