@@ -55,6 +55,7 @@ canvas.addEventListener(moveEvent, function(e){
       y1 = y2
 })
 
+//結束繪圖
 canvas.addEventListener(upEvent, function(e){
   isMouseActive = false
 })

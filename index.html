@@ -46,6 +46,7 @@
         // 設定線條樣式
         context.lineWidth = 5;
         context.lineCap = 'round';
+        context.lineJoin = 'round'
         context.strokeStyle = 'black';
 
         // 獲取觸控或滑鼠位置
@@ -72,7 +73,7 @@
     // 結束繪圖
     function stopDrawing() {
         isDrawing = false;
-        context.closePath();
+        //context.closePath();
     }
 </script>
 
