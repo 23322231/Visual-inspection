@@ -1,3 +1,5 @@
+
+
 // Canvas DOM 元素 
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
@@ -67,15 +69,3 @@ canvas.addEventListener(upEvent, function(e){
   lineCoordinates = [];
 })
 
-let imageUrls = [
-    "C://Users//April//OneDrive//文件//Visual-inspection//pic1.png"
-  ];
-  
-  let showRandomImageButton = document.getElementById("randomBtn");
-  
-  showRandomImageButton.addEventListener("click", () => {
-    let selectedImage = document.getElementById("selected-image");
-    let randomIndex = Math.floor(Math.random() * imageUrls.length);
-    let randomImageUrl = imageUrls[randomIndex];
-    selectedImage.src = randomImageUrl;
-  });
