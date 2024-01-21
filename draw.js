@@ -1,4 +1,3 @@
-//document.write("ok");
 // Canvas DOM 元素 
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
@@ -35,7 +34,8 @@ canvas.addEventListener(downEvent, function(e){
   ctx.lineCap = 'round'
   ctx.lineJoin = 'round'
 })
-
+// 儲存線條軌跡的座標陣列
+var lineCoordinates = [];
 canvas.addEventListener(moveEvent, function(e){
       if(!isMouseActive){
         return
@@ -43,19 +43,39 @@ canvas.addEventListener(moveEvent, function(e){
       // 取得終點座標
       x2 = e.offsetX
       y2 = e.offsetY
-
+      
       // 開始繪圖
       ctx.beginPath()
       ctx.moveTo(x1, y1)
       ctx.lineTo(x2, y2)
       ctx.stroke()
-
+      // 將座標紀錄到軌跡陣列
+      lineCoordinates.push([x2,y2]);
       // 更新起始點座標
       x1 = x2
       y1 = y2
+      
 })
 
 //結束繪圖
 canvas.addEventListener(upEvent, function(e){
   isMouseActive = false
+  // 輸出軌跡座標
+  
+  //document.write(lineCoordinates);
+  // 清空軌跡座標陣列，以便下次繪製
+  lineCoordinates = [];
 })
+
+let imageUrls = [
+    "C://Users//April//OneDrive//文件//Visual-inspection//pic1.png"
+  ];
+  
+  let showRandomImageButton = document.getElementById("randomBtn");
+  
+  showRandomImageButton.addEventListener("click", () => {
+    let selectedImage = document.getElementById("selected-image");
+    let randomIndex = Math.floor(Math.random() * imageUrls.length);
+    let randomImageUrl = imageUrls[randomIndex];
+    selectedImage.src = randomImageUrl;
+  });
