@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>觸控畫圖工具</title>
+    <title>簡單繪圖應用</title>
     <style>
         canvas {
             border: 1px solid #000;
@@ -19,14 +19,19 @@
     var canvas = document.getElementById('drawingCanvas');
     var context = canvas.getContext('2d');
 
-    // 設定觸控事件
-    canvas.addEventListener('touchstart', startDrawing);
-    canvas.addEventListener('touchmove', draw);
-    canvas.addEventListener('touchend', stopDrawing);
-
-    // 設定繪圖參數
+    // 設定初始狀態
     var isDrawing = false;
-    var lineCoordinates = [];
+
+    // 設定觸控和滑鼠事件
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('touchstart', startDrawing);
+
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('touchmove', draw);
+
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseleave', stopDrawing);
+    canvas.addEventListener('touchend', stopDrawing);
 
     // 開始繪圖
     function startDrawing(e) {
@@ -36,38 +41,38 @@
 
     // 繪圖
     function draw(e) {
-        e.preventDefault(); // 防止滾動
-
         if (!isDrawing) return;
 
         // 設定線條樣式
         context.lineWidth = 5;
         context.lineCap = 'round';
-        context.lineJoin = 'round';
         context.strokeStyle = 'black';
 
-        // 取得觸控位置
-        var x = e.touches[0].clientX - canvas.offsetLeft;
-        var y = e.touches[0].clientY - canvas.offsetTop;
-
-        // 將座標紀錄到軌跡陣列
-        lineCoordinates.push({ x, y });
+        // 獲取觸控或滑鼠位置
+        var x, y;
+        if (e.touches) {
+            x = e.touches[0].clientX - canvas.offsetLeft;
+            y = e.touches[0].clientY - canvas.offsetTop;
+        } else {
+            x = e.clientX - canvas.offsetLeft;
+            y = e.clientY - canvas.offsetTop;
+        }
 
         // 開始繪製路徑
         context.beginPath();
-        context.moveTo(lineCoordinates[0].x, lineCoordinates[0].y);
+        context.moveTo(x, y);
 
-        // 繪製連續的線段
-        for (var i = 1; i < lineCoordinates.length; i++) {
-            context.lineTo(lineCoordinates[i].x, lineCoordinates[i].y);
-            context.stroke();
-        }
+        // 繪製至新位置
+        context.lineTo(x, y);
+
+        // 繪製路徑
+        context.stroke();
     }
 
     // 結束繪圖
     function stopDrawing() {
         isDrawing = false;
-        lineCoordinates = []; // 清空軌跡座標陣列，以便下次繪製
+        context.closePath();
     }
 </script>
 
