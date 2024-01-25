@@ -13,15 +13,11 @@
 <body>
 
 <canvas id="drawingCanvas" width="500" height="500"></canvas>
-<div id="coordinates"></div>
     
 <script>
     // 取得 canvas 元素
     var canvas = document.getElementById('drawingCanvas');
     var context = canvas.getContext('2d');
-
-   // 取得顯示座標的元素
-    var coordinatesDiv = document.getElementById('coordinates'); 
 
     // 設定觸控事件
     canvas.addEventListener('touchstart', startDrawing);
@@ -71,20 +67,7 @@
     // 結束繪圖
     function stopDrawing() {
         isDrawing = false;
-        displayCoordinates();  // 顯示座標
         lineCoordinates = []; // 清空軌跡座標陣列，以便下次繪製
-    }
-
-    // 顯示座標
-    function displayCoordinates() {
-        var coordinatesHTML = "Coordinates: ";
-        for (var i = 0; i < lineCoordinates.length; i++) {
-            coordinatesHTML += "(" + lineCoordinates[i].x + ", " + lineCoordinates[i].y + ")";
-            if (i < lineCoordinates.length - 1) {
-                coordinatesHTML += ", ";
-            }
-        }
-        coordinatesDiv.innerHTML = coordinatesHTML;
     }
 </script>
 
