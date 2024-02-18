@@ -1,0 +1,76 @@
+body {
+    text-align: center;
+    background-color: #ffffff; /* 背景顏色 */
+    /* margin: 50px; */
+}
+
+/* 第一行字 */
+#colorBlind{
+    font-size: 50px;
+    font-weight: bold;
+    margin-top: 30px; /* 與頂部的距離 */
+    color:#91a1c5;
+}
+
+/* 按鈕部分 */
+.colorBlind-button {
+    vertical-align: top;
+    display: inline-block;
+    padding: 10px 20px;
+    margin-top: 10px; /* 與文字的距離 */
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+}
+
+/* 點圖測試按鈕 */
+#dotQuiz { 
+    background-color: #ffffff; /* 按鈕背景顏色 */
+    border: 5px solid #b2c2e3; /* 按鈕邊框顏色 */
+    color: #b2c2e3; /* 按鈕文字顏色 */
+    margin-right: 10px; /* 兩個按鈕之間的距離 */
+    font-size: 150%;
+    width: 120px;
+    height: 120px;
+}
+#dotQuiz:hover {
+    background-color: #e2f1fd; /* 當滑鼠停在按鈕上時的背景顏色（灰色） */
+}
+#dotQuiz:active {
+    background-color: #d2e7ff; /* 當滑鼠點按鈕時的背景顏色（灰色） */
+}
+
+/* 日常生活測試按鈕 */
+#dailyQuiz { 
+    background-color: #ffffff; /* 按鈕背景顏色 */
+    border: 5px solid #b2c2e3; /* 按鈕邊框顏色 */
+    color: #b2c2e3; /* 按鈕文字顏色 */
+    margin-right: 10px; /* 兩個按鈕之間的距離 */
+    font-size: 150%;
+    width: 120px;
+    height: 120px;
+}
+#dailyQuiz:hover {
+    background-color: #e2f1fd; /* 當滑鼠停在按鈕上時的背景顏色（灰色） */
+}
+#dailyQuiz:active {
+    background-color: #d2e7ff; /* 當滑鼠點按鈕時的背景顏色（灰色） */
+}
+
+/* 全部測試按鈕 */
+#allQuiz { 
+    background-color: #ffffff; /* 按鈕背景顏色 */
+    border: 5px solid #b2c2e3; /* 按鈕邊框顏色 */
+    color: #b2c2e3; /* 按鈕文字顏色 */
+    margin-right: 10px; /* 兩個按鈕之間的距離 */
+    font-size: 150%;
+    width: 120px;
+    height: 120px;
+}
+#allQuiz:hover {
+    background-color: #e2f1fd; /* 當滑鼠停在按鈕上時的背景顏色（灰色） */
+}
+#allQuiz:active {
+    background-color: #d2e7ff; /* 當滑鼠點按鈕時的背景顏色（灰色） */
+}
