@@ -1,0 +1,55 @@
+<!-- 圖片顯示頁面 目前確認鈕還在這個頁面--> 
+<!DOCTYPE html>
+<html lang="en">
+        <head lang="en">
+        <meta charset="UTF-8">
+        <title>切換照片</title>
+    </head>
+    <style>
+    *{ 
+        margin:0;
+        padding:0;
+    }
+    #picBox{ 
+        margin:100px auto;
+        width:600px;
+        height:400px;
+    }
+    #pic{ 
+        width:600px;
+        height:400px;
+    }
+    #buttonBox{ 
+        width:200px;
+        margin:10px auto;
+    }
+    </style>
+
+    <body>
+    <div id="picBox">
+       
+        <img src="https://media.gq.com.tw/photos/6517ff9d63b2e9a3b2ea1c3d/master/w_1600%2Cc_limit/F6ybr-1bQAA9lXo.jpeg" id="pic" alt="挖哩勒">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+        <script>
+            var index=0;
+            const socket = io();
+            socket.on('button_press', (msg) => {
+                console.log('Button Pressed on the server:', msg);
+                // 在這裡處理按鈕被按下的事件，例如切換圖片
+                // 例如：更新圖片 src，可以根據 msg 的內容進行相應處理
+                var picArr=new Array("https://media.gq.com.tw/photos/6517ff9d63b2e9a3b2ea1c3d/master/w_1600%2Cc_limit/F6ybr-1bQAA9lXo.jpeg","https://media.gq.com.tw/photos/6517ffc98254b07004e5fb2a/master/w_1600%2Cc_limit/EcyuIbsU0AArMzI.jpeg","https://media.gq.com.tw/photos/6518013e8254b07004e5fb2c/master/w_1600%2Cc_limit/Epiep_kUwAE_BGp.jpeg","https://one-uni-static.oneone.com.tw/upload/featured/ade380969c18a268b4a88d378ebc24f2.png");
+                
+                confirm();
+                function confirm(){ 
+                    index++;
+                    if(index==picArr.length){ 
+                        index=0;
+                    }
+                    document.getElementById("pic").src=picArr[index];
+                }
+            });
+        </script>
+    </div>
+    
+    </body>
+</html>
