@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>觸控畫圖工具</title>
+    <style>
+        canvas {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="drawingCanvas" width="300" height="300"></canvas>
+<div id="coordinates"></div>
+
+<script>
+    // 取得 canvas 元素
+    var canvas = document.getElementById('drawingCanvas');
+    var context = canvas.getContext('2d');
+
+    // 取得顯示座標的元素
+    var coordinatesDiv = document.getElementById('coordinates');
+
+    // 設定觸控事件
+    canvas.addEventListener('touchstart', startDrawing);
+    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchend', stopDrawing);
+
+    // 設定繪圖參數
+    var isDrawing = false;
+    var lineCoordinates = [];
+
+    // 開始繪圖
+    function startDrawing(e) {
+        isDrawing = true;
+        draw(e);  // 避免在移動前有斷線的情況
+    }
+
+    // 繪圖
+    function draw(e) {
+        e.preventDefault(); // 防止滾動
+
+        if (!isDrawing) return;
+
+        // 設定線條樣式
+        context.lineWidth = 5;
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+        context.strokeStyle = 'black';
+
+        // 取得觸控位置
+        var x = e.touches[0].clientX - canvas.offsetLeft;
+        var y = e.touches[0].clientY - canvas.offsetTop;
+
+        // 將座標紀錄到軌跡陣列
+        lineCoordinates.push({ x, y });
+
+        // 開始繪製路徑
+        context.beginPath();
+        context.moveTo(lineCoordinates[0].x, lineCoordinates[0].y);
+
+        // 繪製連續的線段
+        for (var i = 1; i < lineCoordinates.length; i++) {
+            context.lineTo(lineCoordinates[i].x, lineCoordinates[i].y);
+            context.stroke();
+        }
+    }
+
+    function sendCoordinatesToFlask(coordinates) {
+        // fetch API，它發送一個 HTTP 請求到指定的 URL /receive_coordinates
+        // 假設 Flask 應用程式正在同一伺服器上運行，並監聽根路徑
+        // 因此 /receive_coordinates 將會發送到 Flask API 的 receive_coordinates 路由
+        fetch('/receive_coordinates', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'  // 表示請求的內容是 JSON 格式的資料
+            },
+            body: JSON.stringify(coordinates)   // 將陣列 coordinates 轉換為 JSON 字串
+        })
+        .then(response => response.json())  // 當伺服器回應返回時，首先將其解析為 JSON 格式
+        .then(data => {
+            console.log(data.message);
+        })  // 將訪問 data 的 message 屬性，並將其輸出到瀏覽器的控制台中
+        .catch(error => {
+            console.error('Error:', error);
+        }); // 錯誤處理部分
+    }
+
+
+    // 結束繪圖
+    function stopDrawing() {
+        isDrawing = false;
+        //console.log(lineCoordinates);
+        sendCoordinatesToFlask(lineCoordinates); // 將坐標資料發送到 Flask 伺服器
+        //displayCoordinates();  // 顯示座標
+        
+        lineCoordinates = []; // 清空軌跡座標陣列，以便下次繪製
+    }
+
+    // 顯示座標
+    function displayCoordinates() {
+        var coordinatesHTML = "Coordinates: ";
+        for (var i = 0; i < lineCoordinates.length; i++) {
+            coordinatesHTML += "(" + lineCoordinates[i].x + ", " + lineCoordinates[i].y + ")";
+            if (i < lineCoordinates.length - 1) {
+                coordinatesHTML += ", ";
+            }
+        }
+        coordinatesDiv.innerHTML = coordinatesHTML;
+    }
+</script>
+
+</body>
+</html>
