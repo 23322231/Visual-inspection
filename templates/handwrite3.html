@@ -20,6 +20,10 @@
     var canvas = document.getElementById('drawingCanvas');
     var context = canvas.getContext('2d');
 
+    // 設置畫布背景為白色
+    context.fillStyle = 'white'; // 填充顏色為白色
+    context.fillRect(0, 0, canvas.width, canvas.height); // 填充整個畫布
+
     // 取得顯示座標的元素
     var coordinatesDiv = document.getElementById('coordinates');
 
@@ -88,7 +92,6 @@
         coordinatesDiv.innerHTML = coordinatesHTML;
     }
 
-    // 存圖片
     function saveImage() {
         var dataURL = canvas.toDataURL();   // 將畫布上的內容轉換為 Data URL 字串
         fetch('/upload', {
