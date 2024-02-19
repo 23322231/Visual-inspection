@@ -1,0 +1,66 @@
+body {
+    background-color: #ffffff; /* 背景顏色 */
+    text-align: center; /* 將文字置中 */
+}
+/*調整第一行的地方*/
+#welcome-text { 
+    font-size: 50px;
+    font-weight: bold;
+    margin-top: 30px; /* 與頂部的距離 */
+    color:#91a1c5;
+}
+
+/* 中間圖片部分 */
+#main-image {
+    margin-top: 15px; /* 圖片與第一行文字的距離 */
+}
+
+/*調整下面那一行字的地方*/
+#question-text {
+    font-size: 30px;
+    margin-top: 5px; /* 與圖片的距離 */
+    color:#b2c2e3;
+}
+
+.quiz-button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-top: 10px; /* 與文字的距離 */
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+}
+
+/*色盲檢查按鈕*/
+#computer-btn { 
+    background-color: #ffffff; /* 按鈕背景顏色 */
+    border: 5px solid #b2c2e3; /* 按鈕邊框顏色 */
+    color: #b2c2e3; /* 按鈕文字顏色 */
+    margin-right: 10px; /* 兩個按鈕之間的距離 */
+    font-size: 160%;
+    width: 130px;
+    height: 90px;
+}
+#computer-btn:hover {
+    background-color: #e2f1fd; /* 當滑鼠停在按鈕上時的背景顏色（灰色） */
+}
+#computer-btn:active {
+    background-color: #d2e7ff; /* 當滑鼠點按鈕時的背景顏色（灰色） */
+}
+
+/*視力檢查按鈕*/
+#phone-btn { 
+    background-color: #ffffff; /* 按鈕背景顏色 */
+    border: 5px solid #b2c2e3; /* 按鈕邊框顏色 */
+    color: #b2c2e3; /* 按鈕文字顏色 */
+    font-size: 160%;
+    width: 130px;
+    height: 90px;
+}
+#phone-btn:hover {
+    background-color: #e2f1fd; /* 當滑鼠停在按鈕上時的背景顏色（灰色） */
+}
+#phone-btn:active {
+    background-color: #d2e7ff; /* 當滑鼠點按鈕時的背景顏色（灰色） */
+}

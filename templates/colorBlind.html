@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>手機端or電腦端</title>
+  <link rel="stylesheet" href="static/colorBlind.css">
+</head>
+<body>
+  <div id="welcome-text">請問您現在使用的是...?</div>
+  <img id="main-image" src="static/main_img.jpg" alt="Main Image">
+  <!-- <div id="question-text">想做甚麼測驗呢</div> -->
+  <div style="width: 100%;margin-left: 0.2%;">
+    <a href="http://127.0.0.1:5000/images">
+        <button id="computer-btn" class="quiz-button">電腦</button>
+    </a>
+    <a href="http://127.0.0.1:5000/confirm">
+        <button id="phone-btn" class="quiz-button">手機</button>
+    </a>
+  </div>
+  <script>
+    document.getElementById('color-blind-btn').addEventListener('click', function() {
+      window.location.href = 'colorBlind/colorBlindMainFrame.html';
+    });
+  </script>
+</body>
+</html>
