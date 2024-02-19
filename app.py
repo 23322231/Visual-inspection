@@ -6,7 +6,11 @@ socketio = SocketIO(app)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('mainFrame.html')
+
+@app.route('/choose')
+def choose():
+    return render_template('colorBlind.html')
 
 @app.route('/confirm')
 def confirm():
