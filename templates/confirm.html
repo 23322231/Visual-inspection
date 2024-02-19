@@ -5,10 +5,71 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Button Click Example</title>
+    <title>手機操作端</title>
+    <link rel="stylesheet" href="static/confirm.css">
+
 </head>
 <body>
-    <button onclick="sendButtonPress()">Press me</button>
+    <div id="answer-text">作答區</div>
+    <canvas id="drawingCanvas" width="500" height="500"></canvas>
+    <script>
+        // 取得 canvas 元素
+        var canvas = document.getElementById('drawingCanvas');
+        var context = canvas.getContext('2d');
+    
+        // 設定觸控事件
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+    
+        // 設定繪圖參數
+        var isDrawing = false;
+        var lineCoordinates = [];
+    
+        // 開始繪圖
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);  // 避免在移動前有斷線的情況
+        }
+    
+        // 繪圖
+        function draw(e) {
+            e.preventDefault(); // 防止滾動
+    
+            if (!isDrawing) return;
+    
+            // 設定線條樣式
+            context.lineWidth = 5;
+            context.lineCap = 'round';
+            context.lineJoin = 'round';
+            context.strokeStyle = 'black';
+    
+            // 取得觸控位置
+            var x = e.touches[0].clientX - canvas.offsetLeft;
+            var y = e.touches[0].clientY - canvas.offsetTop;
+    
+            // 將座標紀錄到軌跡陣列
+            lineCoordinates.push({ x, y });
+    
+            // 開始繪製路徑
+            context.beginPath();
+            context.moveTo(lineCoordinates[0].x, lineCoordinates[0].y);
+    
+            // 繪製連續的線段
+            for (var i = 1; i < lineCoordinates.length; i++) {
+                context.lineTo(lineCoordinates[i].x, lineCoordinates[i].y);
+                context.stroke();
+            }
+        }
+    
+        // 結束繪圖
+        function stopDrawing() {
+            isDrawing = false;
+            lineCoordinates = []; // 清空軌跡座標陣列，以便下次繪製
+        }
+    </script>
+    <button id="confirm-btn"onclick="sendButtonPress()">送出答案</button>
+    
     <script>
         const socket = io();
         socket.on('button_press', (msg) => {
