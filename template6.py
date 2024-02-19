@@ -23,7 +23,7 @@ def upload_image():
     # 然後使用 BytesIO 將其包裝成 BytesIO 對象
     # 最後使用 Pillow 的 Image.open() 方法打開圖片，生成一個 Image
     image = Image.open(BytesIO(base64.b64decode(image_data)))
-    image.save('C:/Users/admin/pythonProject/handwrite/uploaded_image.png')  # 將打開的圖片對象保存為 PNG 格式的圖片檔案
+    image.save('C:/Users/April/OneDrive/文件/Visual-inspection/handwrite/uploaded_image.png')  # 將打開的圖片對象保存為 PNG 格式的圖片檔案
 
     return jsonify({'message': 'Image uploaded successfully'})
 

@@ -12,11 +12,15 @@
 <body>
     <div id="answer-text">作答區</div>
     <canvas id="drawingCanvas" width="500" height="500"></canvas>
+    <div id="coordinates"></div>
     <script>
         // 取得 canvas 元素
         var canvas = document.getElementById('drawingCanvas');
         var context = canvas.getContext('2d');
     
+        // 取得顯示座標的元素
+        var coordinatesDiv = document.getElementById('coordinates');
+        
         // 設定觸控事件
         canvas.addEventListener('touchstart', startDrawing);
         canvas.addEventListener('touchmove', draw);
@@ -61,14 +65,71 @@
                 context.stroke();
             }
         }
-    
+        
+        function sendCoordinatesToFlask(coordinates) {
+            // fetch API，它發送一個 HTTP 請求到指定的 URL /receive_coordinates
+            // 假設 Flask 應用程式正在同一伺服器上運行，並監聽根路徑
+            // 因此 /receive_coordinates 將會發送到 Flask API 的 receive_coordinates 路由
+            fetch('/receive_coordinates', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'  // 表示請求的內容是 JSON 格式的資料
+                },
+                body: JSON.stringify(coordinates)   // 將陣列 coordinates 轉換為 JSON 字串
+            })
+            .then(response => response.json())  // 當伺服器回應返回時，首先將其解析為 JSON 格式
+            .then(data => {
+                console.log(data.message);
+            })  // 將訪問 data 的 message 屬性，並將其輸出到瀏覽器的控制台中
+            .catch(error => {
+                console.error('Error:', error);
+            }); // 錯誤處理部分
+        }
+
         // 結束繪圖
         function stopDrawing() {
             isDrawing = false;
             lineCoordinates = []; // 清空軌跡座標陣列，以便下次繪製
+            sendCoordinatesToFlask(lineCoordinates); // 將坐標資料發送到 Flask 伺服器
+            //console.log(lineCoordinates);
+            //displayCoordinates();
+        }
+
+        // 顯示座標
+        function displayCoordinates() {
+            var coordinatesHTML = "Coordinates: ";
+            for (var i = 0; i < lineCoordinates.length; i++) {
+                coordinatesHTML += "(" + lineCoordinates[i].x + ", " + lineCoordinates[i].y + ")";
+                if (i < lineCoordinates.length - 1) {
+                    coordinatesHTML += ", ";
+                }
+            }
+            coordinatesDiv.innerHTML = coordinatesHTML;
+        }
+
+        // 存圖片
+        function saveImage() {
+            var dataURL = canvas.toDataURL();   // 將畫布上的內容轉換為 Data URL 字串
+            fetch('/upload', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'  // 表示請求的內容是 JSON 格式的資料
+                },
+                body: JSON.stringify({ image: dataURL })    // 將陣列 coordinates 轉換為 JSON 字串
+            })
+            .then(response => response.json())  // 當伺服器回應返回時，首先將其解析為 JSON 格式
+            // 將訪問 data 的 message 屬性，並將其輸出到瀏覽器的控制台中
+            .then(data => {
+                console.log(data);
+            })
+            // 錯誤處理部分
+            .catch(error => {
+                console.error('Error:', error);
+            });
         }
     </script>
-    <button id="confirm-btn"onclick="sendButtonPress()">送出答案</button>
+    <button id="confirm-btn" onclick="sendButtonPress()">送出答案</button>
+    <button id="save-btn" onclick="saveImage()">Save Image</button>
     
     <script>
         const socket = io();
