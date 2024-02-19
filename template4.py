@@ -1,13 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Feb  9 10:56:02 2024
-
-@author: admin
-"""
-
-"""
-2/9 chatgpt
-"""
 from flask import Flask, request, jsonify
 from flask import render_template
 import json
