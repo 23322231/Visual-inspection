@@ -23,6 +23,15 @@ def confirm():
 def image():
     return render_template('images2.html')
 
+# 在 /receive_coordinates 路由上監聽來自客戶端的 POST 請求
+@app.route('/receive_coordinates', methods=['POST'])
+def receive_coordinates():
+    data = request.get_json()   # 從 POST 請求中取得 JSON 格式的資料
+    print("Received coordinates:", data)
+    # 返回一個 JSON 格式的回應，其中包含一個名為 message 的屬性，指示座標資料已成功接收
+    return jsonify({'message': 'Coordinates received successfully'})
+
+
 @app.route('/upload', methods=['POST'])
 def upload_image():
     data = request.json  # 從 POST 請求中獲取 JSON 格式的數據(前端傳來的圖片資料)
@@ -36,17 +45,9 @@ def upload_image():
     # 然後使用 BytesIO 將其包裝成 BytesIO 對象
     # 最後使用 Pillow 的 Image.open() 方法打開圖片，生成一個 Image
     image = Image.open(BytesIO(base64.b64decode(image_data)))
-    image.save('C:/Users/April/OneDrive/文件/Visual-inspection/handwrite/uploaded_image.png')  # 將打開的圖片對象保存為 PNG 格式的圖片檔案
+    image.save('uploaded_image.png')  # 將打開的圖片對象保存為 PNG 格式的圖片檔案
 
     return jsonify({'message': 'Image uploaded successfully'})
-
-# 在 /receive_coordinates 路由上監聽來自客戶端的 POST 請求
-@app.route('/receive_coordinates', methods=['POST'])
-def receive_coordinates():
-    data = request.get_json()   # 從 POST 請求中取得 JSON 格式的資料
-    print("Received coordinates:", data)
-    # 返回一個 JSON 格式的回應，其中包含一個名為 message 的屬性，指示座標資料已成功接收
-    return jsonify({'message': 'Coordinates received successfully'})
 
 @socketio.on('button_press')
 def handle_button_press(msg):
