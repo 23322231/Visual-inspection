@@ -17,6 +17,10 @@
         // 取得 canvas 元素
         var canvas = document.getElementById('drawingCanvas');
         var context = canvas.getContext('2d');
+
+        // 設置畫布背景為白色
+        context.fillStyle = 'white'; // 填充顏色為白色
+        context.fillRect(0, 0, canvas.width, canvas.height); // 填充整個畫布
     
         // 取得顯示座標的元素
         var coordinatesDiv = document.getElementById('coordinates');
@@ -66,6 +70,7 @@
             }
         }
         
+        //傳座標
         function sendCoordinatesToFlask(coordinates) {
             // fetch API，它發送一個 HTTP 請求到指定的 URL /receive_coordinates
             // 假設 Flask 應用程式正在同一伺服器上運行，並監聽根路徑
