@@ -104,6 +104,7 @@
     //傳圖片
     function saveImage() {
         var dataURL = canvas.toDataURL();   // 將畫布上的內容轉換為 Data URL 字串
+        
         fetch('/upload', {
             method: 'POST',
             headers: {
