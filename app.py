@@ -11,17 +11,17 @@ socketio = SocketIO(app)
 def index():
     return render_template('mainFrame.html')
 
-@app.route('/choose')
+@app.route('/colorBlind')
 def choose():
     return render_template('colorBlind.html')
 
-@app.route('/confirm')
+@app.route('/phone_page')
 def confirm():
-    return render_template('confirm.html')
+    return render_template('phone_page.html')
 
-@app.route('/images')
+@app.route('/show_image')
 def image():
-    return render_template('images2.html')
+    return render_template('show_image.html')
 
 # 在 /receive_coordinates 路由上監聽來自客戶端的 POST 請求
 @app.route('/receive_coordinates', methods=['POST'])
