@@ -6,9 +6,9 @@ canvas {
     border: 5px solid #91a1c5;  
     position: relative;/*相對位置*/
     top: 10px;
-    left: 60px;   
+    left: 0px;   
 }
-#answer-text { 
+#answer-text {  
     font-size: 50px;
     font-weight: bold;
     margin-top: 30px; /* 與頂部的距離 */
@@ -17,8 +17,8 @@ canvas {
 /*確認送出答案按鈕*/
 #confirm-btn {
     position: relative;/*相對位置*/
-    top: 100px;
-    left: -245px;
+    top: 50px;
+    left: -75px;
     background-color: #ffffff; /* 按鈕背景顏色 */
     border: 5px solid #b2c2e3; /* 按鈕邊框顏色 */
     color: #b2c2e3; /* 按鈕文字顏色 */
@@ -30,5 +30,24 @@ canvas {
     background-color: #e2f1fd; /* 當滑鼠停在按鈕上時的背景顏色（灰色） */
 }
 #confirm-btn:active {
+    background-color: #d2e7ff; /* 當滑鼠點按鈕時的背景顏色（灰色） */
+}
+
+/*儲存作答圖片*/
+#save-btn {
+    position: relative;/*相對位置*/
+    top: 50px;
+    left: 60px;
+    background-color: #ffffff; /* 按鈕背景顏色 */
+    border: 5px solid #b2c2e3; /* 按鈕邊框顏色 */
+    color: #b2c2e3; /* 按鈕文字顏色 */
+    font-size: 150%;
+    width: 120px;
+    height:90px;
+}
+#save-btn:hover {
+    background-color: #e2f1fd; /* 當滑鼠停在按鈕上時的背景顏色（灰色） */
+}
+#save-btn:active{
     background-color: #d2e7ff; /* 當滑鼠點按鈕時的背景顏色（灰色） */
 }
