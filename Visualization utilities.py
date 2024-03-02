@@ -1,68 +1,41 @@
-#@markdown We implemented some functions to visualize the hand landmark detection results. <br/> Run the following cell to activate the functions.
-
-from mediapipe import solutions
-from mediapipe.framework.formats import landmark_pb2
-import numpy as np
 import cv2
 import mediapipe as mp
-from mediapipe.tasks import python
-from mediapipe.tasks.python import vision
 
-MARGIN = 10  # pixels
-FONT_SIZE = 1
-FONT_THICKNESS = 1
-HANDEDNESS_TEXT_COLOR = (88, 205, 54) # vibrant green
+mp_drawing = mp.solutions.drawing_utils          # mediapipe 繪圖方法
+mp_drawing_styles = mp.solutions.drawing_styles  # mediapipe 繪圖樣式
+mp_hands = mp.solutions.hands                    # mediapipe 偵測手掌方法
 
-def draw_landmarks_on_image(rgb_image, detection_result):
-  hand_landmarks_list = detection_result.hand_landmarks
-  handedness_list = detection_result.handedness
-  annotated_image = np.copy(rgb_image)
+cap = cv2.VideoCapture(2)
 
-  # Loop through the detected hands to visualize.
-  for idx in range(len(hand_landmarks_list)):
-    hand_landmarks = hand_landmarks_list[idx]
-    handedness = handedness_list[idx]
+# mediapipe 啟用偵測手掌
+with mp_hands.Hands(
+    model_complexity=0,
+    # max_num_hands=1,
+    min_detection_confidence=0.5,
+    min_tracking_confidence=0.5) as hands:
 
-    # Draw the hand landmarks.
-    hand_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
-    hand_landmarks_proto.landmark.extend([
-      landmark_pb2.NormalizedLandmark(x=landmark.x, y=landmark.y, z=landmark.z) for landmark in hand_landmarks
-    ])
-    solutions.drawing_utils.draw_landmarks(
-      annotated_image,
-      hand_landmarks_proto,
-      solutions.hands.HAND_CONNECTIONS,
-      solutions.drawing_styles.get_default_hand_landmarks_style(),
-      solutions.drawing_styles.get_default_hand_connections_style())
+    if not cap.isOpened():
+        print("Cannot open camera")
+        exit()
+    while True:
+        ret, img = cap.read()
+        if not ret:
+            print("Cannot receive frame")
+            break
+        img2 = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)   # 將 BGR 轉換成 RGB
+        results = hands.process(img2)                 # 偵測手掌
+        if results.multi_hand_landmarks:
+            for hand_landmarks in results.multi_hand_landmarks:
+                # 將節點和骨架繪製到影像中
+                mp_drawing.draw_landmarks(
+                    img,
+                    hand_landmarks,
+                    mp_hands.HAND_CONNECTIONS,
+                    mp_drawing_styles.get_default_hand_landmarks_style(),
+                    mp_drawing_styles.get_default_hand_connections_style())
 
-    # Get the top left corner of the detected hand's bounding box.
-    height, width, _ = annotated_image.shape
-    x_coordinates = [landmark.x for landmark in hand_landmarks]
-    y_coordinates = [landmark.y for landmark in hand_landmarks]
-    text_x = int(min(x_coordinates) * width)
-    text_y = int(min(y_coordinates) * height) - MARGIN
-
-    # Draw handedness (left or right hand) on the image.
-    cv2.putText(annotated_image, f"{handedness[0].category_name}",
-                (text_x, text_y), cv2.FONT_HERSHEY_DUPLEX,
-                FONT_SIZE, HANDEDNESS_TEXT_COLOR, FONT_THICKNESS, cv2.LINE_AA)
-
-  return annotated_image
-
-
-# STEP 2: Create an HandLandmarker object.
-base_options = python.BaseOptions(model_asset_path='C:\\Users\\April\\OneDrive\\文件\\Visual-inspection\\hand_landmarker.task')
-options = vision.HandLandmarkerOptions(base_options=base_options,
-                                       num_hands=2)
-detector = vision.HandLandmarker.create_from_options(options)
-
-# STEP 3: Load the input image.
-#image = mp.Image.create_from_file("image.jpg")
-image = cv2.imread("image.jpg")
-
-# STEP 4: Detect hand landmarks from the input image.
-detection_result = detector.detect(image)
-
-# STEP 5: Process the classification result. In this case, visualize it.
-annotated_image = draw_landmarks_on_image(image.numpy_view(), detection_result)
-cv2.imshow(cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR))
+        cv2.imshow('oxxostudio', img)
+        if cv2.waitKey(5) == ord('q'):
+            break    # 按下 q 鍵停止
+cap.release()
+cv2.destroyAllWindows()
