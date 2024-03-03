@@ -1,10 +1,19 @@
 <html>
     <head>
+        <meta name="viewpoint" content="width=device-width, initial-scale=1.0">
         <script src="ishihara.js"></script>
+        <link rel="stylesheet" href="ishiharaMainFrameStyle.css">
     </head>
     <body>
-        <center>
-            <canvas id="canvas"></canvas>
-        </center>
+        <section class="container">
+            <div id="toolbar">
+                <label for="lineWidth">Line Width</label>
+                <input id="lineWidth" name="lineWidth" type="number" value="5">
+                <button id="clear">clear</button>
+            </div>
+            <div class="canvas">
+                <canvas id="canvas"></canvas>
+            </div>
+        </section>
     </body>
 </html>

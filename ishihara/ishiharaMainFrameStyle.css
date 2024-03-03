@@ -1,0 +1,39 @@
+body{
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    color: white;
+}
+
+.container{
+    height: 100%;
+    width: 100%;
+    display: flex;
+}
+#toolbar{
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    width: 70px;
+    height: 100%;
+    background-color: black;
+}
+#toolbar *{
+    margin-top: 0px;
+}
+#toolbar label{
+    font-size: 12px;
+}
+#toolbar input{
+    width: 100%;
+}
+#toolbar button{
+    background-color: aliceblue;
+    border-color: gainsboro;
+    border-radius: 10px;
+    color: black;
+    padding: 2px;
+    margin-top: 7px;
+}
