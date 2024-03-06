@@ -1,90 +1,87 @@
-import cv2
-import numpy as np
-import pyrealsense2 as rs
+## License: Apache 2.0. See LICENSE file in root directory.
+## Copyright(c) 2015-2017 Intel Corporation. All Rights Reserved.
 
-# 初始化 RealSense 攝像頭設備
+###############################################
+##      Open CV and Numpy integration        ##
+###############################################
+
+import pyrealsense2 as rs
+import numpy as np
+import cv2
+
+# Configure depth and color streams
 pipeline = rs.pipeline()
 config = rs.config()
-config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-profile = pipeline.start(config)
 
-align_to = rs.align(rs.stream.color)
+# Get device product line for setting a supporting resolution
+pipeline_wrapper = rs.pipeline_wrapper(pipeline)
+pipeline_profile = config.resolve(pipeline_wrapper)
+device = pipeline_profile.get_device()
+device_product_line = str(device.get_info(rs.camera_info.product_line))
 
-# 網絡初始化，這裡的 "MobileNetSSD_deploy.prototxt" 和 "MobileNetSSD_deploy.caffemodel"
-# 文件需要替換成相應的 Python 模型文件
-net = cv2.dnn.readNetFromCaffe("MobileNetSSD_deploy.prototxt", "MobileNetSSD_deploy.caffemodel")
+print(device_product_line)
 
-inWidth, inHeight = 300, 300
-WHRatio = inWidth / float(inHeight)
-inScaleFactor = 0.007843
-meanVal = 127.5
-classNames = ["background", "aeroplane", "bicycle", "bird", "boat",
-              "bottle", "bus", "car", "cat", "chair",
-              "cow", "diningtable", "dog", "horse",
-              "motorbike", "person", "pottedplant",
-              "sheep", "sofa", "train", "tvmonitor"]
+found_rgb = False
+for s in device.sensors:
+    if s.get_info(rs.camera_info.name) == 'RGB Camera':
+        found_rgb = True
+        break
+if not found_rgb:
+    print("The demo requires Depth camera with Color sensor")
+    exit(0)
+
+config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+
+if device_product_line == 'L500':
+    config.enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
+else:
+    config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+
+# Start streaming
+pipeline.start(config)
 
 try:
     while True:
-        # Wait for the next set of frames
-        frames = pipeline.wait_for_frames()
-        # Make sure the frames are spatially aligned
-        aligned_frames = align_to.process(frames)
-        color_frame = aligned_frames.get_color_frame()
-        depth_frame = aligned_frames.get_depth_frame()
 
-        # If we only received new depth frame,
-        # but the color did not update, continue
-        if not color_frame or not depth_frame:
+        # Wait for a coherent pair of frames: depth and color
+        frames = pipeline.wait_for_frames()
+        depth_frame = frames.get_depth_frame()
+        color_frame = frames.get_color_frame()
+        if not depth_frame or not color_frame:
             continue
 
-        # Convert RealSense frame to OpenCV matrix
-        color_image = np.asanyarray(color_frame.get_data())
+        # Convert images to numpy arrays
         depth_image = np.asanyarray(depth_frame.get_data())
+        color_image = np.asanyarray(color_frame.get_data())
 
-        # Crop both color and depth frames
-        height, width, _ = color_image.shape
-        crop_size = (int(height * WHRatio), height) if width / float(height) > WHRatio else (width, int(width / WHRatio))
-        crop = ((width - crop_size[0]) // 2, (height - crop_size[1]) // 2, (width + crop_size[0]) // 2, (height + crop_size[1]) // 2)
+        
 
-        color_image = color_image[crop[1]:crop[3], crop[0]:crop[2]]
-        depth_image = depth_image[crop[1]:crop[3], crop[0]:crop[2]]
+        # Apply colormap on depth image (image must be converted to 8-bit per pixel first)
+        depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
 
-        input_blob = cv2.dnn.blobFromImage(color_image, inScaleFactor, (inWidth, inHeight), meanVal, False)
-        net.setInput(input_blob, "data")
-        detection = net.forward("detection_out")
+        depth_colormap_dim = depth_colormap.shape
+        color_colormap_dim = color_image.shape
 
-        detection_mat = detection.reshape(detection.shape[2], detection.shape[3])
+        # If depth and color resolutions are different, resize color image to match depth image for display
+        if depth_colormap_dim != color_colormap_dim:
+            resized_color_image = cv2.resize(color_image, dsize=(depth_colormap_dim[1], depth_colormap_dim[0]), interpolation=cv2.INTER_AREA)
+            images = np.hstack((resized_color_image, depth_colormap))
+        else:
+            images = np.hstack((color_image, depth_colormap))
 
-        confidence_threshold = 0.8
-        for i in range(detection_mat.shape[0]):
-            confidence = detection_mat[i, 2]
+        # Show images
+        cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
+        cv2.imshow('RealSense', images)
 
-            if confidence > confidence_threshold:
-                object_class = int(detection_mat[i, 1])
-                x_left_bottom = int(detection_mat[i, 3] * color_image.shape[1])
-                y_left_bottom = int(detection_mat[i, 4] * color_image.shape[0])
-                x_right_top = int(detection_mat[i, 5] * color_image.shape[1])
-                y_right_top = int(detection_mat[i, 6] * color_image.shape[0])
+        # 獲取中心像素的深度值
+        center_pixel_x = depth_frame.width // 2
+        center_pixel_y = depth_frame.height // 2
+        depth_value_center = depth_frame.get_distance(center_pixel_x, center_pixel_y)
 
-                object_rect = (x_left_bottom, y_left_bottom, x_right_top - x_left_bottom, y_right_top - y_left_bottom)
-                object_rect = (max(0, object_rect[0]), max(0, object_rect[1]), min(object_rect[2], depth_image.shape[1]), min(object_rect[3], depth_image.shape[0]))
-
-                # Calculate mean depth inside the detection region
-                # This is a very naive way to estimate objects depth
-                # but it is intended to demonstrate how one might
-                # use depth data in general
-                depth_roi = depth_image[object_rect[1]:object_rect[1] + object_rect[3], object_rect[0]:object_rect[0] + object_rect[2]]
-                m = np.mean(depth_roi)
-
-                label_text = f"{classNames[object_class]} {m:.2f} meters away"
-                cv2.rectangle(color_image, (object_rect[0], object_rect[1]), (object_rect[0] + object_rect[2], object_rect[1] + object_rect[3]), (0, 255, 0), 2)
-                cv2.putText(color_image, label_text, (object_rect[0], object_rect[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
-
-        cv2.imshow("Display Image", color_image)
-        if cv2.waitKey(1) >= 0:
-            break
+        print("Depth value at center pixel:", depth_value_center)
+        cv2.waitKey(1)
 
 finally:
+
+    # Stop streaming
     pipeline.stop()
-    cv2.destroyAllWindows()
