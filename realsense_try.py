@@ -70,15 +70,23 @@ try:
             images = np.hstack((color_image, depth_colormap))
 
         # Show images
-        cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
-        cv2.imshow('RealSense', images)
+        # cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
+        # cv2.imshow('RealSense', images)
 
         # 獲取中心像素的深度值
         center_pixel_x = depth_frame.width // 2
         center_pixel_y = depth_frame.height // 2
         depth_value_center = depth_frame.get_distance(center_pixel_x, center_pixel_y)
 
-        print("Depth value at center pixel:", depth_value_center)
+        cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
+        cv2.circle(images, (center_pixel_x, center_pixel_y), 5, (0, 255, 0), -1)
+        cv2.imshow('RealSense', images)
+        
+        
+
+        
+        print("Depth value at center pixel:", depth_value_center ,"m")
+        
         cv2.waitKey(1)
 
 finally:
