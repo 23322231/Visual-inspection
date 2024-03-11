@@ -30,7 +30,9 @@ def draw_landmarks_on_image(rgb_image, detection_result):
   return annotated_image
 
 # STEP 2: Create an PoseLandmarker object.
-base_options = python.BaseOptions(model_asset_path="C:/Users/April/OneDrive/文件/Visual-inspection/pose_landmarker_heavy.task")
+model_path = "C:/Users/April/OneDrive/文件/Visual-inspection/pose_landmarker_heavy.task"
+base_options = python.BaseOptions(model_asset_buffer=open(model_path, "rb").read())
+# base_options = python.BaseOptions(model_asset_path="C:/Users/April/OneDrive/文件/Visual-inspection/pose_landmarker_heavy.task")
 options = vision.PoseLandmarkerOptions(
     base_options=base_options,
     output_segmentation_masks=True)
@@ -44,6 +46,6 @@ detection_result = detector.detect(image)
 
 # STEP 5: Process the detection result. In this case, visualize it.
 annotated_image = draw_landmarks_on_image(image.numpy_view(), detection_result)
-cv2.imshow(cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR))
+cv2.imshow("",cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR))
 cv2.waitKey(0)
 cv2.destroyAllWindows()
