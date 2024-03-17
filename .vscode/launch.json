@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/xampp/htdocs/Visual-inspection",
-      "program": "c:/xampp/htdocs/Visual-inspection/build/Debug/outDebug",
+      "cwd": "c:/Users/April/OneDrive/文件/人工智慧",
+      "program": "c:/Users/April/OneDrive/文件/人工智慧/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
