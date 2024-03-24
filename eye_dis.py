@@ -99,13 +99,16 @@ try:
             center_pixel_y = depth_frame.height // 2
             print(center_pixel_x,center_pixel_y)
             depth_value_center = depth_frame.get_distance(eye_center_x, eye_center_y)
+            depth_value_center1 = depth_frame.get_distance(center_pixel_x, center_pixel_y)
             
 
             cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)#創建一個名為 "RealSense" 的視窗，並設置視窗的顯示方式為自動調整大小 
             cv2.circle(color_image, (color_frame.width // 2, color_frame.height // 2), 5, (0, 255, 0), -1)
             cv2.imshow('RealSense', color_image)
             
-            print("Depth value at center pixel:", depth_value_center*100 ,"cm")
+            center_pixel_x = depth_frame.width // 2
+            print("Depth value at center pixel:", depth_value_center*100 ,"cm",eye_center_x,eye_center_y,depth_value_center1*100,img2.shape)
+        
             cv2.waitKey(1)
 
 finally:
