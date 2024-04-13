@@ -1,3 +1,4 @@
+# 測量眼睛距離，目前數據有點奇怪
 # 測得視窗中間的距離值
 import pyrealsense2 as rs
 import numpy as np

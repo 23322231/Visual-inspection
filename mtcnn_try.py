@@ -4,6 +4,8 @@ import tensorflow as tf
 import detect_face
 import numpy as np
 
+# python版本3.10.13
+
 #----tensorflow version check
 # if tensorflow.__version__.startswith('1.'):
 #     import tensorflow as tf
