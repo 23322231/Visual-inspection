@@ -1,229 +1,119 @@
 # 把mtcnn 和 realsense 合併
 # 把mtcnn 和 realsense 合併
-import cv2
-import time
-import tensorflow as tf
-import detect_face
-import numpy as np
+# 測量眼睛距離，目前數據有點奇怪
+# 測得視窗中間的距離值
 import pyrealsense2 as rs
+import numpy as np
+import cv2
+import mediapipe as mp     # 載入 mediapipe 函式庫
 
-def video_init(is_2_write=False, save_path=None):
-    writer = None
-    cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
-    height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)#default 480
-    width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)#default 640
+mp_face_detection = mp.solutions.face_detection   # 建立偵測方法
+mp_drawing = mp.solutions.drawing_utils           # 建立繪圖方法
 
-    # width = 480
-    # height = 640
-    # cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-    # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+# Configure depth and color streams
+pipeline = rs.pipeline()
+config = rs.config()
 
-    '''
-    ref:https://docs.opencv.org/master/dd/d43/tutorial_py_video_display.html
-    FourCC is a 4-byte code used to specify the video codec. 
-    The list of available codes can be found in fourcc.org. 
-    It is platform dependent. The following codecs work fine for me.
-    In Fedora: DIVX, XVID, MJPG, X264, WMV1, WMV2. (XVID is more preferable. MJPG results in high size video. X264 gives very small size video)
-    In Windows: DIVX (More to be tested and added)
-    In OSX: MJPG (.mp4), DIVX (.avi), X264 (.mkv).
-    FourCC code is passed as `cv.VideoWriter_fourcc('M','J','P','G')or cv.VideoWriter_fourcc(*'MJPG')` for MJPG.
-    '''
+# Get device product line for setting a supporting resolution
+pipeline_wrapper = rs.pipeline_wrapper(pipeline)
+pipeline_profile = config.resolve(pipeline_wrapper)
+device = pipeline_profile.get_device()
+device_product_line = str(device.get_info(rs.camera_info.product_line))
 
-    if is_2_write is True:
-        #fourcc = cv2.VideoWriter_fourcc('x', 'v', 'i', 'd')
-        #fourcc = cv2.VideoWriter_fourcc('X', 'V', 'I', 'D')
-        fourcc = cv2.VideoWriter_fourcc(*'divx')
-        if save_path is None:
-            save_path = 'demo.avi'
-        writer = cv2.VideoWriter(save_path, fourcc, 30, (int(width), int(height)))
+print(device_product_line)
 
-    return cap,height,width,writer
+found_rgb = False
+for s in device.sensors:
+    if s.get_info(rs.camera_info.name) == 'RGB Camera':
+        found_rgb = True
+        break
+if not found_rgb:
+    print("The demo requires Depth camera with Color sensor")
+    exit(0)
 
-def face_detection_MTCNN(detect_multiple_faces=False):
-        #----var
-    frame_count = 0
-    FPS = "Initialing"
-    no_face_str = "No faces detected"
+config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
 
-    #----video streaming init
-    cap, height, width, writer = video_init(is_2_write=False)
+# if device_product_line == 'L500':
+config.enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
+# else:
+    # config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 
-    #----MTCNN init
-    color = (0,255,0)
-    minsize = 20  # minimum size of face
-    threshold = [0.6, 0.7, 0.7]  # three steps's threshold
-    factor = 0.709  # scale factor
-    with tf.Graph().as_default():
-        config = tf.compat.v1.ConfigProto(log_device_placement=True,
-                                allow_soft_placement=True,  # 允許當找不到設備時自動轉換成有支援的設備
-                                )
-        # config.gpu_options.allow_growth = True
-        config.gpu_options.per_process_gpu_memory_fraction = 0.1
-        sess = tf.compat.v1.Session(config=config)
-        with sess.as_default():
-            pnet, rnet, onet = detect_face.create_mtcnn(sess, None)
+# Start streaming
+pipeline.start(config)
 
-
-    while (cap.isOpened()):
-
-        #----get image
-        ret, img = cap.read()
-
-        if ret is True:
-            #----image processing
-            img_rgb = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
-            print("image shape:",img_rgb.shape)
-
-            #----face detection
-            t_1 = time.time()
-            bounding_boxes, points = detect_face.detect_face(img_rgb, minsize, pnet, rnet, onet, threshold, factor)
-            d_t = time.time() - t_1
-            print("Time of face detection: ",d_t)
-
-            #----bounding boxes processing
-            nrof_faces = bounding_boxes.shape[0]
-            if nrof_faces > 0:
-                points = np.array(points)
-                points = np.transpose(points, [1, 0])
-                points = points.astype(np.int16)
-
-                det = bounding_boxes[:, 0:4]
-                det_arr = []
-                img_size = np.asarray(img.shape)[0:2]
-                if nrof_faces > 1:
-                    if detect_multiple_faces:
-                        for i in range(nrof_faces):
-                            det_arr.append(np.squeeze(det[i]))
-                    else:
-                        bounding_box_size = (det[:, 2] - det[:, 0]) * (det[:, 3] - det[:, 1])
-                        img_center = img_size / 2
-                        offsets = np.vstack(
-                            [(det[:, 0] + det[:, 2]) / 2 - img_center[1], (det[:, 1] + det[:, 3]) / 2 - img_center[0]])
-                        offset_dist_squared = np.sum(np.power(offsets, 2.0), 0)
-                        index = np.argmax(
-                            bounding_box_size - offset_dist_squared * 2.0)  # some extra weight on the centering
-                        det_arr.append(det[index, :])
-                else:
-                    det_arr.append(np.squeeze(det))
-
-                det_arr = np.array(det_arr)
-                det_arr = det_arr.astype(np.int16)
-
-                for i, det in enumerate(det_arr):
-                    #det = det.astype(np.int32)
-                    cv2.rectangle(img, (det[0],det[1]), (det[2],det[3]), color, 2)
-
-                    #----draw 5 point on tha face
-                    facial_points = points[i]
-                    for j in range(0,5,1):
-                        #cv2.circle(影像, 圓心座標, 半徑, 顏色, 線條寬度)
-                        cv2.circle(img, (facial_points[j], facial_points[j + 5]), 2, (0, 0, 255), -1, 1)
-
-            # ----no faces detected
-            else:
-                cv2.putText(img, no_face_str, (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
-
-
-            #----FPS count
-            if frame_count == 0:
-                t_start = time.time()
-            frame_count += 1
-            if frame_count >= 20:
-                FPS = "FPS=%1f" % (frame_count / (time.time() - t_start))
-                frame_count = 0
-
-            # cv2.putText(影像, 文字, 座標, 字型, 大小, 顏色, 線條寬度, 線條種類)
-            cv2.putText(img, FPS, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
-
-            #----image display
-            cv2.imshow("demo by JohnnyAI", img)
-
-            #----image writing
-            if writer is not None:
-                writer.write(img)
-
-            #----'q' key pressed?
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-        else:
-            print("get image failed")
-            break
-
-    #----release
-    cap.release()
-    if writer is not None:
-        writer.release()
-    cv2.destroyAllWindows()
-
-if __name__ == "__main__":
-    #----var
-    frame_count = 0
-    FPS = "Initialing"
-    no_face_str = "No faces detected"
-
-    #----video streaming init
-    cap, height, width, writer = video_init(is_2_write=False)
-
-    #----MTCNN init
-    color = (0, 255, 0)
-    minsize = 20  # minimum size of face
-    threshold = [0.6, 0.7, 0.7]  # three steps's threshold
-    factor = 0.709  # scale factor
-    with tf.Graph().as_default():
-        config = tf.compat.v1.ConfigProto(log_device_placement=True,
-                                           allow_soft_placement=True,  # 允許當找不到設備時自動轉換成有支援的設備
-                                           )
-        config.gpu_options.per_process_gpu_memory_fraction = 0.1
-        sess = tf.compat.v1.Session(config=config)
-        with sess.as_default():
-            pnet, rnet, onet = detect_face.create_mtcnn(sess, None)
-
-    # Configure depth and color streams for RealSense
-    pipeline = rs.pipeline()
-    config = rs.config()
-    config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-    config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-    pipeline.start(config)
-
-    try:
+try:
+    # 開始使用人臉偵測模型
+    with mp_face_detection.FaceDetection(             # 開始偵測人臉
+        model_selection=0, min_detection_confidence=0.5) as face_detection:
         while True:
+            eye_center_x=0
+            eye_center_y=0
             # Wait for a coherent pair of frames: depth and color
-            frames = pipeline.wait_for_frames()
-            depth_frame = frames.get_depth_frame()
-            color_frame = frames.get_color_frame()
-            if not depth_frame or not color_frame:
+            frames = pipeline.wait_for_frames() #等待串流 pipeline 中的一組幀。這些幀通常包括深度影像、彩色影像等
+            depth_frame = frames.get_depth_frame()#返回深度影像幀。
+            color_frame = frames.get_color_frame()#返回彩色影像幀。
+            if not depth_frame or not color_frame:#檢查是否成功獲取了深度影像和彩色影像幀
                 continue
 
             # Convert images to numpy arrays
-            depth_image = np.asanyarray(depth_frame.get_data())
-            color_image = np.asanyarray(color_frame.get_data())
+            depth_image = np.asanyarray(depth_frame.get_data())#獲取深度影像的資料並轉換為 NumPy 陣列
+            color_image = np.asanyarray(color_frame.get_data())#獲取彩色影像的資料並轉換為 NumPy 陣列
+            img2=np.asanyarray(color_frame.get_data())
+            results = face_detection.process(img2) 
 
-            # Apply colormap on depth image
+            if results.detections:
+                for detection in results.detections:
+                    mp_drawing.draw_detection(img2, detection)  #在影像上標記出偵測到的人臉
+                    # 取出左右眼的標記點位置
+                    left_eye_landmark = mp_face_detection.get_key_point(
+                        detection, mp_face_detection.FaceKeyPoint.LEFT_EYE)
+                    right_eye_landmark = mp_face_detection.get_key_point(
+                        detection, mp_face_detection.FaceKeyPoint.RIGHT_EYE)
+                    
+                    # 計算左眼和右眼中心點的座標
+                    if left_eye_landmark and right_eye_landmark:
+                        left_eye_x = int(left_eye_landmark.x * img2.shape[1])
+                        left_eye_y = int(left_eye_landmark.y * img2.shape[0])
+                        right_eye_x = int(right_eye_landmark.x * img2.shape[1])
+                        right_eye_y = int(right_eye_landmark.y * img2.shape[0])
+                        eye_center_x = (left_eye_x + right_eye_x) // 2
+                        eye_center_y = (left_eye_y + right_eye_y) // 2
+                        
+                        print("Eye center coordinates (x, y):", eye_center_x, eye_center_y)
+
+            # Apply colormap on depth image (image must be converted to 8-bit per pixel first)
+            #將深度影像轉換為彩色深度圖 (depth colormap)
             depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
 
-            # Calculate center pixel depth value
+            #彩色圖和彩色影像的尺寸資訊
+            depth_colormap_dim = depth_colormap.shape
+            color_colormap_dim = color_image.shape
+
+            # If depth and color resolutions are different, resize color image to match depth image for display
+            #確保深度彩色圖 (depth_colormap) 和彩色影像 (color_image) 的尺寸一致
+            if depth_colormap_dim != color_colormap_dim:
+                resized_color_image = cv2.resize(color_image, dsize=(depth_colormap_dim[1], depth_colormap_dim[0]), interpolation=cv2.INTER_AREA)#interpolation參數指定了調整大小時的插值方法
+                # images = np.hstack((resized_color_image, depth_colormap))#images變數:包含彩色影像和深度圖的水平組合影像。
+            # else:
+                # images = np.hstack((color_image, depth_colormap))
+
+            # 獲取中心像素的深度值
             center_pixel_x = depth_frame.width // 2
             center_pixel_y = depth_frame.height // 2
-            depth_value_center = depth_frame.get_distance(center_pixel_x, center_pixel_y)
+            print(center_pixel_x,center_pixel_y)
+            depth_value_center = depth_frame.get_distance(eye_center_x, eye_center_y)
+            depth_value_center1 = depth_frame.get_distance(center_pixel_x, center_pixel_y)
+            
 
-            # Display depth value on the image
-            cv2.circle(color_image, (center_pixel_x, center_pixel_y), 5, (0, 255, 0), -1)
-            cv2.putText(color_image, f"Depth: {depth_value_center:.2f} m", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                        (0, 255, 0), 2)
-
-            # Display images
+            cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)#創建一個名為 "RealSense" 的視窗，並設置視窗的顯示方式為自動調整大小 
+            cv2.circle(color_image, (color_frame.width // 2, color_frame.height // 2), 5, (0, 255, 0), -1)
             cv2.imshow('RealSense', color_image)
-            cv2.imshow('Depth', depth_colormap)
+            
+            center_pixel_x = depth_frame.width // 2
+            print("Depth value at center pixel:", depth_value_center*100 ,"cm",eye_center_x,eye_center_y,depth_value_center1*100,img2.shape)
+        
+            cv2.waitKey(1)
 
-            # 檢查按鍵 'q' 是否被按下
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-
-    finally:
-        # Stop streaming
-        pipeline.stop()
-        # Release video capture
-        cap.release()
-        if writer is not None:
-            writer.release()
-        cv2.destroyAllWindows()
+finally:
+    # Stop streaming
+    pipeline.stop()
