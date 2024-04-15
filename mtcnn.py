@@ -125,6 +125,7 @@ def face_detection_MTCNN(detect_multiple_faces=False):
 
     #----release
     cap.release()
+    cv2.waitKey(1)
     cv2.destroyAllWindows()
 
 
