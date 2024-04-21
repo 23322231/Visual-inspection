@@ -10,7 +10,7 @@ import numpy as np
 def video_init(is_2_write=False,save_path=None):
     # writer = None
     # cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
-    cap = cv2.VideoCapture("test1.mp4")
+    cap = cv2.VideoCapture("test2.mp4")
     # 初始化視訊捕獲對象
     # height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)#default 480
     # width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)#default 640
