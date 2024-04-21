@@ -104,27 +104,29 @@ try:
             img_size = np.asarray(color_image.shape)[0:2]#得到圖像的高度和寬度
             detect_multiple_faces=False#處理多個檢測到的人臉或僅處理其中的一個
             
-            if nrof_faces > 1:
-                if detect_multiple_faces:
-                    for i in range(nrof_faces):
-                        det_arr.append(np.squeeze(det[i]))#將邊界框添加到 det_arr 列表中
-                else:
-                    bounding_box_size = (det[:, 2] - det[:, 0]) * (det[:, 3] - det[:, 1])
-                    img_center = img_size / 2
-                    offsets = np.vstack(
-                        [(det[:, 0] + det[:, 2]) / 2 - img_center[1], (det[:, 1] + det[:, 3]) / 2 - img_center[0]])
-                    offset_dist_squared = np.sum(np.power(offsets, 2.0), 0)
-                    index = np.argmax(
-                        bounding_box_size - offset_dist_squared * 2.0)  # some extra weight on the centering
-                    det_arr.append(det[index, :])
-            else:
-                det_arr.append(np.squeeze(det))#det_arr 中的每個元素都是一個表示邊界框的一維陣列
+            # if nrof_faces > 1:
+            #     if detect_multiple_faces:
+            #         for i in range(nrof_faces):
+            #             det_arr.append(np.squeeze(det[i]))#將邊界框添加到 det_arr 列表中
+            #     else:
+            #         bounding_box_size = (det[:, 2] - det[:, 0]) * (det[:, 3] - det[:, 1])
+            #         img_center = img_size / 2
+            #         offsets = np.vstack(
+            #             [(det[:, 0] + det[:, 2]) / 2 - img_center[1], (det[:, 1] + det[:, 3]) / 2 - img_center[0]])
+            #         offset_dist_squared = np.sum(np.power(offsets, 2.0), 0)
+            #         index = np.argmax(
+            #             bounding_box_size - offset_dist_squared * 2.0)  # some extra weight on the centering
+            #         det_arr.append(det[index, :])
+            # else:
+            
+            det_arr.append(np.squeeze(det))#det_arr 中的每個元素都是一個表示邊界框的一維陣列
 
             det_arr = np.array(det_arr)
             det_arr = det_arr.astype(np.int16)
 
             for i, det in enumerate(det_arr):#遍歷 det_arr 中的每個邊界框
-                cv2.rectangle(color_image, (det[0],det[1]), (det[2],det[3]), color, 2)#在原始影像上繪製一個矩形
+                if len(det) > 0  and len(det) == 4:
+                    cv2.rectangle(color_image, (det[0],det[1]), (det[2],det[3]), color, 2)#在原始影像上繪製一個矩形
 
                 #在人臉上繪製 5 個特徵點
                 facial_points = points[i]
@@ -173,7 +175,8 @@ try:
             resized_color_image = cv2.resize(color_image, dsize=(depth_colormap_dim[1], depth_colormap_dim[0]), interpolation=cv2.INTER_AREA)#interpolation參數指定了調整大小時的插值方法
         
         cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
-        cv2.imshow('RealSense', color_image)
+        combined_image = cv2.hconcat([color_image, depth_colormap])
+        cv2.imshow('RealSense', combined_image)
 
         #----如果按下 'q' 鍵，則退出無限循環
         if cv2.waitKey(1) & 0xFF == ord('q'):
