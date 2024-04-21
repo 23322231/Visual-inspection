@@ -12,10 +12,11 @@ def video_init(is_2_write=False,save_path=None):
     # cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
     cap = cv2.VideoCapture(2)
     # 初始化視訊捕獲對象
-    height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)#default 480
-    width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)#default 640
+    # height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)#default 480
+    # width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)#default 640
 
-    return cap,height,width
+    # return cap,height,width
+    return cap
 
 # 定義人臉檢測函數
 def face_detection_MTCNN(detect_multiple_faces=False):
@@ -25,7 +26,8 @@ def face_detection_MTCNN(detect_multiple_faces=False):
     no_face_str = "No faces detected"
 
     #初始化視訊流
-    cap, height, width = video_init(is_2_write=False)
+    # cap, height, width = video_init(is_2_write=False)
+    cap = video_init(is_2_write=False)
 
     #初始化 MTCNN
     color = (0,255,0)
