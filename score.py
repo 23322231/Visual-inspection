@@ -61,5 +61,5 @@ def Score_calculation(image_ans, image_user):
     
     return score
 
-
-print(Score_calculation("ans/1ans.png", "uploaded_image.png"))
+# 1 放點圖答案路徑,2 使用者畫好上傳的圖片
+print(Score_calculation("ans/38ans.png", "uploaded_image.png"))
