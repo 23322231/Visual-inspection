@@ -3,21 +3,14 @@ import base64
 from PIL import Image
 from io import BytesIO
 from flask import render_template
+import cv2
+import numpy
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template('handwrite.html')
-
-
-# 在 /receive_coordinates 路由上監聽來自客戶端的 POST 請求
-@app.route('/receive_coordinates', methods=['POST'])
-def receive_coordinates():
-    data = request.get_json()   # 從 POST 請求中取得 JSON 格式的資料
-    print("Received coordinates:", data)
-    # 返回一個 JSON 格式的回應，其中包含一個名為 message 的屬性，指示座標資料已成功接收
-    return jsonify({'message': 'Coordinates received successfully'})
+    return render_template('user_handwrite_image.html')
 
 
 @app.route('/upload', methods=['POST'])
@@ -37,5 +30,8 @@ def upload_image():
 
     return jsonify({'message': 'Image uploaded successfully'})
 
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)  #host改為0.0.0.0,讓手機暫時可以連上
+
