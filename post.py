@@ -31,7 +31,6 @@ def upload_image():
     return jsonify({'message': 'Image uploaded successfully'})
 
 
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)  #host改為0.0.0.0,讓手機暫時可以連上
 
