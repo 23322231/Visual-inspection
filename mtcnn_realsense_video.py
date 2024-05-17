@@ -1,3 +1,4 @@
+# 當初寫的自己錄影片當測茲的版本
 import pyrealsense2 as rs
 import numpy as np
 import cv2
