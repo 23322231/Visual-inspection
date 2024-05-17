@@ -1,0 +1,10 @@
+{
+  "hosting": {
+    "public": "桌面\\html5up-alpha",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

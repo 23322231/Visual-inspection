@@ -1,0 +1,47 @@
+<!DOCTYPE html>  
+ <html>  
+   <head>   
+     <title>Demo HTML5 WebCam</title>  
+     <meta charset="UTF-8">  
+     <script type="text/javascript">  
+       // 建立一個監聽事件 （事件名稱 ，要執行的function, useCapture)  
+       window.addEventListener("DOMContentLoaded", function () {  
+         // Grab elements, create settings, etc.  
+         var video = document.getElementById("video"),  
+              //使用影像: true ，取用聲音 true  
+             videoObj = {video: true ,audio: true},  
+         errBack = function (error) {  
+           console.log("Video capture error: ", error.code);  
+         };  
+         // 依據Browser不同使用不同的API          
+         if (navigator.getUserMedia) { // Standard  
+           navigator.getUserMedia(videoObj, function (stream) {  
+             video.src = stream;  
+             video.play();  
+           }, errBack);  
+         } else if (navigator.webkitGetUserMedia) { // WebKit-prefixed  
+           navigator.webkitGetUserMedia(videoObj, function (stream) {  
+             video.src = window.webkitURL.createObjectURL(stream);  
+             video.play();  
+           }, errBack);  
+         }  
+         else if (navigator.mozGetUserMedia) { // Firefox-prefixed  
+           navigator.mozGetUserMedia(videoObj, function (stream) {  
+             video.src = window.URL.createObjectURL(stream);  
+             video.play();  
+           }, errBack);  
+         }  
+         else if (navigator.msGetUserMedia){  
+          navigator.msGetUserMedia(videoObj, function (stream) {  
+             video.src = window.URL.createObjectURL(stream);  
+             video.play();  
+           }, errBack);  
+         }  
+       }, false);  
+     </script>  
+   </head>  
+   <body>  
+     <!-- 放一個Video element 上去 指定大小為640*480 並且自動播放 -->  
+     <video id="video" width="640" height="480" autoplay></video>      
+   </body>  
+ </html>  
