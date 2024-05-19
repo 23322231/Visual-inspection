@@ -27,15 +27,11 @@ let chunks = [] // 在 mediaRecord 要用的 chunks
 // 在 getUserMedia 使用的 constraints 變數
 let constraints = {
   audio: false,
-  video: true
+  video: { deviceId: undefined }
 }
 
-// 設備列表
-let videoDevices = []
-let selectedDeviceId = null
-
 // 第一次啟動攝影機
-enumerateDevices()
+setupCamera()
 
 /**
  * MediaRecorder Related Event Handler
@@ -82,25 +78,31 @@ function onReset (e) {
   inputVideo.src = ''
 
   // 重新啟動攝影機
-  mediaRecorderSetup()
+  setupCamera()
 }
 
 /**
- * 列出所有媒體設備
- */
-function enumerateDevices() {
+ * Setup Camera
+ **/
+
+function setupCamera() {
+  // 先取得所有的媒體裝置
   navigator.mediaDevices.enumerateDevices()
     .then(devices => {
-      videoDevices = devices.filter(device => device.kind === 'videoinput')
-      if (videoDevices.length > 0) {
-        selectedDeviceId = videoDevices[2].deviceId/*改成用L515鏡頭*/
-        // 設置初始攝像頭
-        mediaRecorderSetup()
+      let videoDevices = devices.filter(device => device.kind === 'videoinput')
+      if (videoDevices.length > 1) {
+        // 選擇外接鏡頭 (假設第一個是內建鏡頭，第二個是外接鏡頭)
+        constraints.video.deviceId = { exact: videoDevices[2].deviceId }
+      } else if (videoDevices.length === 1) {
+        // 如果只有一個鏡頭，使用這個鏡頭
+        constraints.video.deviceId = { exact: videoDevices[0].deviceId }
       } else {
-        errorMsg('No video devices found')
+        errorMsg('No video devices found.')
+        return
       }
+      mediaRecorderSetup()
     })
-    .catch(error => {
+    .catch(function (error) {
       errorMsg('enumerateDevices error: ' + error.name, error)
     })
 }
@@ -113,14 +115,6 @@ function mediaRecorderSetup () {
   // 設定顯示的按鍵
   isRecordingBtn('start')
 
-  if (!selectedDeviceId) {
-    errorMsg('No video device selected')
-    return
-  }
-
-  // 更新約束條件
-  constraints.video = { deviceId: { exact: selectedDeviceId } }
-
   // mediaDevices.getUserMedia() 取得使用者媒體影音檔
   navigator.mediaDevices
     .getUserMedia(constraints)
@@ -129,9 +123,11 @@ function mediaRecorderSetup () {
        * inputVideo Element
        * 將串流的 inputVideo 設定到 <video> 上
        **/
+      // Older browsers may not have srcObject
       if ('srcObject' in inputVideo) {
         inputVideo.srcObject = stream
       } else {
+        // Avoid using this in new browsers, as it is going away.
         inputVideo.src = window.URL.createObjectURL(stream)
       }
       inputVideo.controls = false
@@ -139,8 +135,11 @@ function mediaRecorderSetup () {
       /**
        * 透過 MediaRecorder 錄製影音串流
        */
+      // 建立 MediaRecorder 準備錄影
+      // 如果沒有指定 mimeType，錄下來的 webm 影片在 Firefox 上可能不能看（Firefox 也不支援 h264)
       mediaRecorder = new MediaRecorder(stream, {
         mimeType: 'video/webm;codecs=VP9',
+        // bitsPerSecond: '512000',
       })
 
       /* MediaRecorder EventHandler */
@@ -207,7 +206,6 @@ function errorMsg (msg, error) {
   }
 }
 
-// 保存錄製的視頻數據
 function saveData (dataURL) {
   var fileName = 'my-download-' + Date.now() + '.webm'
   var a = document.createElement('a')
@@ -218,7 +216,6 @@ function saveData (dataURL) {
   a.click()
 }
 
-// 設定按鈕顯示狀態
 function isRecordingBtn (recordBtnState) {
   startBtn.style.display = 'none'
   stopBtn.style.display = 'none'
@@ -226,14 +223,14 @@ function isRecordingBtn (recordBtnState) {
   isRecordingIcon.style.display = 'none'
   switch (recordBtnState) {
     case 'start':
-      startBtn.style.display = 'block' // 顯示 startBtn
+      startBtn.style.display = 'block' // show startBtn
       break
     case 'stop':
-      stopBtn.style.display = 'block' // 顯示 stopBtn
+      stopBtn.style.display = 'block' // show stopBtn
       isRecordingIcon.style.display = 'block'
       break
     case 'reset':
-      resetBtn.style.display = 'block' // 顯示 resetBtn
+      resetBtn.style.display = 'block' // show resetBtn
       break
     default:
       console.warn('isRecordingBtn error')
