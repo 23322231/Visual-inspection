@@ -26,7 +26,7 @@ let chunks = [] // 在 mediaRecord 要用的 chunks
 
 // 在 getUserMedia 使用的 constraints 變數
 let constraints = {
-  audio: false,
+  audio: true,
   video: { deviceId: undefined }
 }
 

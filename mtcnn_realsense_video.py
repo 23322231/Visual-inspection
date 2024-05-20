@@ -21,7 +21,7 @@ with tf.Graph().as_default():
         pnet, rnet, onet = detect_face.create_mtcnn(sess, None)
 
 # 讀取影片
-video_path = 'test1.mp4'  
+video_path = 'testdata/test1.mp4'  
 playback = rs.playback(video_path)
 # cap = cv2.VideoCapture(video_path)
 detect_multiple_faces = False
@@ -49,6 +49,7 @@ try:
 
         # Wait for a coherent pair of frames: depth and color
         frames = pipeline.wait_for_frames()
+        print(type(frames))
         depth_frame = frames.get_depth_frame()#返回深度影像幀。
         color_frame = frames.get_color_frame()#返回彩色影像幀。
         if not depth_frame or not color_frame:#檢查是否成功獲取了深度影像和彩色影像幀
