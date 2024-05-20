@@ -88,7 +88,7 @@ function onReset (e) {
 function setupCamera() {
   // 先取得所有的媒體裝置
   navigator.mediaDevices.enumerateDevices()
-    .then(devices => {
+    .then(devices => {//處理成功結果
       let videoDevices = devices.filter(device => device.kind === 'videoinput')
       if (videoDevices.length > 1) {
         // 選擇外接鏡頭 (假設第一個是內建鏡頭，第二個是外接鏡頭)
@@ -102,7 +102,7 @@ function setupCamera() {
       }
       mediaRecorderSetup()
     })
-    .catch(function (error) {
+    .catch(function (error) {//處理錯誤結果
       errorMsg('enumerateDevices error: ' + error.name, error)
     })
 }
