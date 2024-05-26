@@ -12,9 +12,9 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-@app.route('/quiz')
+@app.route('/quiz1')
 def start():
-    return render_template('quiz.html')
+    return render_template('quiz1.html')
 
 @app.route('/camera')
 def choose():
@@ -24,8 +24,8 @@ def choose():
 def confirm():
     return render_template('myopia.html')
 
-@app.route('/handwrite')
-def handwrite():
+@app.route('/quiz1/user_handwrite_image')
+def user_handwrite_image():
     return render_template('user_handwrite_image.html')
 
 
