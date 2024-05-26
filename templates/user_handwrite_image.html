@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>觸控畫圖工具</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        canvas {
+            background-image: url('static/colorblind_image/38.png'); /* 替換成要顯示的題目圖片路徑 */
+            background-size: cover; /* 讓背景圖片填滿畫布 */
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="drawingCanvas" width="500" height="500"></canvas>
+<div id="coordinates"></div>
+
+<script>
+    // 取得 canvas 元素
+    var canvas = document.getElementById('drawingCanvas');
+    var context = canvas.getContext('2d');
+
+    // 取得顯示座標的元素
+    var coordinatesDiv = document.getElementById('coordinates');
+
+    // 設定觸控事件
+    canvas.addEventListener('touchstart', startDrawing);
+    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchend', stopDrawing);
+
+    // 設定繪圖參數
+    var isDrawing = false;
+    var lineCoordinates = [];
+
+    // 開始繪圖
+    function startDrawing(e) {
+        isDrawing = true;
+        draw(e);  // 避免在移動前有斷線的情況
+    }
+
+    // 繪圖
+    function draw(e) {
+        e.preventDefault(); // 防止滾動
+
+        if (!isDrawing) return;
+
+        // 設定線條樣式
+        context.lineWidth = 12;
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+        context.strokeStyle = 'black';
+
+        // 取得觸控位置
+        var x = e.touches[0].clientX - canvas.offsetLeft;
+        var y = e.touches[0].clientY - canvas.offsetTop;
+
+        // 將座標紀錄到軌跡陣列
+        lineCoordinates.push({ x, y });
+
+        // 開始繪製路徑
+        context.beginPath();
+        context.moveTo(lineCoordinates[0].x, lineCoordinates[0].y);
+
+        // 繪製連續的線段
+        for (var i = 1; i < lineCoordinates.length; i++) {
+            context.lineTo(lineCoordinates[i].x, lineCoordinates[i].y);
+            context.stroke();
+        }
+    }
+
+    // 結束繪圖
+    function stopDrawing() {
+        isDrawing = false;
+        //console.log(lineCoordinates);
+        //displayCoordinates();
+        lineCoordinates = [];
+    }
+
+    //存使用者畫的圖片
+    function saveImage() {
+       
+        var dataURL = canvas.toDataURL();   // 將畫布上的內容轉換為 Data URL 字串
+        fetch('/upload', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'  // 表示請求的內容是 JSON 格式的資料
+            },
+            body: JSON.stringify({ image: dataURL })    // 將陣列 coordinates 轉換為 JSON 字串
+        })
+        .then(response => response.json())  // 當伺服器回應返回時，首先將其解析為 JSON 格式
+        // 將訪問 data 的 message 屬性，並將其輸出到瀏覽器的控制台中
+        .then(data => {
+            console.log(data);
+        })
+        // 錯誤處理部分
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+</script>
+
+<button onclick="saveImage()">Save Image</button>
+
+</body>
+</html>
