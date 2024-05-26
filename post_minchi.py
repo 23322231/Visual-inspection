@@ -10,6 +10,22 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
+    return render_template('index.html')
+
+@app.route('/quiz')
+def start():
+    return render_template('quiz.html')
+
+@app.route('/camera')
+def choose():
+    return render_template('camera_try.html')
+
+@app.route('/myopia')
+def confirm():
+    return render_template('myopia.html')
+
+@app.route('/handwrite')
+def handwrite():
     return render_template('user_handwrite_image.html')
 
 
