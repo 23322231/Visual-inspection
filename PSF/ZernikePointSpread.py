@@ -133,7 +133,7 @@ def PupilApertureImage(radius, sd):
 def EquivalentDefocus(coefficient, pupildiameter):
     return (16 * np.sqrt(3) * pupildiameter**-2) * coefficient
 
-def ZernikeImage(n, m, radius):
+def ZernikeImage(n, m, radius=64):
     h = int(np.ceil(radius))
     # print(type(PolarList(radius)))
     R = PolarList(radius)
@@ -160,8 +160,15 @@ def PolarList(radius):
             y = j / radius
             r, a = CartesianToPolar((x, y))
             cartesian_points.append([r, a])
+            
+    # print("cartesian_points =",cartesian_points)
     packed_array = np.array(cartesian_points)
-    # print(packed_array)
+    # packed_array_T = np.transpose(packed_array)
+    # packed_array_flatten=packed_array_T.flatten()
+    # print("packed_array_flatten =",packed_array_flatten)
+    # packed_array_T=np.transpose(packed_array_flatten)
+    # print("packed_array =",packed_array)
+    # print('packed_array_T.shape =',packed_array_T.shape)
     return packed_array
 
 def Zernike(n, m, r, a):
@@ -178,6 +185,9 @@ def ApertureImage(radius):
                 image[i + h, j + h] = 0
             else:
                 image[i + h, j + h] = 1
+    np.set_printoptions(threshold=np.inf,linewidth=200)
+    # print(h)
+    # print("image =",image)
     return image
 
 def CartesianToPolar(point):
