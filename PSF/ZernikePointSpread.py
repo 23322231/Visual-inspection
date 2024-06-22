@@ -62,10 +62,10 @@ def ZernikePointSpread(coefficients, **kwargs):
     # img {1, 1}
     # {256, 256}
     # 從這裡開始看
-    psf = np.abs(np.fft.ifftshift(np.fft.ifft2(pgp)))**2
+    psf = np.abs((np.fft.ifft2(pgp,norm='ortho')))**2
     psf /= np.sum(psf)
     
-    otf = imagesamples * np.fft.ifftshift(np.fft.ifft2(psf)) if otfq == True or otfq == "Both" else []
+    otf = imagesamples * ((np.fft.ifft2(psf,norm='ortho'))) if otfq == True or otfq == "Both" else []
     
     if verbose:
         plt.figure(figsize=(12, 8))
@@ -111,7 +111,11 @@ def WaveAberrationImage(coefficients=None, radius=16):
     
     # print("radius = ",radius)
     for n, m, c in coefficients:
+        # total_image 是二維陣列，把算完的ZernikeImage用係數(c)加權後再加到total_image上
+        # 就是不同的二維陣列疊加起來就是 total_image
         total_image += c * ZernikeImage(n, m, radius)
+        # print("total_image =",total_image)
+    # np.set_printoptions(threshold=np.inf,linewidth=200)
     # print("total_image =",total_image)
     return total_image
 
@@ -148,8 +152,13 @@ def ZernikeImage(n, m, radius=64):
     # print(np.size(r))
     for i in range(np.size(r)):
         zernike.append(Zernike(n, m, r[i], a[i]))
-    packed_array = np.array(zernike).reshape((2 * h, 2 * h))
-    return packed_array
+    zernike=np.array(zernike)
+    # print("zernike =",zernike.shape)
+    # print("2h =",h*2)
+    # print("aperture_image =",aperture_image.shape)
+    packed_array = zernike.reshape((2 * h, 2 * h))
+    # print("aperture_image*packed_array =",aperture_image*packed_array)
+    return aperture_image*packed_array
 
 def PolarList(radius):
     h = int(np.ceil(radius))
@@ -197,21 +206,17 @@ def CartesianToPolar(point):
     return r, a
 
 def RZ(n, m, r):
-    # py 遞迴預設數量為 1000 左右，這裡遞迴會太深
-    # 所以在這裡改了遞迴的深度
-    sys.setrecursionlimit(1000000000)
     if m<0:
         m=-m
-    s_values = np.arange(0, (n - m) // 2 + 1)
-    # print(r)
-    
+    # print("r =",r)
+    if r>1 or (n-m)%2:
+        return 0
+    if m==0 and r==0:
+        return (-1)**(n/2)
     
     result=[]
-    for s in s_values:            
-        result.append(np.where(r>1,0, 
-                        np.where((n-m)%2!=0, 0, 
-                        np.where(m==0 and r==0, (-1)**(n/2), 
-                        calculate_RZ(n, m, s, r)))))
+    for s in np.arange(0, (n - m) // 2 + 1):            
+        result.append(calculate_RZ(n, m, s, r))
     return np.sum(result)
 
 def calculate_RZ(n, m, s, r):
