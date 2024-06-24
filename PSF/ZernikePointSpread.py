@@ -241,13 +241,13 @@ def NZ(n, m):
     else:
         return math.sqrt(2 * (n + 1))
 
-zc=np.array([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],[3,-1,-0.121],
-            [3,1,0.0264],[3,3,-0.113],[4,-4,0.0292],[4,-2,0.03],[4,0,0.0294],
-            [4,2,0.0163],[4,4,0.064]])
+zc=np.array([[2,-2,-0.094629],[2,0,0.096927],[2,2,0.30527],[3,-3,0.045947],
+             [3,-1,-0.12144],[3,1,0.026396],[3,3,-0.11346],[4,-4,0.029154],
+             [4,-2,0.030043],[4,0,0.029426],[4,2,0.016292],[4,4,0.063988]])
 
 psf=ZernikePointSpread(zc)
 # print(psf)
-letter=cv2.imread("C:\\Users\\user\\Project\\PSF\\letter.png")
+letter=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter.png")
 blurredImg=cv2.filter2D(src=letter,ddepth=-1,kernel=Wrap.wrap(psf))
 # cv2.imshow('Blurred Img',blurredImg)
 # cv2.waitKey(0)
