@@ -5,7 +5,7 @@ from PIL import Image
 from io import BytesIO
 
 app = Flask(__name__)
-socketio = SocketIO(app)
+# socketio = SocketIO(app)
 
 @app.route('/')
 def index():
@@ -13,7 +13,7 @@ def index():
 
 @app.route('/quiz')
 def start():
-    return render_template('quiz.html')
+    return render_template('quiz1.html')
 
 @app.route('/camera')
 def choose():
@@ -60,4 +60,6 @@ def confirm():
     
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    # socketio.run(app)
+    # socketio.run(app, debug=True,host='0.0.0.0', port=5000)
+    app.run(debug=True)
