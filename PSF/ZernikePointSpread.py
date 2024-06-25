@@ -247,7 +247,7 @@ zc=np.array([[2,-2,-0.094629],[2,0,0.096927],[2,2,0.30527],[3,-3,0.045947],
 
 psf=ZernikePointSpread(zc)
 # print(psf)
-letter=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter.png")
+letter=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter.jpg")
 blurredImg=cv2.filter2D(src=letter,ddepth=-1,kernel=Wrap.wrap(psf))
 # cv2.imshow('Blurred Img',blurredImg)
 # cv2.waitKey(0)
