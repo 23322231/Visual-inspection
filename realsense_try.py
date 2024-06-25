@@ -1,4 +1,5 @@
 # 測得視窗中間的距離值
+# 只有中間那點
 import pyrealsense2 as rs
 import numpy as np
 import cv2
