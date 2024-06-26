@@ -19,6 +19,7 @@ def ZernikePointSpread(coefficients, **kwargs):
     # test用，非正式用
     # pupilsamples=126.2
     # print(degrees)
+    print("ImageSamples =",imagesamples)
     if "Degrees" not in kwargs.keys():
         degrees = PSFDegrees(pupilsamples, wavelength, pupil)
     else:
@@ -247,7 +248,7 @@ zc=np.array([[2,-2,-0.094629],[2,0,0.096927],[2,2,0.30527],[3,-3,0.045947],
 
 psf=ZernikePointSpread(zc)
 # print(psf)
-letter=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter.jpg")
+letter=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_math_draw.jpg")
 blurredImg=cv2.filter2D(src=letter,ddepth=-1,kernel=Wrap.wrap(psf))
 # cv2.imshow('Blurred Img',blurredImg)
 # cv2.waitKey(0)
