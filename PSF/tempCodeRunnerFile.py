@@ -1,1 +1,2 @@
-_test
+Plot(psf=psf)
+plt.show()
