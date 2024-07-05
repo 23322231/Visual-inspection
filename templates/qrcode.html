@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>掃描 QR Code 進入繪圖頁面</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        #qrcode {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>請掃描以下 QR Code 進入繪圖頁面</h1>
+<div id="qrcode"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+    // 生成 QR code
+    function generateQRCode(url) {
+        var qrcodeContainer = document.getElementById('qrcode');
+        new QRCode(qrcodeContainer, url);
+    }
+
+    // 設定繪圖頁面的 URL
+    var drawingPageURL = window.location.href + 'drawing.html';
+    generateQRCode(drawingPageURL);
+
+    // 連接到 WebSocket 伺服器
+    var socket = new WebSocket('ws://localhost:8080');
+
+    socket.onmessage = function(event) {
+        if (event.data === 'startDrawing') {
+            window.location.href = 'show_question.html';
+        }
+    };
+</script>
+
+</body>
+</html>

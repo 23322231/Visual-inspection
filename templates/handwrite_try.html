@@ -26,14 +26,14 @@
             padding: 10px 20px;
             font-size: 16px;
             color: #fff;
-            background-color: #e89980;
+            background-color: #007BFF;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         button:hover {
-            background-color: #cd755b;
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -46,9 +46,6 @@
     // 取得 canvas 元素
     var canvas = document.getElementById('drawingCanvas');
     var context = canvas.getContext('2d');
-
-    // 取得顯示座標的元素
-    var coordinatesDiv = document.getElementById('coordinates');
 
     // 設定觸控事件
     canvas.addEventListener('touchstart', startDrawing);
@@ -98,14 +95,11 @@
     // 結束繪圖
     function stopDrawing() {
         isDrawing = false;
-        //console.log(lineCoordinates);
-        //displayCoordinates();
         lineCoordinates = [];
     }
 
     //存使用者畫的圖片
     function saveImage() {
-       
         var dataURL = canvas.toDataURL();   // 將畫布上的內容轉換為 Data URL 字串
         fetch('/upload', {
             method: 'POST',
@@ -115,18 +109,23 @@
             body: JSON.stringify({ image: dataURL })    // 將陣列 coordinates 轉換為 JSON 字串
         })
         .then(response => response.json())  // 當伺服器回應返回時，首先將其解析為 JSON 格式
-        // 將訪問 data 的 message 屬性，並將其輸出到瀏覽器的控制台中
         .then(data => {
             console.log(data);
+            socket.send(JSON.stringify({ action: 'drawingComplete', image: dataURL }));
         })
-        // 錯誤處理部分
         .catch(error => {
             console.error('Error:', error);
         });
     }
+
+    // 連接到 WebSocket 伺服器
+    var socket = new WebSocket('ws://localhost:8080');
+
+    socket.onopen = function() {
+        socket.send('startDrawing');
+    };
 </script>
 
-<!-- <a href="myapp://"><button onclick="saveImage()">Save Image</button></a> -->
-<button onclick="saveImage()">Save Image</button>
+<a href="myapp://"><button onclick="saveImage()">Save Image</button></a>
 </body>
 </html>
