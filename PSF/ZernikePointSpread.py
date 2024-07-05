@@ -7,26 +7,27 @@ import cv2
 import sys
 
 # 論文第六頁內有提到參數的相關設置
-def ZernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, PupilSamples=128, ImageSamples=512, Degrees=0.5,  **kwargs):
-    pupil = kwargs.get("PupilDiameter", 6)
+def ZernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSamples=62.89, ImageSamples=256, **kwargs):
     otfq = kwargs.get("OTF", False)
     apod = kwargs.get("Apodization", False)
     verbose = kwargs.get("Verbose", False)
+    Degrees = kwargs.get("Degrees", 0.5)
     # test用，非正式用
     # PupilSamples=126.2
     print("ImageSamples =",ImageSamples)
     if "Degrees" not in kwargs.keys():
-        Degrees = PSFDegrees(PupilSamples, Wavelength, pupil)
+        Degrees = PSFDegrees(pupilSamples, Wavelength, PupilDiameter)
     else:
-        PupilSamples = PupilSamples(Degrees, Wavelength, pupil)
+        print("!!!!!!!!!!!!!!!!!!")
+        pupilSamples = PupilSamples(Degrees, Wavelength, PupilDiameter)
     
     # ZernikeImage 的第三個參數，簡單來說，數值越大，準確率越高
-    radius = PupilSamples/2
+    radius = pupilSamples/2
     ppd = ImageSamples / Degrees
     # pai 有問題(6/15 看了感覺應該沒問題)
     print("type(apod) =",type(apod))
     if type(apod)==int or type(apod)==float:
-        pai = PupilApertureImage(radius, apod * radius / (pupil/2))
+        pai = PupilApertureImage(radius, apod * radius / (pupilSamples/2))
     else:
         pai = PupilApertureImage2(radius)
     
@@ -38,7 +39,7 @@ def ZernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, PupilSampl
     w=np.size(gp,0)
     
     # 這裡會報錯(ok!)
-    if ImageSamples > PupilSamples:
+    if ImageSamples > pupilSamples:
         pgp = np.pad(gp, (ImageSamples-w,0), mode='constant',constant_values=0)
     else:
         pgp = gp
@@ -58,7 +59,7 @@ def ZernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, PupilSampl
     if verbose:
         plt.figure(figsize=(12, 8))
         plt.subplot(2, 2, 1)
-        plt.imshow(pai, extent=(-pupil/2, pupil/2, -pupil/2, pupil/2))
+        plt.imshow(pai, extent=(-PupilDiameter/2, PupilDiameter/2, -PupilDiameter/2, PupilDiameter/2))
         plt.title("Pupil aperture")
         
         plt.subplot(2, 2, 2)
@@ -66,7 +67,7 @@ def ZernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, PupilSampl
         plt.title("Wave aberration")
         
         plt.subplot(2, 2, 3)
-        plt.imshow(np.real(pgp), extent=(-pupil/2, pupil/2, -pupil/2, pupil/2))
+        plt.imshow(np.real(pgp), extent=(-PupilDiameter/2, PupilDiameter/2, -PupilDiameter/2, PupilDiameter/2))
         plt.title("Generalized pupil")
         
         plt.subplot(2, 2, 4)
@@ -97,8 +98,8 @@ def WaveAberrationImage(coefficients=None, radius=16):
     # print("total_image =",total_image)
     return total_image
 
-def PSFDegrees(PupilSamples, Wavelength, pupildiameter):
-    return PupilSamples * Wavelength * 180 * (10**(-6)) / (pupildiameter * np.pi)
+def PSFDegrees(pupilSamples, Wavelength, pupildiameter):
+    return pupilSamples * Wavelength * 180 * (10**(-6)) / (pupildiameter * np.pi)
 
 def PupilApertureImage2(radius):
     h = int(np.ceil(radius))
@@ -219,6 +220,7 @@ def NZ(n, m):
     else:
         return math.sqrt(2 * (n + 1))
     
+# 畫出PSF
 def PSFPlot(psf, Degrees=0.5, Magnification=1, ScaleMark=True, **kwargs):
     dim = psf.shape
     newdim = 2 * np.ceil(np.array(dim) / Magnification / 2).astype(int)
@@ -251,14 +253,36 @@ zc=np.array([[2,-2,-0.094629],[2,0,0.096927],[2,2,0.30527],[3,-3,0.045947],
              [5,-5,0.049899],[5,-3,-0.025238],[5,-1,0.0074414],[5,1,0.0015506],
              [5,3,-0.0068646],[5,5,0.028846],[6,-6,0.0024519],[6,-4,0.0018495],
              [6,-2,0.0012222],[6,0,-0.0075453],[6,2,-0.00069273],[6,4,0.00055051],
-             [6,6,-0.014835]])
+             [6,6,-0.014835]    
+             ])
+
+            #  [5,-5,0.0499],[5,-3,-0.0252],[5,-1,0.00744],[5,1,0.00155],
+            #  [5,3,-0.00686],[5,5,0.0288],[6,-6,0.00245],[6,-4,0.00185],
+            #  [6,-2,0.00122],[6,0,-0.00755],[6,2,-0.000693],[6,4,0.000551],
+            #  [6,6,-0.0148]
+# [5,-5,0.049899],[5,-3,-0.025238],[5,-1,0.0074414],[5,1,0.0015506],
+#              [5,3,-0.0068646],[5,5,0.028846],[6,-6,0.0024519],[6,-4,0.0018495],
+#              [6,-2,0.0012222],[6,0,-0.0075453],[6,2,-0.00069273],[6,4,0.00055051],
+#              [6,6,-0.014835]
+# [[2,-2,-0.094629],[2,0,0.096927],[2,2,0.30527],[3,-3,0.045947],
+#              [3,-1,-0.12144],[3,1,0.026396],[3,3,-0.11346],[4,-4,0.029154],
+#              [4,-2,0.030043],[4,0,0.029426],[4,2,0.016292],[4,4,0.063988],
+#              [5,-5,0.049899],[5,-3,-0.025238],[5,-1,0.0074414],[5,1,0.0015506],
+#              [5,3,-0.0068646],[5,5,0.028846],[6,-6,0.0024519],[6,-4,0.0018495],
+#              [6,-2,0.0012222],[6,0,-0.0075453],[6,2,-0.00069273],[6,4,0.00055051],
+#              [6,6,-0.014835]    
+#              ]
+# [[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],
+#              [3,-1,-0.121],[3,1,0.0264],[3,3,-0.113],[4,-4,0.0292],
+#              [4,-2,0.03],[4,0,0.0294],[4,2,0.0163],[4,4,0.064],
+#              ]
 
 
-psf=ZernikePointSpread(zc)
+[psf,otf]=ZernikePointSpread([],PupilDiameter=2,OTF="Both")
 psf = np.rot90(psf,axes=(1,0))
-# psf_img = PSFPlot(psf=psf)
-# plt.show()
-letter=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_math_draw.jpg")
+psf_img = PSFPlot(psf=psf,Magnification=4)
+plt.show()
+letter=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_z.png")
 blurredImg=cv2.filter2D(src=letter,ddepth=-1,kernel=Wrap.wrap(psf))
 # cv2.imshow('Blurred Img',blurredImg)
 # cv2.waitKey(0)

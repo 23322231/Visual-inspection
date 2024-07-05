@@ -1,2 +1,2 @@
-Plot(psf=psf)
+ot(psf=psf)
 plt.show()
