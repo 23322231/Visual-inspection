@@ -34,7 +34,7 @@
     }
 
     // 設定繪圖頁面的 URL
-    var drawingPageURL = window.location.href + 'drawing.html';
+    var drawingPageURL = window.location.href + 'handwrite';
     generateQRCode(drawingPageURL);
 
     // 連接到 WebSocket 伺服器
@@ -42,7 +42,7 @@
 
     socket.onmessage = function(event) {
         if (event.data === 'startDrawing') {
-            window.location.href = 'show_question.html';
+            window.location.href = 'show.html';
         }
     };
 </script>

@@ -10,17 +10,17 @@ from flask_httpauth import HTTPBasicAuth
 
 app = Flask(__name__)
 # 設定 MongoDB 連線資訊
-app.config["MONGO_URI"] = "mongodb://localhost:27017/dorm"
-mongo = PyMongo(app)
+# app.config["MONGO_URI"] = "mongodb://localhost:27017/dorm"
+# mongo = PyMongo(app)
 # socketio = SocketIO(app)
 
 # 建立 HTTPBasicAuth 物件
-auth = HTTPBasicAuth()
+# auth = HTTPBasicAuth()
 
 # 設定帳號密碼驗證機制
-@auth.verify_password
-def verify_password(username, password):
-    return username == "admin" and password == "123456"
+# @auth.verify_password
+# def verify_password(username, password):
+#     return username == "admin" and password == "123456"
 
 # 定義路由和 HTTP 方法，並使用 auth.login_required decorator要求驗證
 # @app.route("/visitors", methods=["GET", "POST"])
@@ -59,9 +59,9 @@ def elements():
 def contact():
     return render_template('contact.html')
 
-@app.route('/handwrite_try')
-def handwrite_try():
-    return render_template('handwrite_try.html')
+@app.route('/qrcodehandwrite')
+def handwrite():
+    return render_template('handwrite.html')
 
 # @app.route('/show_image')
 # def image():
@@ -104,3 +104,4 @@ if __name__ == '__main__':
     # socketio.run(app, debug=True,host='0.0.0.0', port=5000)
     # app.run(debug=True)
     app.run(host='0.0.0.0', port=5000, debug=True)  #host改為0.0.0.0,讓手機暫時可以連上
+    # app.run(host='0.0.0.0') 
