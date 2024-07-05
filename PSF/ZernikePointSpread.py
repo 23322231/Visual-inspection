@@ -12,6 +12,7 @@ def ZernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSampl
     apod = kwargs.get("Apodization", False)
     verbose = kwargs.get("Verbose", False)
     Degrees = kwargs.get("Degrees", 0.5)
+    print("Wavelength",Wavelength)
     # test用，非正式用
     # PupilSamples=126.2
     print("ImageSamples =",ImageSamples)
@@ -48,13 +49,13 @@ def ZernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSampl
     # img [1, 1]
     # [256, 256]
     # 從這裡開始看
-    psf = np.abs((np.fft.ifft2(pgp)))**2
+    psf = np.abs((np.fft.ifft2(pgp,norm='ortho')))**2
     psf /= np.sum(psf)
     # psf = np.abs(pgp)**2
     # psf /= np.sum(psf)
     # psf = np.fft.fftshift(psf)
     
-    otf = ImageSamples * (((psf))) if otfq == True or otfq == "Both" else []
+    otf = ImageSamples * ((np.fft.ifft2(psf,norm='ortho'))) if otfq == True or otfq == "Both" else []
     
     if verbose:
         plt.figure(figsize=(12, 8))
@@ -278,9 +279,9 @@ zc=np.array([[2,-2,-0.094629],[2,0,0.096927],[2,2,0.30527],[3,-3,0.045947],
 #              ]
 
 
-[psf,otf]=ZernikePointSpread([],PupilDiameter=2,OTF="Both")
+psf=ZernikePointSpread(zc,Wavelength=700)
 psf = np.rot90(psf,axes=(1,0))
-psf_img = PSFPlot(psf=psf,Magnification=4)
+psf_img = PSFPlot(psf=psf)
 plt.show()
 letter=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_z.png")
 blurredImg=cv2.filter2D(src=letter,ddepth=-1,kernel=Wrap.wrap(psf))
