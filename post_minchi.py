@@ -24,7 +24,7 @@ def choose():
 def confirm():
     return render_template('myopia.html')
 
-@app.route('/quiz1/user_handwrite_image')
+@app.route('/user_handwrite_image')
 def user_handwrite_image():
     return render_template('user_handwrite_image.html')
 
