@@ -5,126 +5,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>觸控畫圖工具</title>
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
         canvas {
-            border: 1px solid #000;
+            background-image: url('static/colorblind_image/38.png');
+            background-size: cover;
+            border: 2px solid black;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #e89980;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            background-color: #cd755b;
         }
     </style>
 </head>
 <body>
 
-<canvas id="drawingCanvas" width="300" height="300"></canvas>
+<canvas id="drawingCanvas" width="500" height="500"></canvas>
 <div id="coordinates"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/socket.io@4.0.0/dist/socket.io.min.js"></script>
 <script>
-    // 取得 canvas 元素
     var canvas = document.getElementById('drawingCanvas');
     var context = canvas.getContext('2d');
-
-    // 設置畫布背景為白色
-    context.fillStyle = 'white'; // 填充顏色為白色
-    context.fillRect(0, 0, canvas.width, canvas.height); // 填充整個畫布
-
-    // 取得顯示座標的元素
     var coordinatesDiv = document.getElementById('coordinates');
+    var isDrawing = false;
+    var lineCoordinates = [];
 
-    // 設定觸控事件
     canvas.addEventListener('touchstart', startDrawing);
     canvas.addEventListener('touchmove', draw);
     canvas.addEventListener('touchend', stopDrawing);
 
-    // 設定繪圖參數
-    var isDrawing = false;
-    var lineCoordinates = [];
-
-    // 開始繪圖
     function startDrawing(e) {
         isDrawing = true;
-        draw(e);  // 避免在移動前有斷線的情況
+        draw(e);
     }
 
-    // 繪圖
     function draw(e) {
-        e.preventDefault(); // 防止滾動
+        e.preventDefault();
 
         if (!isDrawing) return;
 
-        // 設定線條樣式
-        context.lineWidth = 5;
+        context.lineWidth = 12;
         context.lineCap = 'round';
         context.lineJoin = 'round';
         context.strokeStyle = 'black';
 
-        // 取得觸控位置
         var x = e.touches[0].clientX - canvas.offsetLeft;
         var y = e.touches[0].clientY - canvas.offsetTop;
 
-        // 將座標紀錄到軌跡陣列
         lineCoordinates.push({ x, y });
 
-        // 開始繪製路徑
         context.beginPath();
         context.moveTo(lineCoordinates[0].x, lineCoordinates[0].y);
 
-        // 繪製連續的線段
         for (var i = 1; i < lineCoordinates.length; i++) {
             context.lineTo(lineCoordinates[i].x, lineCoordinates[i].y);
             context.stroke();
         }
     }
 
-    //傳座標
-    function sendCoordinatesToFlask(coordinates) {
-        // fetch API，它發送一個 HTTP 請求到指定的 URL /receive_coordinates
-        // 假設 Flask 應用程式正在同一伺服器上運行，並監聽根路徑
-        // 因此 /receive_coordinates 將會發送到 Flask API 的 receive_coordinates 路由
-        fetch('/receive_coordinates', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'  // 表示請求的內容是 JSON 格式的資料
-            },
-            body: JSON.stringify(coordinates)   // 將陣列 coordinates 轉換為 JSON 字串
-        })
-        .then(response => response.json())  // 當伺服器回應返回時，首先將其解析為 JSON 格式
-        .then(data => {
-            console.log(data.message);
-        })  // 將訪問 data 的 message 屬性，並將其輸出到瀏覽器的控制台中
-        .catch(error => {
-            console.error('Error:', error);
-        }); // 錯誤處理部分
-    }
-
-    // 結束繪圖
     function stopDrawing() {
         isDrawing = false;
-        sendCoordinatesToFlask(lineCoordinates); // 將坐標資料發送到 Flask 伺服器
-
         lineCoordinates = [];
     }
 
-    //傳圖片
-    function saveImage() {
-        var dataURL = canvas.toDataURL();   // 將畫布上的內容轉換為 Data URL 字串
-        
-        fetch('/upload', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'  // 表示請求的內容是 JSON 格式的資料
-            },
-            body: JSON.stringify({ image: dataURL })    // 將陣列 coordinates 轉換為 JSON 字串
-        })
-        .then(response => response.json())  // 當伺服器回應返回時，首先將其解析為 JSON 格式
-        // 將訪問 data 的 message 屬性，並將其輸出到瀏覽器的控制台中
-        .then(data => {
-            console.log(data);
-        })
-        // 錯誤處理部分
-        .catch(error => {
-            console.error('Error:', error);
-        });
+    function submitDrawing() {
+        var dataURL = canvas.toDataURL();
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.emit('submit_drawing', dataURL);
     }
+
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+    socket.emit('start_drawing');
 </script>
 
-<button onclick="saveImage()">Save Image</button>
-
+<button onclick="submitDrawing()">確認送出</button>
 </body>
 </html>

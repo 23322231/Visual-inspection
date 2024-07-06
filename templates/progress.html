@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作答進度</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        #status {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        #drawing {
+            border: 2px solid black;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #e89980;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            background-color: #cd755b;
+        }
+    </style>
+</head>
+<body>
+    <div id="status">等待使用者作答...</div>
+    <img id="drawing" src="" alt="用戶繪圖" style="display:none;"/>
+
+    <script src="https://cdn.jsdelivr.net/npm/socket.io@4.0.0/dist/socket.io.min.js"></script>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('start_drawing', function() {
+            document.getElementById('status').innerText = '使用者正在作答...';
+        });
+
+        socket.on('display_drawing', function(dataURL) {
+            var drawing = document.getElementById('drawing');
+            drawing.src = dataURL;
+            drawing.style.display = 'block';
+            document.getElementById('status').innerText = '使用者已提交答案';
+        });
+
+        function confirmSubmission() {
+            socket.emit('confirm_submission');
+        }
+    </script>
+
+    <button onclick="confirmSubmission()">確認送出</button>
+</body>
+</html>
