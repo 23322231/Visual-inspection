@@ -103,5 +103,5 @@ if __name__ == '__main__':
     # socketio.run(app)
     # socketio.run(app, debug=True,host='0.0.0.0', port=5000)
     # app.run(debug=True)
-    app.run(host='0.0.0.0', port=5000, debug=True)  #host改為0.0.0.0,讓手機暫時可以連上
+    app.run(host='0.0.0.0', port=10000, debug=True)  #host改為0.0.0.0,讓手機暫時可以連上
     # app.run(host='0.0.0.0') 
