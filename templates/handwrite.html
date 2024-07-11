@@ -20,6 +20,10 @@
             background-size: cover;
             border: 2px solid black;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 500px;
+            height: auto;
+            aspect-ratio: 1;
         }
         button {
             margin-top: 20px;
@@ -39,7 +43,7 @@
 </head>
 <body>
 
-<canvas id="drawingCanvas" width="500" height="500"></canvas>
+<canvas id="drawingCanvas"></canvas>
 <div id="coordinates"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/socket.io@4.0.0/dist/socket.io.min.js"></script>
@@ -50,12 +54,24 @@
     var isDrawing = false;
     var lineCoordinates = [];
 
+    // Adjust canvas size to fit the screen
+    function resizeCanvas() {
+        var rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.width; // Maintain aspect ratio of 1:1
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('orientationchange', resizeCanvas);
+    resizeCanvas();
+
     canvas.addEventListener('touchstart', startDrawing);
     canvas.addEventListener('touchmove', draw);
     canvas.addEventListener('touchend', stopDrawing);
 
     function startDrawing(e) {
         isDrawing = true;
+        lineCoordinates.push({ x: e.touches[0].clientX - canvas.offsetLeft, y: e.touches[0].clientY - canvas.offsetTop });
         draw(e);
     }
 

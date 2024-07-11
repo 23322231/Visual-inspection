@@ -5,7 +5,7 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.llms import LlamaCpp
 from langchain.chains import RetrievalQA
 
-loader = PyMuPDFLoader("Virtual_characters.pdf")
+loader = PyMuPDFLoader("test-data.pdf")
 PDF_data = loader.load()
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=5)
 all_splits = text_splitter.split_documents(PDF_data)
@@ -82,5 +82,5 @@ qa = RetrievalQA.from_chain_type(
     retriever=retriever, 
     verbose=True
 )
-query = "Tell me about Alison Hawk's career and age"
+query = "告訴我有關眼睛保健的知識"
 qa.invoke(query)

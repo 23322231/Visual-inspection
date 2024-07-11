@@ -119,11 +119,11 @@
     }
 
     // 連接到 WebSocket 伺服器
-    // var socket = new WebSocket('ws://localhost:8080');
+    var socket = new WebSocket('ws://localhost:8080');
 
-    // socket.onopen = function() {
-    //     socket.send('startDrawing');
-    // };
+    socket.onopen = function() {
+        socket.send('startDrawing');
+    };
 </script>
 
 <a href="myapp://"><button onclick="saveImage()">Save Image</button></a>
