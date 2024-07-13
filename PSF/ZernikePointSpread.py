@@ -90,7 +90,7 @@ def WaveAberrationImage(coefficients=None, radius=16):
     for n, m, c in coefficients:
         # total_image 是二維陣列，把算完的ZernikeImage用係數(c)加權後再加到total_image上
         # 就是不同的二維陣列疊加起來就是 total_image
-        
+        # 已確定 ZernikeImage 的第一個參數及第二個參數為數字並非陣列
         total_image += c * ZernikeImage(n, m, radius)
     return total_image
 
@@ -127,14 +127,15 @@ def ZernikeImage(n, m, radius=64):
     # print(np.size(r))
     
     # 這裡錯了
-    for i in range(np.size(r)):
-        zernike.append(Zernike(n, m, r[i], a[i]))
+    # for i in range(np.size(r)):
+    zernike=Zernike(n, m, r, a)
     zernike=np.array(zernike)
     # print("zernike =",zernike.shape)
     # print("2h =",h*2)
     # print("aperture_image =",aperture_image.shape)
     packed_array = zernike.reshape((2 * h, 2 * h))
-    print("packed_array =",packed_array)
+    if n==2 and m==-2:
+        print("packed_array =",packed_array)
     
     # print("aperture_image*packed_array =",aperture_image*packed_array)
     return aperture_image*packed_array
@@ -160,9 +161,18 @@ def PolarList(radius):
     return packed_array.transpose()
 
 def Zernike(n, m, r, a):
-    # 這裡的計算感覺是以 r a 是一個值的計算，但他們是兩個陣列，所以要改一下計算方式，回傳一陣列
+    # 這裡的計算以 r a 是 array 計算
     # print(n,m,r,a)
-    zernike_value = np.where(r > 1, 0, np.where(m < 0, -1, 1) * NZ(n, m) * RZ(n, m, r) * AZ(n, m, a))
+    print("M =",m)
+    if m<0:
+        m=-1
+    else:
+        m=1
+    print("type(m) =",type(m))
+    zernike_value = np.where(r > 1, 0, 1 *
+                             NZ(n, m) * 
+                             RZ(n, m, r) * 
+                             AZ(n, m, a))
     # if n==6 and m==6 and r ==1.394200045589631 and a==0.7853981633974483:
     #     print(zernike_value)
     return zernike_value
@@ -193,31 +203,31 @@ def RZ(n, m, r):
     if m<0:
         m=-m
     # print("r =",r)
-    if r>1 or (n-m)%2:
+    if (type(r)==int and r>1) or (n-m)%2:
         return 0
-    if m==0 and r==0:
+    if m==0 and (type(r)==int and r==0):
         return (-1)**(n/2)
     
-    result=[]
-    for s in np.arange(0, (n - m) // 2 + 1):            
-        result.append(calculate_RZ(n, m, s, r))
-    return np.sum(result)
-
-def calculate_RZ(n, m, s, r):
-    # print(n - m)
-    # 因為計算太長，加一個自己加的 function
-    result = (-1) ** s * np.math.factorial(int(n - s)) * r ** (n - 2 * s) / (
-        np.math.factorial(int(s)) * np.math.factorial(int((n + m) // 2 - s)) * 
-        np.math.factorial(int((n - m) // 2 - s))
-    )
-
+    result = []
+    for ri in r:
+        sum_value = sum(
+            (-1)**s * math.factorial(int(n - s)) * ri**(int(n - 2 * s)) / (
+                math.factorial(s) * 
+                math.factorial(int((n + m) // 2) - s) * 
+                math.factorial(int((n - m) // 2) - s)
+            ) for s in range(int((n - m) // 2) + 1)
+        )
+        result.append(sum_value)
     return result
 
 def AZ(n, m, a):
-    if m < 0:
-        return math.sin(m * a)
-    else:
-        return math.cos(m * a)
+    result=[]
+    for ai in a:
+        if m < 0:
+            result.append(math.sin(m * ai))
+        else:
+            result.append(math.cos(m * ai))
+    return result
     
 def NZ(n, m):
     if m == 0:

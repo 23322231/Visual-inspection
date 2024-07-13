@@ -17,4 +17,5 @@ import sys
         
 # plt.imshow(letter, cmap='gray')
 # plt.show()
-print(np.linalg.norm([-2, 1]))
+r=np.array([1,2,3])
+print(r>1)
