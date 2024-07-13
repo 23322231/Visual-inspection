@@ -17,4 +17,4 @@ import sys
         
 # plt.imshow(letter, cmap='gray')
 # plt.show()
-print(int(1.111))
+print(np.linalg.norm([-2, 1]))

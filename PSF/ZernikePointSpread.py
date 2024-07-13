@@ -24,6 +24,7 @@ def ZernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSampl
     
     # ZernikeImage 的第三個參數，簡單來說，數值越大，準確率越高
     radius = pupilSamples/2
+    print("radius =",radius)
     ppd = ImageSamples / Degrees
     # pai 有問題(6/15 看了感覺應該沒問題)
     print("type(apod) =",type(apod))
@@ -48,12 +49,8 @@ def ZernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSampl
     # img = 256
     # img [1, 1]
     # [256, 256]
-    # 從這裡開始看
     psf = np.abs((np.fft.ifft2(pgp,norm='ortho')))**2
     psf /= np.sum(psf)
-    # psf = np.abs(pgp)**2
-    # psf /= np.sum(psf)
-    # psf = np.fft.fftshift(psf)
     
     otf = ImageSamples * ((np.fft.ifft2(psf,norm='ortho'))) if otfq == True or otfq == "Both" else []
     
@@ -93,10 +90,8 @@ def WaveAberrationImage(coefficients=None, radius=16):
     for n, m, c in coefficients:
         # total_image 是二維陣列，把算完的ZernikeImage用係數(c)加權後再加到total_image上
         # 就是不同的二維陣列疊加起來就是 total_image
+        
         total_image += c * ZernikeImage(n, m, radius)
-        # print("total_image =",total_image)
-    # np.set_printoptions(threshold=np.inf,linewidth=200)
-    # print("total_image =",total_image)
     return total_image
 
 def PSFDegrees(pupilSamples, Wavelength, pupildiameter):
@@ -121,8 +116,8 @@ def ZernikeImage(n, m, radius=64):
     h = int(np.ceil(radius))
     # print(type(PolarList(radius)))
     R = PolarList(radius)
-    r=R[:,0]
-    a=R[:,1]
+    r=R[0][:]
+    a=R[1][:]
     # print(a)
     r = np.where(r == 0., np.finfo(float).eps, r)
     # print(r)
@@ -130,6 +125,8 @@ def ZernikeImage(n, m, radius=64):
     # n, m=2.0,-2.0
     zernike=[]
     # print(np.size(r))
+    
+    # 這裡錯了
     for i in range(np.size(r)):
         zernike.append(Zernike(n, m, r[i], a[i]))
     zernike=np.array(zernike)
@@ -137,32 +134,37 @@ def ZernikeImage(n, m, radius=64):
     # print("2h =",h*2)
     # print("aperture_image =",aperture_image.shape)
     packed_array = zernike.reshape((2 * h, 2 * h))
+    print("packed_array =",packed_array)
+    
     # print("aperture_image*packed_array =",aperture_image*packed_array)
     return aperture_image*packed_array
 
 def PolarList(radius):
     h = int(np.ceil(radius))
+    print("radius =",radius)
     cartesian_points = []
     for i in range(-h, h):
         for j in range(-h, h):
             x = i / radius
             y = j / radius
+            # 將笛卡爾坐標系(就是一般數學用的坐標系)轉為極座標
             r, a = CartesianToPolar((x, y))
             cartesian_points.append([r, a])
             
-    # print("cartesian_points =",cartesian_points)
+    # print("cartesian_points =")
+    # print(cartesian_points[0:2][:])
     packed_array = np.array(cartesian_points)
-    # packed_array_T = np.transpose(packed_array)
-    # packed_array_flatten=packed_array_T.flatten()
-    # print("packed_array_flatten =",packed_array_flatten)
-    # packed_array_T=np.transpose(packed_array_flatten)
-    # print("packed_array =",packed_array)
-    # print('packed_array_T.shape =',packed_array_T.shape)
-    return packed_array
+    # print("packed_array =")
+    # print(packed_array.transpose())
+    
+    return packed_array.transpose()
 
 def Zernike(n, m, r, a):
     # 這裡的計算感覺是以 r a 是一個值的計算，但他們是兩個陣列，所以要改一下計算方式，回傳一陣列
+    # print(n,m,r,a)
     zernike_value = np.where(r > 1, 0, np.where(m < 0, -1, 1) * NZ(n, m) * RZ(n, m, r) * AZ(n, m, a))
+    # if n==6 and m==6 and r ==1.394200045589631 and a==0.7853981633974483:
+    #     print(zernike_value)
     return zernike_value
     
 def ApertureImage(radius):
@@ -176,12 +178,14 @@ def ApertureImage(radius):
                 image[i + h, j + h] = 1
     np.set_printoptions(threshold=np.inf,linewidth=200)
     # print(h)
-    # print("image =",image)
+    # print("image =",image.shape)
     return image
 
 def CartesianToPolar(point):
     x, y = point
+    # r為半徑
     r = np.linalg.norm([x, y])
+    # a為角度
     a = np.arctan2(y, x)
     return r, a
 
@@ -273,10 +277,13 @@ np.set_printoptions(threshold=np.inf)
 #              [6,-2,0.0012222],[6,0,-0.0075453],[6,2,-0.00069273],[6,4,0.00055051],
 #              [6,6,-0.014835]    
 #              ]
+
+# 文章上方對 E 字做模糊的係數
 # zc=np.array([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],
 #              [3,-1,-0.121],[3,1,0.0264],[3,3,-0.113],[4,-4,0.0292],
 #              [4,-2,0.03],[4,0,0.0294],[4,2,0.0163],[4,4,0.064],
 #              ])
+
 # TestCoefficients
 zc=np.array([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],
              [3,-1,-0.121],[3,1,0.0264],[3,3,-0.113],[4,-4,0.0292],
@@ -289,7 +296,7 @@ zc=np.array([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],
 
 
 psf=ZernikePointSpread(zc)
-psf = np.rot90(psf,axes=(1,0))
+# psf = np.rot90(psf,axes=(1,0))
 psf_img = PSFPlot(psf=psf)
 plt.show()
 # letter=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_z.png")
