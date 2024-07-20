@@ -92,6 +92,12 @@ def WaveAberrationImage(coefficients=None, radius=16):
         # 就是不同的二維陣列疊加起來就是 total_image
         # 已確定 ZernikeImage 的第一個參數及第二個參數為數字並非陣列
         total_image += c * ZernikeImage(n, m, radius)
+    
+    print(total_image)
+    
+    if n>=[1,1,1]:
+        print()
+        
     return total_image
 
 def PSFDegrees(pupilSamples, Wavelength, pupildiameter):
@@ -115,34 +121,32 @@ def EquivalentDefocus(coefficient, pupildiameter):
 def ZernikeImage(n, m, radius=64):
     h = int(np.ceil(radius))
     # print(type(PolarList(radius)))
+    # print("radius =",(radius))
+    # PolarList 沒錯
     R = PolarList(radius)
-    r=R[0][:]
+    r=R[0][:] # 這裡的 r 沒錯
     a=R[1][:]
-    # print(a)
-    r = np.where(r == 0., np.finfo(float).eps, r)
-    # print(r)
+    
+    # 若有 0 出現在 r 中，用一個極小的數字替代他
+    # r 的數值看起來很奇怪，但對過後發現是正確的
+    r = np.where(r == 0.0, np.finfo(float).eps, r)
     aperture_image = ApertureImage(radius)
     # n, m=2.0,-2.0
     zernike=[]
     # print(np.size(r))
     
-    # 這裡錯了
     # for i in range(np.size(r)):
     zernike=Zernike(n, m, r, a)
-    zernike=np.array(zernike)
-    # print("zernike =",zernike.shape)
-    # print("2h =",h*2)
-    # print("aperture_image =",aperture_image.shape)
+    
     packed_array = zernike.reshape((2 * h, 2 * h))
-    if n==2 and m==-2:
-        print("packed_array =",packed_array)
     
     # print("aperture_image*packed_array =",aperture_image*packed_array)
+    # 這裡沒錯
     return aperture_image*packed_array
 
 def PolarList(radius):
     h = int(np.ceil(radius))
-    print("radius =",radius)
+    # print("radius =",radius)
     cartesian_points = []
     for i in range(-h, h):
         for j in range(-h, h):
@@ -162,19 +166,23 @@ def PolarList(radius):
 
 def Zernike(n, m, r, a):
     # 這裡的計算以 r a 是 array 計算
-    # print(n,m,r,a)
-    print("M =",m)
+    cou=1
     if m<0:
-        m=-1
+        cou=-1.0
     else:
-        m=1
-    print("type(m) =",type(m))
-    zernike_value = np.where(r > 1, 0, 1 *
-                             NZ(n, m) * 
-                             RZ(n, m, r) * 
-                             AZ(n, m, a))
-    # if n==6 and m==6 and r ==1.394200045589631 and a==0.7853981633974483:
-    #     print(zernike_value)
+        cou=1.0
+        
+    # print("n, m =",n,m)
+    n=int(n)
+    rz= np.array(RZ(n, m, r))
+    az=np.array(AZ(n, m, a))
+    # print("NZ(n, m) * RZ(n, m, r) =",az)
+    # NZ RZ AZ 沒錯
+    # zernike_value 沒錯(格式根長度都是一樣的)
+    zernike_value = cou * NZ(n, m) * rz * az
+    zernike_value = np.where(r>1, 0, zernike_value)
+    # print("zernike_value =",zernike_value)
+    
     return zernike_value
     
 def ApertureImage(radius):

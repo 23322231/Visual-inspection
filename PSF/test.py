@@ -17,5 +17,7 @@ import sys
         
 # plt.imshow(letter, cmap='gray')
 # plt.show()
-r=np.array([1,2,3])
-print(r>1)
+r=np.array([1.43917424, 1.4168656,  1.39492525, 0])
+zernike_value=np.array([1.43917424, 1.4168656,  1.39492525, 1.37337083])
+zernike_value = np.where(r>1 , 0, zernike_value)
+print(zernike_value)
