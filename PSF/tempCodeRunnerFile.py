@@ -1,2 +1,1 @@
-ot(psf=psf)
-plt.show()
+print(c*z)

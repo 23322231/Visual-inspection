@@ -85,15 +85,26 @@ def WaveAberrationImage(coefficients=None, radius=16):
     total_image = np.zeros((size, size))
     if coefficients is None or len(coefficients) == 0:
         return total_image
-    
+    aa=ZernikeImage(2,-2, radius)[1][27]
+    bb=ZernikeImage(2,0, radius)[1][27]
+    cc=ZernikeImage(2,2, radius)[1][27] #有錯，職應該是複數但是答案是正數
+    print(aa,bb,cc)
     # print("radius = ",radius)
     for n, m, c in coefficients:
         # total_image 是二維陣列，把算完的ZernikeImage用係數(c)加權後再加到total_image上
         # 就是不同的二維陣列疊加起來就是 total_image
         # 已確定 ZernikeImage 的第一個參數及第二個參數為數字並非陣列
-        total_image += c * ZernikeImage(n, m, radius)
+        z=ZernikeImage(n, m, radius)
+        
+        total_image = np.add(total_image, c * z)
+        if n==2 and m==2:
+            # print(type(z))
+            # print(c*z)
+            break
+        
     
-    print(total_image)
+    
+    # print("total_image =",total_image)
     
     if n>=[1,1,1]:
         print()
@@ -166,6 +177,8 @@ def PolarList(radius):
 
 def Zernike(n, m, r, a):
     # 這裡的計算以 r a 是 array 計算
+    n=2
+    m=2
     cou=1
     if m<0:
         cou=-1.0
@@ -176,7 +189,8 @@ def Zernike(n, m, r, a):
     n=int(n)
     rz= np.array(RZ(n, m, r))
     az=np.array(AZ(n, m, a))
-    # print("NZ(n, m) * RZ(n, m, r) =",az)
+    # print("RZ(n, m, r) =",rz)
+    # print("AZ(n, m, a) =",az)
     # NZ RZ AZ 沒錯
     # zernike_value 沒錯(格式根長度都是一樣的)
     zernike_value = cou * NZ(n, m) * rz * az
@@ -229,6 +243,7 @@ def RZ(n, m, r):
     return result
 
 def AZ(n, m, a):
+    print("a =",a)
     result=[]
     for ai in a:
         if m < 0:
@@ -309,8 +324,7 @@ zc=np.array([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],
              [5,-5,0.0499],[5,-3,-0.0252],[5,-1,0.00744],[5,1,0.00155],
              [5,3,-0.00686],[5,5,0.0288],[6,-6,0.00245],[6,-4,0.00185],
              [6,-2,0.00122],[6,0,-0.00755],[6,2,-0.000693],[6,4,0.000551],
-             [6,6,-0.0148]
-             ])
+             [6,6,-0.0148]])
 
 
 psf=ZernikePointSpread(zc)
