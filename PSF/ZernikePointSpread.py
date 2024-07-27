@@ -5,39 +5,38 @@ import Wrap
 import math
 import cv2
 import sys
+from wolframclient.evaluation import WolframLanguageSession
+from wolframclient.language import wl, wlexpr
 
 # 論文第六頁內有提到參數的相關設置
-def ZernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSamples=62.89, ImageSamples=256, **kwargs):
+def zernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSamples=62.89, ImageSamples=256, **kwargs):
     otfq = kwargs.get("OTF", False)
     apod = kwargs.get("Apodization", False)
     verbose = kwargs.get("Verbose", False)
     Degrees = kwargs.get("Degrees", 0.5)
-    print("Wavelength",Wavelength)
     # test用，非正式用
     # PupilSamples=126.2
-    print("ImageSamples =",ImageSamples)
     if "Degrees" not in kwargs.keys():
         Degrees = PSFDegrees(pupilSamples, Wavelength, PupilDiameter)
     else:
-        print("!!!!!!!!!!!!!!!!!!")
         pupilSamples = PupilSamples(Degrees, Wavelength, PupilDiameter)
     
     # ZernikeImage 的第三個參數，簡單來說，數值越大，準確率越高
     radius = pupilSamples/2
-    print("radius =",radius)
     ppd = ImageSamples / Degrees
     # pai 有問題(6/15 看了感覺應該沒問題)
-    print("type(apod) =",type(apod))
     if type(apod)==int or type(apod)==float:
         pai = PupilApertureImage(radius, apod * radius / (pupilSamples/2))
     else:
         pai = PupilApertureImage2(radius)
     
-
+    print(pai)
+    if Wavelength==[1,1,1,1]:
+        print()
     # total wavefront aberration image是加權後的Zernike polynomial images總合，
     wai = WaveAberrationImage(coefficients, radius)
-
     gp = pai * np.exp((1j * 2 * np.pi * 10**3 / Wavelength) * wai)
+    print(gp)
     w=np.size(gp,0)
     
     # 這裡會報錯(ok!)
@@ -85,11 +84,7 @@ def WaveAberrationImage(coefficients=None, radius=16):
     total_image = np.zeros((size, size))
     if coefficients is None or len(coefficients) == 0:
         return total_image
-    aa=ZernikeImage(2,-2, radius)[1][27]
-    bb=ZernikeImage(2,0, radius)[1][27]
-    cc=ZernikeImage(2,2, radius)[1][27] #有錯，職應該是複數但是答案是正數
-    print(aa,bb,cc)
-    # print("radius = ",radius)
+    
     for n, m, c in coefficients:
         # total_image 是二維陣列，把算完的ZernikeImage用係數(c)加權後再加到total_image上
         # 就是不同的二維陣列疊加起來就是 total_image
@@ -97,18 +92,7 @@ def WaveAberrationImage(coefficients=None, radius=16):
         z=ZernikeImage(n, m, radius)
         
         total_image = np.add(total_image, c * z)
-        if n==2 and m==2:
-            # print(type(z))
-            # print(c*z)
-            break
-        
-    
-    
-    # print("total_image =",total_image)
-    
-    if n>=[1,1,1]:
-        print()
-        
+                
     return total_image
 
 def PSFDegrees(pupilSamples, Wavelength, pupildiameter):
@@ -116,8 +100,6 @@ def PSFDegrees(pupilSamples, Wavelength, pupildiameter):
 
 def PupilApertureImage2(radius):
     h = int(np.ceil(radius))
-    # print("h =",h)
-    # print("Table =", np.array([[0 if abs(x + 1j*y) > radius else 1 for x in range(-h, h)] for y in range(-h, h)]))
     # 1j 用來表示虛數的 i
     return np.array([[0 if abs(x + 1j*y) > radius else 1 for x in range(-h, h)] for y in range(-h, h)])
 
@@ -131,33 +113,53 @@ def EquivalentDefocus(coefficient, pupildiameter):
 
 def ZernikeImage(n, m, radius=64):
     h = int(np.ceil(radius))
-    # print(type(PolarList(radius)))
-    # print("radius =",(radius))
-    # PolarList 沒錯
-    R = PolarList(radius)
-    r=R[0][:] # 這裡的 r 沒錯
-    a=R[1][:]
+    
+    # 啟動 Wolfram Engine session
+    session = WolframLanguageSession("C:\\Users\\user\\Downloads\\Mathematica\\Mathematica\\wolfram.exe")
+
+    # 定義 Mathematica 程式碼
+    mathematica_code = """
+     PolarList[radius_] := PolarList[radius] = Block[{h},
+    h = Ceiling[radius];
+    ToPackedArray[
+        N[Transpose[
+        Flatten[Transpose[
+            Array[CartesianToPolar[{##}/radius] &, 2 {h, h}, {-h, -h}]], 
+        1]]]]]
+    CartesianToPolar[{0., 0.}] := {0, 0}
+    CartesianToPolar[{0., 0}] := {0, 0}
+    CartesianToPolar[{0, 0.}] := {0, 0}
+    CartesianToPolar[{0, 0}] := {0, 0}
+    CartesianToPolar[{x_, y_}] := {Norm[{x, y}], ArcTan[x, y]}
+    """
+
+    # 執行 Mathematica 程式碼
+    session.evaluate(wlexpr(mathematica_code))
+
+    # 測試 PolarList 函數
+    R = session.evaluate(wlexpr(f'PolarList[{radius}]'))
+
+    r=R[0][0][:]
+    a=R[0][1][:]
+
+    # 關閉 session
+    session.terminate()
     
     # 若有 0 出現在 r 中，用一個極小的數字替代他
     # r 的數值看起來很奇怪，但對過後發現是正確的
     r = np.where(r == 0.0, np.finfo(float).eps, r)
     aperture_image = ApertureImage(radius)
-    # n, m=2.0,-2.0
     zernike=[]
-    # print(np.size(r))
     
     # for i in range(np.size(r)):
     zernike=Zernike(n, m, r, a)
     
     packed_array = zernike.reshape((2 * h, 2 * h))
     
-    # print("aperture_image*packed_array =",aperture_image*packed_array)
-    # 這裡沒錯
     return aperture_image*packed_array
 
 def PolarList(radius):
     h = int(np.ceil(radius))
-    # print("radius =",radius)
     cartesian_points = []
     for i in range(-h, h):
         for j in range(-h, h):
@@ -167,35 +169,25 @@ def PolarList(radius):
             r, a = CartesianToPolar((x, y))
             cartesian_points.append([r, a])
             
-    # print("cartesian_points =")
-    # print(cartesian_points[0:2][:])
     packed_array = np.array(cartesian_points)
-    # print("packed_array =")
-    # print(packed_array.transpose())
     
     return packed_array.transpose()
 
 def Zernike(n, m, r, a):
     # 這裡的計算以 r a 是 array 計算
-    n=2
-    m=2
     cou=1
     if m<0:
         cou=-1.0
     else:
         cou=1.0
         
-    # print("n, m =",n,m)
     n=int(n)
     rz= np.array(RZ(n, m, r))
     az=np.array(AZ(n, m, a))
-    # print("RZ(n, m, r) =",rz)
-    # print("AZ(n, m, a) =",az)
     # NZ RZ AZ 沒錯
     # zernike_value 沒錯(格式根長度都是一樣的)
     zernike_value = cou * NZ(n, m) * rz * az
     zernike_value = np.where(r>1, 0, zernike_value)
-    # print("zernike_value =",zernike_value)
     
     return zernike_value
     
@@ -209,8 +201,6 @@ def ApertureImage(radius):
             else:
                 image[i + h, j + h] = 1
     np.set_printoptions(threshold=np.inf,linewidth=200)
-    # print(h)
-    # print("image =",image.shape)
     return image
 
 def CartesianToPolar(point):
@@ -224,7 +214,6 @@ def CartesianToPolar(point):
 def RZ(n, m, r):
     if m<0:
         m=-m
-    # print("r =",r)
     if (type(r)==int and r>1) or (n-m)%2:
         return 0
     if m==0 and (type(r)==int and r==0):
@@ -243,7 +232,6 @@ def RZ(n, m, r):
     return result
 
 def AZ(n, m, a):
-    print("a =",a)
     result=[]
     for ai in a:
         if m < 0:
@@ -314,8 +302,7 @@ np.set_printoptions(threshold=np.inf)
 # 文章上方對 E 字做模糊的係數
 # zc=np.array([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],
 #              [3,-1,-0.121],[3,1,0.0264],[3,3,-0.113],[4,-4,0.0292],
-#              [4,-2,0.03],[4,0,0.0294],[4,2,0.0163],[4,4,0.064],
-#              ])
+#              [4,-2,0.03],[4,0,0.0294],[4,2,0.0163],[4,4,0.064]])
 
 # TestCoefficients
 zc=np.array([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],
@@ -327,20 +314,19 @@ zc=np.array([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],
              [6,6,-0.0148]])
 
 
-psf=ZernikePointSpread(zc)
-# psf = np.rot90(psf,axes=(1,0))
+psf=zernikePointSpread(zc, Wavelength=400)
 psf_img = PSFPlot(psf=psf)
 plt.show()
-# letter=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_z.png")
-# blurredImg=cv2.filter2D(src=letter,ddepth=-1,kernel=Wrap.wrap(psf))
-# cv2.imshow('Blurred Img',blurredImg)
-# cv2.waitKey(0)
+letter=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_z.png")
+blurredImg=cv2.filter2D(src=letter,ddepth=-1,kernel=Wrap.wrap(psf))
+cv2.imshow('Blurred Img',blurredImg)
+cv2.waitKey(0)
 
-# plt.figure(figsize=(10, 5))
-# plt.subplot(1, 2, 1)
-# plt.title("Original")
-# plt.imshow(letter, cmap='gray')
-# plt.subplot(1, 2, 2)
-# plt.title("Blurred")
-# plt.imshow(blurredImg, cmap='gray')
-# plt.show()
+plt.figure(figsize=(10, 5))
+plt.subplot(1, 2, 1)
+plt.title("Original")
+plt.imshow(letter, cmap='gray')
+plt.subplot(1, 2, 2)
+plt.title("Blurred")
+plt.imshow(blurredImg, cmap='gray')
+plt.show()
