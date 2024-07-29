@@ -205,8 +205,11 @@ session.evaluate(wlexpr(code))
 
 # 測試 PolarList 函數
 psf = session.evaluate(wlexpr(f'ZernikePointSpread[{zc_mathematica}]'))
+print("ZernikePointSpread done!")
 psf_img = session.evaluate(wlexpr(f'PSFPlot[{psf}]'))
+print("PSFPlot done!")
 plt.show()
 
 # 關閉 session
 session.terminate()
+print(np.exp(1j * 2 * np.pi * 10**3/555))
