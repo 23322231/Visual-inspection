@@ -1,0 +1,77 @@
+<!-- 確認是否進入作答畫面的頁面 -->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>色盲點圖測驗</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f8ff;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            text-align: center;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 2em;
+            color: #333333;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <!-- <script>
+        function generateUniqueURL() {
+            // 生成唯一標識符（UUID）
+            const uuid = URL.createObjectURL(new Blob()).substring(9);
+            // 跳轉到帶有唯一標識符的 handwrite.html 頁面
+            window.location.href = `handwrite.html?session=${uuid}`;
+        }
+    </script> -->
+    <script>
+        function generateUniqueURL() {
+            fetch('/generate-url')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.url) {
+                        window.location.href = data.url;
+                    } else {
+                        console.error('Error generating URL');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    </script>
+    <!-- <button onclick="generateUniqueURL()">確認</button> -->
+    
+</head>
+<body>
+    <div class="container">
+        <h1>進入色盲點圖測驗</h1>
+        <button onclick="generateUniqueURL()">確認</button>
+    </div>
+</body>
+</html>

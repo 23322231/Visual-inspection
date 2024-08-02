@@ -11,12 +11,35 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #f0f0f0;
+            background-image: url('static/images/qrcode_background.jpg'); /* 替換為你的背景圖像URL */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
             margin: 0;
             padding: 0;
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+        }
+        h1 {
+            color: #fff;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
         }
         #qrcode {
-            margin-top: 20px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
     </style>
 </head>
@@ -26,25 +49,68 @@
 <div id="qrcode"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 <script>
-    // 生成 QR code
+    // 生成 QR Code 的函數
     function generateQRCode(url) {
         var qrcodeContainer = document.getElementById('qrcode');
-        new QRCode(qrcodeContainer, url);
+        new QRCode(qrcodeContainer, url); // 在指定的容器內生成 QR Code
+        console.log('QR Code generated with URL:', url); // 在控制台打印生成的 URL
     }
 
-    // 設定繪圖頁面的 URL
-    var drawingPageURL = window.location.href + 'handwrite';
-    generateQRCode(drawingPageURL);
-
-    // 連接到 WebSocket 伺服器
-    var socket = new WebSocket('ws://localhost:8080');
-
-    socket.onmessage = function(event) {
-        if (event.data === 'startDrawing') {
-            window.location.href = 'show.html';
+    // 從後端獲取唯一 URL
+    async function fetchUniqueURL() {
+        try {
+            const response = await fetch('/generate-url');
+            const data = await response.json();
+            return data.url;
+        } catch (error) {
+            console.error('Error fetching unique URL:', error);
         }
-    };
+    }
+
+    // 初始化 WebSocket 連接
+    var socket = io();
+    var sessionID = generateUUID(); // 生成唯一的 session ID
+
+    // 生成 UUID 的函數
+    function generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    // WebSocket 連接成功時的處理
+    socket.on('connect', function() {
+        console.log('WebSocket 連接已打開');
+        socket.emit('startSession', { sessionID: sessionID }); // 向服務器發送啟動會話的請求
+    });
+
+    // WebSocket 連接錯誤時的處理
+    socket.on('connect_error', function(error) {
+        console.error('WebSocket 連接錯誤:', error);
+    });
+
+    // 收到開始繪圖消息時的處理
+    socket.on('startDrawing', function(message) {
+        if (message.sessionID === sessionID) { // 檢查收到的 session ID 是否匹配
+            console.log('Session ID matched. Redirecting to drawing page.');
+            window.location.href = 'handwrite?session=' + sessionID; // 重定向到繪圖頁面
+        }
+    });
+
+    // WebSocket 連接關閉時的處理
+    socket.on('disconnect', function() {
+        console.log('WebSocket 連接已關閉');
+    });
+
+    // 獲取並顯示唯一 URL 的 QR Code
+    fetchUniqueURL().then(url => {
+        // 確保生成的URL指向繪圖頁面
+        var fullUrl = url + '?session=' + sessionID;
+        generateQRCode(fullUrl);
+    });
 </script>
 
 </body>

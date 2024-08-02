@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,71 +13,103 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #f0f0f0;
+            background-color: #e0f7fa;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
         canvas {
-            background-image: url('static/colorblind_image/38.png');
+            background-image: url(data:image/png;base64,{{data}});
             background-size: cover;
-            border: 2px solid black;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 2px solid #004d40;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             width: 90%;
             max-width: 500px;
             height: auto;
             aspect-ratio: 1;
+            margin-bottom: 20px;
         }
         button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 12px 25px;
+            font-size: 18px;
             color: #fff;
-            background-color: #e89980;
+            background-color: #00796b;
             border: none;
-            border-radius: 5px;
+            border-radius: 25px;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease;
         }
         button:hover {
-            background-color: #cd755b;
+            background-color: #004d40;
+        }
+        .status {
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-<canvas id="drawingCanvas"></canvas>
-<div id="coordinates"></div>
+<div class="container">
+    <div class="status" id="status">完成題數: 0/10</div>
+    <canvas id="drawingCanvas" width="500" height="500"></canvas>
+    <button onclick="saveImage()">確認送出</button>
+</div>
 
-<script src="https://cdn.jsdelivr.net/npm/socket.io@4.0.0/dist/socket.io.min.js"></script>
 <script>
-    var canvas = document.getElementById('drawingCanvas');
-    var context = canvas.getContext('2d');
-    var coordinatesDiv = document.getElementById('coordinates');
-    var isDrawing = false;
-    var lineCoordinates = [];
+    var totalQuestions = 10;
+    var completedQuestions = 0;
+    window.addEventListener('resize', resizeCanvas);
 
-    // Adjust canvas size to fit the screen
     function resizeCanvas() {
-        var rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = rect.width; // Maintain aspect ratio of 1:1
+        var currentBackgroundImage = canvas.style.backgroundImage;
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+        canvas.style.backgroundImage = currentBackgroundImage;
     }
 
-    window.addEventListener('resize', resizeCanvas);
-    window.addEventListener('orientationchange', resizeCanvas);
-    resizeCanvas();
+    function updateStatus() {
+        resizeCanvas();
+        document.getElementById('status').innerText = '完成題數: ' + completedQuestions + '/' + totalQuestions;
+    }
 
+    var canvas = document.getElementById('drawingCanvas');
+    var context = canvas.getContext('2d');
     canvas.addEventListener('touchstart', startDrawing);
     canvas.addEventListener('touchmove', draw);
     canvas.addEventListener('touchend', stopDrawing);
 
+    var isDrawing = false;
+    var lineCoordinates = [];
+
+    function getTouchPosition(canvas, touchEvent) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: touchEvent.touches[0].clientX - rect.left,
+            y: touchEvent.touches[0].clientY - rect.top
+        };
+    }
+
     function startDrawing(e) {
         isDrawing = true;
-        lineCoordinates.push({ x: e.touches[0].clientX - canvas.offsetLeft, y: e.touches[0].clientY - canvas.offsetTop });
+        var pos = getTouchPosition(canvas, e);
+        lineCoordinates.push(pos);
         draw(e);
     }
 
     function draw(e) {
         e.preventDefault();
-
         if (!isDrawing) return;
 
         context.lineWidth = 12;
@@ -85,10 +117,8 @@
         context.lineJoin = 'round';
         context.strokeStyle = 'black';
 
-        var x = e.touches[0].clientX - canvas.offsetLeft;
-        var y = e.touches[0].clientY - canvas.offsetTop;
-
-        lineCoordinates.push({ x, y });
+        var pos = getTouchPosition(canvas, e);
+        lineCoordinates.push(pos);
 
         context.beginPath();
         context.moveTo(lineCoordinates[0].x, lineCoordinates[0].y);
@@ -104,17 +134,52 @@
         lineCoordinates = [];
     }
 
-    function submitDrawing() {
-        var dataURL = canvas.toDataURL();
-        var socket = io.connect('http://' + document.domain + ':' + location.port);
-
-        socket.emit('submit_drawing', dataURL);
+    function saveImage() {
+        if (confirm("您確定要送出嗎？")) {
+            var dataURL = canvas.toDataURL();
+            fetch('/upload', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image: dataURL })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                completedQuestions++;
+                updateStatus();
+                if (completedQuestions < totalQuestions) {
+                    loadNextImage();
+                } else {
+                    alert("已完成所有題目！");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
     }
 
-    var socket = io.connect('http://' + document.domain + ':' + location.port);
-    socket.emit('start_drawing');
+    function loadNextImage() {
+        fetch('/next-image')
+        .then(response => response.json())
+        .then(data => {
+            if (data.nextImageUrl) {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                canvas.style.backgroundImage = 'url(' + data.nextImageUrl + ')';
+            } else {
+                console.error('Error: no image URL returned');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading next image:', error);
+        });
+    }
+
+    loadNextImage();
+    updateStatus();
 </script>
 
-<button onclick="submitDrawing()">確認送出</button>
 </body>
 </html>
