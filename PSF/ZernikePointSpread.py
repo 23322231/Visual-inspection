@@ -992,28 +992,28 @@ def zernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSampl
   0. + 0.j]]
     # print(sum(np.round(wai,3)==np.round(cmp,3)))
     gp = pai * np.exp((1j * 2 * np.pi * 10**3 / Wavelength) * wai)
-    # 啟動 Wolfram Engine session
-    session = WolframLanguageSession("C:\\Users\\user\\Downloads\\Mathematica\\Mathematica\\wolfram.exe")
+    # # 啟動 Wolfram Engine session
+    # session = WolframLanguageSession("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\wolfram.exe")
     
-    gp_code="""
-    GP[pai_, wavelength_, wai_] :=  GP[pai_, wavelength_, wai_] = 
-    pai Exp[(I 2. Pi 10^3/wavelength) wai]"""
+    # gp_code="""
+    # GP[pai_, wavelength_, wai_] :=  GP[pai_, wavelength_, wai_] = 
+    # pai Exp[(I 2. Pi 10^3/wavelength) wai]"""
     
-    # 執行 Mathematica 程式碼
-    session.evaluate(wlexpr(gp_code))
+    # # 執行 Mathematica 程式碼
+    # session.evaluate(wlexpr(gp_code))
     
-    wai_mathematica = str(wai.tolist()).replace('[', '{').replace(']', '}')
-    pai_mathematica = str(pai.tolist()).replace('[', '{').replace(']', '}')
+    # wai_mathematica = str(wai.tolist()).replace('[', '{').replace(']', '}')
+    # pai_mathematica = str(pai.tolist()).replace('[', '{').replace(']', '}')
 
-    # 測試 GP 函數
-    gp = session.evaluate(wlexpr(f'GP[{pai_mathematica,Wavelength,wai_mathematica}]'))
-    # 關閉 session
-    session.terminate()
+    # # 測試 GP 函數
+    # gp = session.evaluate(wlexpr(f'GP[{pai_mathematica,Wavelength,wai_mathematica}]'))
+    # # 關閉 session
+    # session.terminate()
     
     
     print(1111111111111)
     
-    print("gp =",gp)
+    # print("gp =",gp)
     
                 
     w=np.size(gp,0)
@@ -1094,7 +1094,7 @@ def ZernikeImage(n, m, radius=64):
     h = int(np.ceil(radius))
     
     # 啟動 Wolfram Engine session
-    session = WolframLanguageSession("C:\\Users\\user\\Downloads\\Mathematica\\Mathematica\\wolfram.exe")
+    session = WolframLanguageSession("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\wolfram.exe")
 
     # 定義 Mathematica 程式碼
     mathematica_code = """
