@@ -194,22 +194,30 @@ zc=np.array([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],
              [5,3,-0.00686],[5,5,0.0288],[6,-6,0.00245],[6,-4,0.00185],
              [6,-2,0.00122],[6,0,-0.00755],[6,2,-0.000693],[6,4,0.000551],
              [6,6,-0.0148]])
-# 將 Zernike 系數轉換成 Mathematica 語法
-zc_mathematica = str(zc.tolist()).replace('[', '{').replace(']', '}')
 
 # 啟動 Wolfram Engine session
 session = WolframLanguageSession("C:\\Users\\user\\Downloads\\Mathematica\\Mathematica\\wolfram.exe")
 
+# 定義 Mathematica 程式碼
+mathematica_code = """
+  PolarList[radius_] := PolarList[radius] = Block[{h},
+h = Ceiling[radius];
+ToPackedArray[
+    N[Transpose[
+    Flatten[Transpose[
+        Array[CartesianToPolar[{##}/radius] &, 2 {h, h}, {-h, -h}]], 1]]]]]
+CartesianToPolar[{0., 0.}] := {0, 0}
+CartesianToPolar[{0., 0}] := {0, 0}
+CartesianToPolar[{0, 0.}] := {0, 0}
+CartesianToPolar[{0, 0}] := {0, 0}
+CartesianToPolar[{x_, y_}] := {Norm[{x, y}], ArcTan[x, y]}
+"""
+
 # 執行 Mathematica 程式碼
-session.evaluate(wlexpr(code))
-
+session.evaluate(wlexpr(mathematica_code))
+radius=31.445
 # 測試 PolarList 函數
-psf = session.evaluate(wlexpr(f'ZernikePointSpread[{zc_mathematica}]'))
-print("ZernikePointSpread done!")
-psf_img = session.evaluate(wlexpr(f'PSFPlot[{psf}]'))
-print("PSFPlot done!")
-plt.show()
-
+R = session.evaluate(wlexpr(f'PolarList[{radius}]'))
+print(R)
 # 關閉 session
 session.terminate()
-print(np.exp(1j * 2 * np.pi * 10**3/555))

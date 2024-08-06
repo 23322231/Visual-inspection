@@ -1,3 +1,3 @@
-sf = session.evaluate(wlexpr(f'ZernikePointSpread[{zc}]'))
-# psf_img = session.evaluate(wlexpr(f'PSFPlot[{psf}]'))
-# plt.show()
+for i in range(4096):
+    #     if cartesian_points[i][0]!=cmp[i]:
+    #         print(cartesian_points[i][0],cmp[i])
