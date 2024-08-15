@@ -42,11 +42,8 @@ def zernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSampl
         pgp = np.pad(gp, (ImageSamples-w,0), mode='constant',constant_values=0)
     else:
         pgp = gp
-    
-    # mathematica 的輸出
-    # img = 256
-    # img [1, 1]
-    # [256, 256]
+
+    # InverseFourier
     psf = np.abs((np.fft.ifftn(pgp)))**2
     cmp=[[1.15189 + 0.271646j, 
   0.499761 + 0.791154j, -0.127262 + 0.597304j, -0.207178 + 0.1229j,
