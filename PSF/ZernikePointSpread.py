@@ -9,6 +9,8 @@ from wolframclient.evaluation import WolframLanguageSession
 from wolframclient.language import wl, wlexpr
 import itertools
 import pyfftw
+from scipy.fft import ifft2, ifftshift
+
 
 
 # 論文第六頁內有提到參數的相關設置
@@ -31425,7 +31427,7 @@ def zernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSampl
   0.618394 + 0.53749j, -0.032072 + 0.910733j, -0.785649 + 
    0.664637j, -1.13241 - 0.10894j, -0.763891 - 0.92435j, 
   0.109733 - 1.17841j]]
-    result=inverse_fourier_mathematica(pgp)
+    result=inverse_fourier_2d(pgp)
     print((result)[0][0])
     print(sum(np.round(cmp,4)==np.round(result,4)))
     psf /= np.sum(psf)
@@ -31455,19 +31457,32 @@ def zernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSampl
 
     return otf if otfq == True else psf if otfq == False else [psf, otf]
 
-def inverse_fourier_mathematica(X):
-    x = np.fft.ifft2(X)
-    # M, N = X.shape  # Dimensions of the input array
-    # x = np.zeros((M, N), dtype=complex)  # Output array
-
-    # for m in range(M):
-    #     for n in range(N):
-    #         for p in range(M):
-    #             for q in range(N):
-    #                 x[m, n] += X[p, q] * np.exp(2j * np.pi * (p * m / M + q * n / N))
-    #         x[m, n] /= (M * N)  # Normalize by the total number of points
-
-    return x
+def inverse_fourier_2d(data):
+    # 確保輸入是 numpy 數組並且是二維的
+    data = np.asarray(data, dtype=float)
+    if data.ndim != 2:
+        raise ValueError("Input must be a 2D array")
+    
+    M, N = data.shape
+    
+    # 創建頻率網格
+    kx = np.fft.fftfreq(M, d=1.0/(2*np.pi))
+    ky = np.fft.fftfreq(N, d=1.0/(2*np.pi))
+    kx, ky = np.meshgrid(kx, ky, indexing='ij')
+    
+    # 計算相位因子
+    phase = (kx**2 + ky**2) / 2
+    phase_factor = np.exp(1j * phase)
+    
+    # 應用相位因子和執行逆傅立葉變換
+    data_shifted = ifftshift(data) * phase_factor
+    result = ifft2(data_shifted)
+    
+    # 應用 Mathematica 的歸一化
+    norm_factor = 2 * np.pi / np.sqrt(M * N)
+    result *= norm_factor
+    
+    return result
 
 
 def PupilSamples(Degrees, Wavelength, pupildiameter):
