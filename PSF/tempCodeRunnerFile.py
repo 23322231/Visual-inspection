@@ -1,1 +1,1 @@
-aperture_image*packed_array
+integrate sin(x) dx

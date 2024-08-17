@@ -213,11 +213,13 @@ CartesianToPolar[{0, 0}] := {0, 0}
 CartesianToPolar[{x_, y_}] := {Norm[{x, y}], ArcTan[x, y]}
 """
 
-# 執行 Mathematica 程式碼
-session.evaluate(wlexpr(mathematica_code))
-radius=31.445
-# 測試 PolarList 函數
-R = session.evaluate(wlexpr(f'PolarList[{radius}]'))
-print(R)
-# 關閉 session
-session.terminate()
+# # 執行 Mathematica 程式碼
+# session.evaluate(wlexpr(mathematica_code))
+# radius=31.445
+# # 測試 PolarList 函數
+# R = session.evaluate(wlexpr(f'PolarList[{radius}]'))
+# print(R)
+# # 關閉 session
+# session.terminate()
+
+

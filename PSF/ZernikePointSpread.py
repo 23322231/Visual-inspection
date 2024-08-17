@@ -8,6 +8,8 @@ import sys
 from wolframclient.evaluation import WolframLanguageSession
 from wolframclient.language import wl, wlexpr
 import itertools
+import pyfftw
+
 
 # 論文第六頁內有提到參數的相關設置
 def zernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSamples=62.89, ImageSamples=256, **kwargs):
@@ -45,6 +47,7 @@ def zernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSampl
 
     # InverseFourier
     psf = np.abs((np.fft.ifftn(pgp)))**2
+    # InverseFourier[pgp]
     cmp=[[1.15189 + 0.271646j, 
   0.499761 + 0.791154j, -0.127262 + 0.597304j, -0.207178 + 0.1229j,
    0.149425 - 0.0328009j, 0.423995 + 0.318945j, 
@@ -31422,8 +31425,9 @@ def zernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSampl
   0.618394 + 0.53749j, -0.032072 + 0.910733j, -0.785649 + 
    0.664637j, -1.13241 - 0.10894j, -0.763891 - 0.92435j, 
   0.109733 - 1.17841j]]
-    print((np.fft.ifftn(pgp)))
-    # print(sum(np.round(cmp,4)==np.round((np.fft.ifft2(pgp)),4)))
+    result=inverse_fourier_mathematica(pgp)
+    print((result)[0][0])
+    print(sum(np.round(cmp,4)==np.round(result,4)))
     psf /= np.sum(psf)
    
     
@@ -31450,6 +31454,22 @@ def zernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSampl
         plt.show()
 
     return otf if otfq == True else psf if otfq == False else [psf, otf]
+
+def inverse_fourier_mathematica(X):
+    x = np.fft.ifft2(X)
+    # M, N = X.shape  # Dimensions of the input array
+    # x = np.zeros((M, N), dtype=complex)  # Output array
+
+    # for m in range(M):
+    #     for n in range(N):
+    #         for p in range(M):
+    #             for q in range(N):
+    #                 x[m, n] += X[p, q] * np.exp(2j * np.pi * (p * m / M + q * n / N))
+    #         x[m, n] /= (M * N)  # Normalize by the total number of points
+
+    return x
+
+
 def PupilSamples(Degrees, Wavelength, pupildiameter):
     # 在 mathematica 中的 Degree 的功能即為 角度轉弧度(np.deg2rad)
     return np.deg2rad(10**6 * Degrees * pupildiameter) / Wavelength
