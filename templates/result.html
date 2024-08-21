@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>測驗結果</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #e0f7fa;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+        }
+        .container {
+            text-align: center;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        .score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #00796b;
+            margin-bottom: 20px;
+        }
+        .message {
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 18px;
+            color: #fff;
+            background-color: #00796b;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #004d40;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="score" id="score">你的分數: 80</div>
+        <div class="message" id="message">恭喜！你完成了測驗。</div>
+        <button onclick="window.location.href='/'">回到首頁</button>
+        <button onclick="window.location.href='/details'">查看詳細資料</button>
+    </div>
+    <script>
+        // 這裡可以通過 JavaScript 從 URL 或其他方式獲取動態分數
+        // 示例:
+        // var score = new URLSearchParams(window.location.search).get('score');
+        // document.getElementById('score').innerText = '你的分數: ' + score;
+    </script>
+</body>
+</html>

@@ -1,3 +1,4 @@
+<!-- 色盲點圖作答頁面 -->
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -22,9 +23,11 @@
             flex-direction: column;
             align-items: center;
             background-color: #ffffff;
-            padding: 20px;
+            padding: 10px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 400px;
         }
         canvas {
             background-image: url(data:image/png;base64,{{data}});
@@ -32,19 +35,18 @@
             border: 2px solid #004d40;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            max-width: 500px;
+            width: 100%;
             height: auto;
-            aspect-ratio: 1;
+            aspect-ratio: 1 / 1; /* 保持正方形 */
             margin-bottom: 20px;
         }
         button {
-            padding: 12px 25px;
-            font-size: 18px;
+            padding: 10px 20px;
+            font-size: 16px;
             color: #fff;
             background-color: #00796b;
             border: none;
-            border-radius: 25px;
+            border-radius: 20px;
             cursor: pointer;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             transition: background-color 0.3s ease;
@@ -53,8 +55,8 @@
             background-color: #004d40;
         }
         .status {
-            font-size: 20px;
-            margin-bottom: 20px;
+            font-size: 16px;
+            margin-bottom: 10px;
             font-weight: bold;
         }
     </style>
@@ -62,37 +64,54 @@
 <body>
 
 <div class="container">
+    <!-- 顯示完成題數的狀態 -->
     <div class="status" id="status">完成題數: 0/10</div>
-    <canvas id="drawingCanvas" width="500" height="500"></canvas>
+    <!-- 畫圖的 canvas 元素 -->
+    <canvas id="drawingCanvas"></canvas>
+    <!-- 確認送出的按鈕 -->
     <button onclick="saveImage()">確認送出</button>
 </div>
-
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 <script>
+    // 初始化 WebSocket 連接
+    var socket = io.connect('http://192.168.0.156:5000');
+
+    // 設定總題數
     var totalQuestions = 10;
+    // 設定已完成的題數
     var completedQuestions = 0;
+
+    // 當視窗大小變化時，調整 canvas 的大小
     window.addEventListener('resize', resizeCanvas);
 
+    // 調整 canvas 大小，使其保持正方形
     function resizeCanvas() {
+        var canvas = document.getElementById('drawingCanvas');
         var currentBackgroundImage = canvas.style.backgroundImage;
         canvas.width = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
+        canvas.height = canvas.clientWidth;  // 保持 canvas 是正方形
         canvas.style.backgroundImage = currentBackgroundImage;
     }
 
+    // 更新顯示的題數狀態
     function updateStatus() {
-        resizeCanvas();
+        resizeCanvas(); // 確保 canvas 大小正確
         document.getElementById('status').innerText = '完成題數: ' + completedQuestions + '/' + totalQuestions;
     }
 
+    // 獲取 canvas 元素和其上下文
     var canvas = document.getElementById('drawingCanvas');
     var context = canvas.getContext('2d');
+    
+    // 設定觸摸事件的處理函數
     canvas.addEventListener('touchstart', startDrawing);
     canvas.addEventListener('touchmove', draw);
     canvas.addEventListener('touchend', stopDrawing);
 
-    var isDrawing = false;
-    var lineCoordinates = [];
+    var isDrawing = false; // 確認是否正在畫圖
+    var lineCoordinates = []; // 儲存繪圖線條的座標
 
+    // 獲取觸摸事件在 canvas 上的位置
     function getTouchPosition(canvas, touchEvent) {
         var rect = canvas.getBoundingClientRect();
         return {
@@ -101,6 +120,7 @@
         };
     }
 
+    // 開始繪圖
     function startDrawing(e) {
         isDrawing = true;
         var pos = getTouchPosition(canvas, e);
@@ -108,14 +128,15 @@
         draw(e);
     }
 
+    // 繪圖
     function draw(e) {
-        e.preventDefault();
+        e.preventDefault(); // 防止觸摸事件的預設行為
         if (!isDrawing) return;
 
-        context.lineWidth = 12;
-        context.lineCap = 'round';
-        context.lineJoin = 'round';
-        context.strokeStyle = 'black';
+        context.lineWidth = 8; // 設定線條寬度
+        context.lineCap = 'round'; // 設定線條末端為圓形
+        context.lineJoin = 'round'; // 設定線條交接處為圓形
+        context.strokeStyle = 'black'; // 設定線條顏色為黑色
 
         var pos = getTouchPosition(canvas, e);
         lineCoordinates.push(pos);
@@ -125,32 +146,34 @@
 
         for (var i = 1; i < lineCoordinates.length; i++) {
             context.lineTo(lineCoordinates[i].x, lineCoordinates[i].y);
-            context.stroke();
+            context.stroke(); // 畫線
         }
     }
 
+    // 停止繪圖
     function stopDrawing() {
         isDrawing = false;
-        lineCoordinates = [];
+        lineCoordinates = []; // 清空座標數組
     }
 
+    // 確認並送出圖像
     function saveImage() {
         if (confirm("您確定要送出嗎？")) {
-            var dataURL = canvas.toDataURL();
+            var dataURL = canvas.toDataURL(); // 將 canvas 轉換為 Data URL
             fetch('/upload', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ image: dataURL })
+                body: JSON.stringify({ image: dataURL }) // 將圖像數據發送到伺服器
             })
             .then(response => response.json())
             .then(data => {
-                console.log(data);
+                
                 completedQuestions++;
-                updateStatus();
+                updateStatus(); // 更新顯示的題數狀態
                 if (completedQuestions < totalQuestions) {
-                    loadNextImage();
+                    loadNextImage(); // 載入下一張圖片
                 } else {
                     alert("已完成所有題目！");
                 }
@@ -161,13 +184,15 @@
         }
     }
 
+    // 載入下一張圖片
     function loadNextImage() {
         fetch('/next-image')
         .then(response => response.json())
         .then(data => {
             if (data.nextImageUrl) {
-                context.clearRect(0, 0, canvas.width, canvas.height);
-                canvas.style.backgroundImage = 'url(' + data.nextImageUrl + ')';
+                context.clearRect(0, 0, canvas.width, canvas.height); // 清空 canvas
+                canvas.style.backgroundImage = 'url(' + data.nextImageUrl + ')'; // 設定新圖片作為背景
+                socket.emit('img-connect', {'background-image': data.nextImageUrl});
             } else {
                 console.error('Error: no image URL returned');
             }
@@ -177,8 +202,15 @@
         });
     }
 
-    loadNextImage();
-    updateStatus();
+    // 頁面載入完成後初始化
+    window.onload = function() {
+        loadNextImage(); // 載入第一張圖片
+        updateStatus(); // 更新題數狀態
+        resizeCanvas(); // 確保初始加載時 canvas 适应屏幕大小
+    };
+
+    
+    
 </script>
 
 </body>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>色盲點圖測驗</title>
+    <title>確認是否進入作答畫面的頁面</title>
     <style>
         body {
             display: flex;
@@ -41,32 +41,54 @@
             background-color: #45a049;
         }
     </style>
-    <!-- <script>
-        function generateUniqueURL() {
-            // 生成唯一標識符（UUID）
-            const uuid = URL.createObjectURL(new Blob()).substring(9);
-            // 跳轉到帶有唯一標識符的 handwrite.html 頁面
-            window.location.href = `handwrite.html?session=${uuid}`;
-        }
-    </script> -->
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
+        var socket = io.connect('http://192.168.0.156:5000');
+        // var socket = io();
+
+        socket.on('connect', function() {
+            console.log('WebSocket 連接已打開');
+        });
+
+        socket.on('connect_error', function(error) {
+            console.error('WebSocket 連接錯誤:', error);
+        });
+
+        socket.on('disconnect', function() {
+            console.log('WebSocket 連接已關閉');
+        });
+
         function generateUniqueURL() {
+        // 向伺服器端 (app.py) 發送 一個HTTP GET 請求到 '/generate-url' 端点
             fetch('/generate-url')
-                .then(response => response.json())
+                .then(response => response.json())  // 將response解析為 JSON 格式
                 .then(data => {
+                    // 檢查response數據中是否包含 URL
                     if (data.url) {
+                        
+                        // 獲取 URL 的后缀部分 從=的地方切 http://192.168.0.155:5000/comfirm_colordot?session=705c8991-e61c-4600-a5f7-f566330a6a5d
+                        var urlSuffix = data.url.split('=').pop();
+                        alert('Sent1 urlSuffix: ' + urlSuffix);  //debug
+                        // console.log('Emitting confirmDrawing with urlSuffix:', urlSuffix);
+                        // 發送 WebSocket 消息通知 QRcode頁面更新
+                        socket.emit('confirmDrawing', {'urlSuffix': urlSuffix});
+                        alert('Sent2 urlSuffix:'+ urlSuffix); 
+
+                        // 將瀏覽器重新定向到生成的唯一URL
                         window.location.href = data.url;
                     } else {
+                        // 如果没有 URL，在控制台中輸出錯誤
                         console.error('Error generating URL');
                     }
                 })
                 .catch(error => {
+                    // 如果請求過程中出現錯誤，則在控制台中輸出錯誤訊息
                     console.error('Error:', error);
                 });
-        }
+         }
+        
+
     </script>
-    <!-- <button onclick="generateUniqueURL()">確認</button> -->
-    
 </head>
 <body>
     <div class="container">

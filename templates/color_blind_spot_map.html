@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>色盲點圖測驗題目(電腦端)</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #e0f7fa;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+        }
+        canvas {
+            background-size: cover;
+            border: 2px solid #004d40;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1 / 1; /* 保持正方形 */
+            margin-bottom: 20px;
+        }
+        .status {
+            font-size: 24px; /* 增大字體 */
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #00796b;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 18px;
+            color: #fff;
+            background-color: #00796b;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #004d40;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顯示完成題數的狀態 -->
+        <div class="status" id="status">完成題數: 0/10</div>
+        <!-- 顯示圖片的 canvas 元素 -->
+        <canvas id="drawingCanvas"></canvas>
+    </div>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+        // 初始化 WebSocket 連接
+        var socket = io.connect('http://192.168.0.156:5000');
+
+        // 設定總題數
+        var totalQuestions = 10;
+        // 設定已完成的題數
+        var completedQuestions = 0;
+
+        // 當視窗大小變化時，調整 canvas 的大小
+        window.addEventListener('resize', resizeCanvas);
+
+        // socket.on('disconnect', function(reason) {
+        //     console.log('Client disconnected:', reason);
+        // });
+
+
+        // 調整 canvas 大小，使其保持正方形
+        function resizeCanvas() {
+            var canvas = document.getElementById('drawingCanvas');
+            var currentBackgroundImage = canvas.style.backgroundImage;
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientWidth;  // 保持 canvas 是正方形
+            canvas.style.backgroundImage = currentBackgroundImage;
+        }
+
+        // 更新顯示的題數狀態
+        function updateStatus() {
+            resizeCanvas(); // 確保 canvas 大小正確
+            document.getElementById('status').innerText = '完成題數: ' + completedQuestions + '/' + totalQuestions;
+        }
+
+        // 載入下一張圖片
+        function loadNextImage() {
+            console.log("e04")
+            socket.on('update_image', function(message) {
+                console.log('Received message:', message.image);
+                console.log("e04e04")
+                if (message.image) {
+                    // 更新 canvas 背景圖片
+                    var canvas = document.getElementById('drawingCanvas');
+                    var context = canvas.getContext('2d');
+                    context.clearRect(0, 0, canvas.width, canvas.height); // 清空 canvas
+                    canvas.style.backgroundImage = 'url(' + message.image + ')'; // 設定新圖片作為背景
+                    completedQuestions++; //題數++
+                    updateStatus(); // 更新題數狀態
+                    if (completedQuestions < totalQuestions) {
+                        loadNextImage(); // 載入下一張圖片
+                    } else {
+                        alert("已完成所有題目！");
+                    }
+                } else {
+                    console.error('Error: no image URL');
+                }
+            });
+        }
+
+        // 頁面載入完成後初始化
+        window.onload = function() {
+            console.log("1111111111")
+            loadNextImage(); // 載入第一張圖片
+            console.log("2222222")
+            updateStatus(); // 更新題數狀態
+            resizeCanvas(); // 確保初始加載時 canvas 适应屏幕大小
+        };
+        
+    </script>
+</body>
+</html>
