@@ -304,19 +304,20 @@ zc=np.array([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],
              [6,6,-0.0148]])
 
 
-psf=zernikePointSpread(zc,degree=0.25)
-
-psf_img = PSFPlot(psf=psf,Degrees=0.25)  
+psf=zernikePointSpread(zc,Degrees=0.5)
+psf_img = PSFPlot(psf=psf,Degrees=0.5)
 # print(type(psf_img))
-buttom, top=plt.ylim()
-plt.ylim((top,buttom))
+# buttom, top=plt.ylim()
+# plt.ylim((top,buttom))
 plt.show()
 
 letter=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_z.png")
-# letter=cv2.flip(letter, 1)
-print(letter.shape)
+# 圖片左右翻轉(因為文章中的 Basis 的 Image 有提到，卷積是從圖片的底部開始做的)
+# 不知道為啥是左右翻轉
+letter=cv2.flip(letter, 1)
 blurredImg=cv2.filter2D(src=letter,ddepth=-1,kernel=Wrap.wrap(psf))
-# blurredImg=cv2.flip(blurredImg,1)
+blurredImg=cv2.flip(blurredImg,1)
+letter=cv2.flip(letter, 1)
 
 plt.figure()
 plt.subplot(1, 2, 1)
