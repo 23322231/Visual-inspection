@@ -92,11 +92,8 @@ def WaveAberrationImage(coefficients=None, radius=16):
         # 就是不同的二維陣列疊加起來就是 total_image
         # 已確定 ZernikeImage 的第一個參數及第二個參數為數字並非陣列
         z=ZernikeImage(n, m, radius)
-        
         total_image = np.add(total_image, c * z)
         
-    
-       
     return total_image
 
 def PSFDegrees(pupilSamples, Wavelength, pupildiameter):
@@ -254,7 +251,9 @@ def PSFPlot(psf, Degrees=0.5, Magnification=1, ScaleMark=True, **kwargs):
     
     plt.tight_layout()
     return fig
-
+# 計算模仿 defocus 的 Zernike 參數
+def InverseEquivalentDefocus(diopters,pupildiameter):
+    return diopters*pupildiameter**2/(16*np.sqrt(3))
 
 # np.set_printoptions(threshold=np.inf)
 # zc=np.array([[2,-2,-0.094629],[2,0,0.096927],[2,2,0.30527],[3,-3,0.045947],
@@ -302,13 +301,12 @@ zc=np.array([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],
              [5,3,-0.00686],[5,5,0.0288],[6,-6,0.00245],[6,-4,0.00185],
              [6,-2,0.00122],[6,0,-0.00755],[6,2,-0.000693],[6,4,0.000551],
              [6,6,-0.0148]])
-
-
-psf=zernikePointSpread(zc,Degrees=0.5)
-psf_img = PSFPlot(psf=psf,Degrees=0.5)
-# print(type(psf_img))
-# buttom, top=plt.ylim()
-# plt.ylim((top,buttom))
+# for i in np.arange(0,2,0.5):
+Defocus=InverseEquivalentDefocus(-4,6)
+print(zc)
+# print(np.append(zc,[[2,0,Defocus]],axis=0))
+psf=zernikePointSpread([[2,0,Defocus]],Degrees=2)
+psf_img = PSFPlot(psf=psf,Degrees=2)
 plt.show()
 
 letter=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_z.png")
