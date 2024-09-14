@@ -364,10 +364,11 @@ zc=np.array([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],
 # print(zc)
 # print(np.append(zc,[[2,0,Defocus]],axis=0))
 
-# 多 wavelength 測試
+# 多 wavelength 測試(Polychromatic PSF)
 spectrum = np.array([[455,0.00477],[475,0.0727],[495,0.175],[515,0.22],[535,0.198],[555,0.143],[575,0.0896],
             [595,0.0502],[615,0.0258],[635,0.0123],[655,0.00558],[675,0.0024]])
 
+# Defocus 測試(近視遠視)
 # Defocus=InverseEquivalentDefocus(-4,6)
 # print(np.append(zc,[[2,0,Defocus]],axis=0))
 
