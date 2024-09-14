@@ -365,15 +365,18 @@ zc=np.array([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],
 # print(np.append(zc,[[2,0,Defocus]],axis=0))
 
 # 多 wavelength 測試
-spectrum = [[455,0.00477],[475,0.0727],[495,0.175],[515,0.22],[535,0.198],[555,0.143],[575,0.0896],
-            [595,0.0502],[615,0.0258],[635,0.0123],[655,0.00558],[675,0.0024]]
+spectrum = np.array([[455,0.00477],[475,0.0727],[495,0.175],[515,0.22],[535,0.198],[555,0.143],[575,0.0896],
+            [595,0.0502],[615,0.0258],[635,0.0123],[655,0.00558],[675,0.0024]])
 
 # Defocus=InverseEquivalentDefocus(-4,6)
 # print(np.append(zc,[[2,0,Defocus]],axis=0))
 
-wavelength=np.array([455])
+# 要顯示不同波長的波長
+# wavelength=np.array([555])
+psf=zernikePointSpread(zc, np.array([spectrum[0][0]]))*spectrum[0][1]
 
-psf=zernikePointSpread(zc,wavelength)
+for wavelength in spectrum[1:]:
+    psf+=zernikePointSpread(zc, np.array([wavelength[0]]))*wavelength[1]
 psf_img = PSFPlot(psf=psf)
 plt.show()
 
