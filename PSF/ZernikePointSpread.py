@@ -15,21 +15,25 @@ from PIL import Image
 
 
 # 論文第六頁內有提到參數的相關設置
-def zernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSamples=62.89, ImageSamples=256, **kwargs):
-    otfq = kwargs.get("OTF", False)
-    apod = kwargs.get("Apodization", False)
-    verbose = kwargs.get("Verbose", False)
-    Degrees = kwargs.get("Degrees", 0.5)
-    # test用，非正式用
-    # PupilSamples=126.2
-    if "Degrees" not in kwargs.keys():
-        Degrees = PSFDegrees(pupilSamples, Wavelength, PupilDiameter)
+def zernikePointSpread(coefficients, spectrum=None, **kwargs):
+    # Default values
+    wavelength = kwargs.get('Wavelength', 555)
+    pupil = kwargs.get('PupilDiameter', 6)
+    pupilSamples = kwargs.get('PupilSamples', 62.89)
+    imagesamples = kwargs.get('ImageSamples', 256)
+    otfq = kwargs.get('OTF', False)
+    verbose = kwargs.get('Verbose', False)
+    degrees = kwargs.get('Degrees', 0.5)
+    apod = kwargs.get('Apodization', False)
+    
+    if "Degrees" == "Automatic":
+        degrees = PSFDegrees(pupilSamples, wavelength, pupil)
     else:
-        pupilSamples = PupilSamples(Degrees, Wavelength, PupilDiameter)
+        pupilSamples = PupilSamples(degrees, wavelength, pupil)        
     
     # ZernikeImage 的第三個參數，簡單來說，數值越大，準確率越高
     radius = pupilSamples/2
-    ppd = ImageSamples / Degrees
+    ppd = imagesamples / degrees
     # pai 
     if type(apod)==int or type(apod)==float:
         pai = PupilApertureImage(radius, apod * radius / (pupilSamples/2))
@@ -39,12 +43,12 @@ def zernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSampl
     
     # total wavefront aberration image是加權後的Zernike polynomial images總合，
     wai = WaveAberrationImage(coefficients, radius)
-    gp = pai * np.exp(((1j *2 * np.pi * 10**3 / Wavelength) * wai))
+    gp = pai * np.exp(((1j *2 * np.pi * 10**3 / wavelength) * wai))
 
     w=np.size(gp,0)
     
-    if ImageSamples > pupilSamples:
-        pgp = np.pad(gp, (ImageSamples-w,0), mode='constant',constant_values=0)
+    if imagesamples > pupilSamples:
+        pgp = np.pad(gp, (imagesamples-w,0), mode='constant',constant_values=0)
     else:
         pgp = gp
 
@@ -52,29 +56,60 @@ def zernikePointSpread(coefficients, Wavelength=555, PupilDiameter=6, pupilSampl
     psf = np.abs((np.fft.fft2(pgp,norm="ortho")))**2    
     psf /= np.sum(psf)
     
-    otf = ImageSamples * ((np.fft.ifft2(psf,norm='ortho'))) if otfq == True or otfq == "Both" else []
+    otf = imagesamples * ((np.fft.ifft2(psf,norm='ortho'))) if otfq == True or otfq == "Both" else []
     
     if verbose:
-        plt.figure(figsize=(12, 8))
-        plt.subplot(2, 2, 1)
-        plt.imshow(pai, extent=(-PupilDiameter/2, PupilDiameter/2, -PupilDiameter/2, PupilDiameter/2))
-        plt.title("Pupil aperture")
-        
-        plt.subplot(2, 2, 2)
-        plt.imshow(wai, extent=(-1, 1, -1, 1))
-        plt.title("Wave aberration")
-        
-        plt.subplot(2, 2, 3)
-        plt.imshow(np.real(pgp), extent=(-PupilDiameter/2, PupilDiameter/2, -PupilDiameter/2, PupilDiameter/2))
-        plt.title("Generalized pupil")
-        
-        plt.subplot(2, 2, 4)
-        plt.imshow(psf, extent=(-Degrees/2, Degrees/2, -Degrees/2, Degrees/2))
-        plt.title("PSF")
-        
-        plt.show()
+        plot_verbose_output(pai, wai, gp, psf, pupil, degrees)
+    
+    if spectrum is not None:
+        process_spectrum(coefficients, spectrum, kwargs)
 
     return otf if otfq == True else psf if otfq == False else [psf, otf]
+
+def plot_verbose_output(pai, wai, gp, psf, pupil, degrees):
+    fig, axs = plt.subplots(2, 2, figsize=(12, 12))
+    
+    axs[0, 0].imshow(pai, extent=(-pupil/2, pupil/2, -pupil/2, pupil/2))
+    axs[0, 0].set_title("Pupil aperture")
+    
+    axs[0, 1].imshow(wai, extent=(-1, 1, -1, 1))
+    axs[0, 1].set_title("Wave aberration")
+    
+    axs[1, 0].imshow(np.real(gp), extent=(-pupil/2, pupil/2, -pupil/2, pupil/2))
+    axs[1, 0].set_title("Generalized pupil")
+    
+    axs[1, 1].imshow(psf, extent=(-degrees/2, degrees/2, -degrees/2, degrees/2))
+    axs[1, 1].set_title("PSF")
+    
+    plt.tight_layout()
+    plt.show()
+    
+# 計算有 a list of wavelength 跟比例的 PSF
+def process_spectrum(coefficients, spectrum, kwargs):
+    print("get in RGB PSF")
+    result = np.zeros((kwargs.get('ImageSamples', 256), kwargs.get('ImageSamples', 256)))
+    if kwargs.get('OTF', False) == "Both":
+        result = [result, result]
+    for wave, intensity in spectrum:
+        defocus = [2, 0, ChromaticDefocusZernike(wave, kwargs.get('Wavelength', 555), kwargs.get('PupilDiameter', 6))]
+        new_coeffs = coefficients + [defocus]
+        temp_result = zernikePointSpread(new_coeffs, Wavelength=wave, **kwargs)
+        if isinstance(result, list):
+            result[0] += intensity * temp_result[0]
+            result[1] += intensity * temp_result[1]
+        else:
+            result += intensity * temp_result
+
+    return result
+
+def ChromaticDefocusZernike(wavelength, focuswavelength, pupildiameter=6):
+    return InverseEquivalentDefocus(ChromaticDefocus(wavelength)-ChromaticDefocus(focuswavelength), pupildiameter)
+
+def ChromaticDefocus(wavelength):
+    p = 1.68524
+    q = 0.63346
+    c = 0.21410
+    return p - q/(wavelength*0.001 - c)
 
 def PupilSamples(Degrees, Wavelength, pupildiameter):
     # 在 mathematica 中的 Degree 的功能即為 角度轉弧度(np.deg2rad)
@@ -111,6 +146,10 @@ def PupilApertureImage(radius, sd):
 
 def EquivalentDefocus(coefficient, pupildiameter):
     return (16 * np.sqrt(3) * pupildiameter**-2) * coefficient
+
+# 計算模仿 defocus 的 Zernike 參數
+def InverseEquivalentDefocus(diopters,pupildiameter):
+    return diopters*pupildiameter**2/(16*np.sqrt(3))
 
 def ZernikeImage(n, m, radius=64):
     h = int(np.ceil(radius))
@@ -251,9 +290,7 @@ def PSFPlot(psf, Degrees=0.5, Magnification=1, ScaleMark=True, **kwargs):
     
     plt.tight_layout()
     return fig
-# 計算模仿 defocus 的 Zernike 參數
-def InverseEquivalentDefocus(diopters,pupildiameter):
-    return diopters*pupildiameter**2/(16*np.sqrt(3))
+
 
 # np.set_printoptions(threshold=np.inf)
 # zc=np.array([[2,-2,-0.094629],[2,0,0.096927],[2,2,0.30527],[3,-3,0.045947],
@@ -301,27 +338,54 @@ zc=np.array([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],
              [5,3,-0.00686],[5,5,0.0288],[6,-6,0.00245],[6,-4,0.00185],
              [6,-2,0.00122],[6,0,-0.00755],[6,2,-0.000693],[6,4,0.000551],
              [6,6,-0.0148]])
-# for i in np.arange(0,2,0.5):
-Defocus=InverseEquivalentDefocus(-4,6)
-print(zc)
+
+# 不同的波長在 RGB 這三種顏色裡面各自所佔的比例(所以總合為 1 )
+# spectra_R = np.array([[535,0.00986],[555,0.088],[575,0.163],[595,0.19],[615,0.176],[635,0.143],
+#                     [655,0.106],[675,0.0741],[695,0.0493]])
+# spectra_G = np.array([[455,0.00477],[475,0.0727],[495,0.175],[515,0.22],[535,0.198],[555,0.143],
+#                     [575,0.0896],[595,0.0502],[615,0.0258],[635,0.0123],[655,0.00558],[675,0.0024],[695,0.000991]])
+# spectra_B = np.array([[415,0.000458],[435, 0.0503],[455, 0.157],[475, 0.217],[495,0.204],[515,0.154],
+#                     [535,0.0994],[555,0.0578],[575,0.031],[595,0.0156],[615,0.00744],[635,0.0034],[655,0.0015],[675,0.000641],[695,0.000266]])
+# 畫RGB的波長占比圖
+# plt.plot(spectra_R[:,0], spectra_R[:,1], 'r-')  # 紅色
+# plt.plot(spectra_G[:,0], spectra_G[:,1], 'g-')  # 綠色
+# plt.plot(spectra_B[:,0], spectra_B[:,1], 'b-')  # 藍色
+# plt.show()
+
+# Defocus=InverseEquivalentDefocus(-4,6)
+# print(zc)
 # print(np.append(zc,[[2,0,Defocus]],axis=0))
-psf=zernikePointSpread([[2,0,Defocus]],Degrees=2)
-psf_img = PSFPlot(psf=psf,Degrees=2)
+
+# 多 wavelength 測試
+spectrum = [[455,0.00477],[475,0.0727],[495,0.175],[515,0.22],[535,0.198],[555,0.143],[575,0.0896],
+            [595,0.0502],[615,0.0258],[635,0.0123],[655,0.00558],[675,0.0024]]
+
+# 計算 PSF
+psf=zernikePointSpread(zc,spectrum=spectrum)
+
+# 輸出 PSF(要對圖片做卷積的 kernel)
+psf_img = PSFPlot(psf)
 plt.show()
 
-letter=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_z.png")
-# 圖片左右翻轉(因為文章中的 Basis 的 Image 有提到，卷積是從圖片的底部開始做的)
-# 不知道為啥是左右翻轉
-letter=cv2.flip(letter, 1)
-blurredImg=cv2.filter2D(src=letter,ddepth=-1,kernel=Wrap.wrap(psf))
-blurredImg=cv2.flip(blurredImg,1)
-letter=cv2.flip(letter, 1)
+# # 讀取要處理的圖片
+# letter=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_z.png")
 
-plt.figure()
-plt.subplot(1, 2, 1)
-plt.title("Original")
-plt.imshow(letter, cmap='gray')
-plt.subplot(1, 2, 2)
-plt.title("Blurred")
-plt.imshow(blurredImg, cmap='gray')
-plt.show()
+# # 圖片左右翻轉(因為文章中的 Basis 的 Image 有提到，卷積是從圖片的底部開始做的)
+# # 不知道為啥是左右翻轉
+# letter=cv2.flip(letter, 1)
+
+# # 對圖片做處理
+# blurredImg=cv2.filter2D(src=letter,ddepth=-1,kernel=Wrap.wrap(psf))
+
+# # 把圖片翻回來
+# blurredImg=cv2.flip(blurredImg,1)
+# letter=cv2.flip(letter, 1)
+
+# plt.figure()
+# plt.subplot(1, 2, 1)
+# plt.title("Original")
+# plt.imshow(letter, cmap='gray')
+# plt.subplot(1, 2, 2)
+# plt.title("Blurred")
+# plt.imshow(blurredImg, cmap='gray')
+# plt.show()
