@@ -74,7 +74,7 @@
 <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 <script>
     // 初始化 WebSocket 連接
-    var socket = io.connect('http://192.168.0.156:5000');
+    var socket = io.connect('https://8f84-114-34-178-54.ngrok-free.app/');
 
     // 設定總題數
     var totalQuestions = 10;
@@ -165,11 +165,12 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ image: dataURL }) // 將圖像數據發送到伺服器
+                body: JSON.stringify({ image: dataURL,
+                                       completedQuestions:completedQuestions
+                 }) // 將圖像數據發送到伺服器
             })
             .then(response => response.json())
             .then(data => {
-                
                 completedQuestions++;
                 updateStatus(); // 更新顯示的題數狀態
                 if (completedQuestions < totalQuestions) {
