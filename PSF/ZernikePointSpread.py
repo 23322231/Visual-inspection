@@ -127,8 +127,11 @@ def WaveAberrationImage(coefficients=None, radius=16):
         # 就是不同的二維陣列疊加起來就是 total_image
         # 已確定 ZernikeImage 的第一個參數及第二個參數為數字並非陣列
         z=ZernikeImage(n, m, radius)
+        
         total_image = np.add(total_image, c * z)
         
+    
+       
     return total_image
 
 def PSFDegrees(pupilSamples, Wavelength, pupildiameter):
@@ -361,10 +364,15 @@ spectrum = [[455,0.00477],[475,0.0727],[495,0.175],[515,0.22],[535,0.198],[555,0
             [595,0.0502],[615,0.0258],[635,0.0123],[655,0.00558],[675,0.0024]]
 
 # 計算 PSF
-psf=zernikePointSpread(zc,spectrum=spectrum)
+psf=zernikePointSpread(zc,Degrees=0.5)
 
 # 輸出 PSF(要對圖片做卷積的 kernel)
-psf_img = PSFPlot(psf)
+psf_img = PSFPlot(psf=psf,Degrees=0.5)
+
+
+# print(type(psf_img))
+# buttom, top=plt.ylim()
+# plt.ylim((top,buttom))
 plt.show()
 
 # # 讀取要處理的圖片
