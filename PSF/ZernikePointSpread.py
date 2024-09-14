@@ -26,6 +26,12 @@ def zernikePointSpread(coefficients, spectrum=None, **kwargs):
     degrees = kwargs.get('Degrees', 0.5)
     apod = kwargs.get('Apodization', False)
     
+    if spectrum is not None:
+        if spectrum.ndim == 1:
+            defocus = [2, 0, ChromaticDefocusZernike(spectrum[0], wavelength, pupil)]
+            coefficients = np.append(coefficients,[defocus],axis=0)
+            return zernikePointSpread(coefficients, Wavelength=spectrum[0])
+    
     if "Degrees" == "Automatic":
         degrees = PSFDegrees(pupilSamples, wavelength, pupil)
     else:
@@ -362,12 +368,13 @@ zc=np.array([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],
 spectrum = [[455,0.00477],[475,0.0727],[495,0.175],[515,0.22],[535,0.198],[555,0.143],[575,0.0896],
             [595,0.0502],[615,0.0258],[635,0.0123],[655,0.00558],[675,0.0024]]
 
-# for i in np.arange(0,2,0.5):
-Defocus=InverseEquivalentDefocus(-4,6)
-print(zc)
+# Defocus=InverseEquivalentDefocus(-4,6)
 # print(np.append(zc,[[2,0,Defocus]],axis=0))
-psf=zernikePointSpread([[2,0,Defocus]],Degrees=2)
-psf_img = PSFPlot(psf=psf,Degrees=2)
+
+wavelength=np.array([455])
+
+psf=zernikePointSpread(zc,wavelength)
+psf_img = PSFPlot(psf=psf)
 plt.show()
 
 # # 讀取要處理的圖片

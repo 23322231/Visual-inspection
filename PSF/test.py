@@ -221,5 +221,7 @@ CartesianToPolar[{x_, y_}] := {Norm[{x, y}], ArcTan[x, y]}
 # print(R)
 # # 關閉 session
 # session.terminate()
+zc=([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305]])
+print(zc.ndim)
 
 
