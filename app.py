@@ -12,6 +12,7 @@ from sqlalchemy.exc import IntegrityError
 from psycopg2 import Binary
 import string
 from flask import Response,send_from_directory
+import psycopg2
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # 用於會話加密的密鑰
@@ -20,7 +21,16 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 #第一次的資料庫
 #app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://april0909:c7CslksYkeusqcvAkMecoFDQPIFuiPKp@dpg-cqcj0sg8fa8c73crb3u0-a.oregon-postgres.render.com/data_uire"
 #第二次
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://april0909:TevhMabtcGLrRlyn1rqrnfVcI5sVIKsH@dpg-cr1ljs5umphs73afhad0-a.oregon-postgres.render.com/data_0ol7"
+# app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://april0909:TevhMabtcGLrRlyn1rqrnfVcI5sVIKsH@dpg-cr1ljs5umphs73afhad0-a.oregon-postgres.render.com/data_0ol7"
+
+# 連接到 PostgreSQL 資料庫
+conn = psycopg2.connect(
+    dbname="visual", 
+    user="postgres", 
+    password="01057126", 
+    host="localhost", 
+    port="5432"
+)
 
 db = SQLAlchemy(app)
 socketio = SocketIO(app , cors_allowed_origins="*") # cors_allowed_origins="*" 可以允許任何来源的跨域請求。
