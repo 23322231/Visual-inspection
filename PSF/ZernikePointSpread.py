@@ -354,6 +354,7 @@ zc=np.array([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],
 #                     [575,0.0896],[595,0.0502],[615,0.0258],[635,0.0123],[655,0.00558],[675,0.0024],[695,0.000991]])
 # spectra_B = np.array([[415,0.000458],[435, 0.0503],[455, 0.157],[475, 0.217],[495,0.204],[515,0.154],
 #                     [535,0.0994],[555,0.0578],[575,0.031],[595,0.0156],[615,0.00744],[635,0.0034],[655,0.0015],[675,0.000641],[695,0.000266]])
+
 # 畫RGB的波長占比圖
 # plt.plot(spectra_R[:,0], spectra_R[:,1], 'r-')  # 紅色
 # plt.plot(spectra_G[:,0], spectra_G[:,1], 'g-')  # 綠色
@@ -372,34 +373,36 @@ spectrum = np.array([[455,0.00477],[475,0.0727],[495,0.175],[515,0.22],[535,0.19
 # Defocus=InverseEquivalentDefocus(-4,6)
 # print(np.append(zc,[[2,0,Defocus]],axis=0))
 
-# 要顯示不同波長的波長
+# 要顯示不同波長的波長設定
 # wavelength=np.array([555])
-psf=zernikePointSpread(zc, np.array([spectrum[0][0]]))*spectrum[0][1]
+# psf=zernikePointSpread(zc, np.array([spectrum[0][0]]))*spectrum[0][1]
 
-for wavelength in spectrum[1:]:
-    psf+=zernikePointSpread(zc, np.array([wavelength[0]]))*wavelength[1]
-psf_img = PSFPlot(psf=psf)
-plt.show()
-
-# # 讀取要處理的圖片
-# letter=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_z.png")
-
-# # 圖片左右翻轉(因為文章中的 Basis 的 Image 有提到，卷積是從圖片的底部開始做的)
-# # 不知道為啥是左右翻轉
-# letter=cv2.flip(letter, 1)
-
-# # 對圖片做處理
-# blurredImg=cv2.filter2D(src=letter,ddepth=-1,kernel=Wrap.wrap(psf))
-
-# # 把圖片翻回來
-# blurredImg=cv2.flip(blurredImg,1)
-# letter=cv2.flip(letter, 1)
-
-# plt.figure()
-# plt.subplot(1, 2, 1)
-# plt.title("Original")
-# plt.imshow(letter, cmap='gray')
-# plt.subplot(1, 2, 2)
-# plt.title("Blurred")
-# plt.imshow(blurredImg, cmap='gray')
+# for wavelength in spectrum[1:]:
+#     psf+=zernikePointSpread(zc, np.array([wavelength[0]]))*wavelength[1]
+# psf_img = PSFPlot(psf=psf)
 # plt.show()
+
+psf=zernikePointSpread(zc)
+
+# 讀取要處理的圖片
+letter=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_z.png")
+
+# 圖片左右翻轉(因為文章中的 Basis 的 Image 有提到，卷積是從圖片的底部開始做的)
+# 不知道為啥是左右翻轉
+letter=cv2.flip(letter, 1)
+
+# 對圖片做處理
+blurredImg=cv2.filter2D(src=letter,ddepth=-1,kernel=Wrap.wrap(psf))
+
+# 把圖片翻回來
+blurredImg=cv2.flip(blurredImg,1)
+letter=cv2.flip(letter, 1)
+
+plt.figure()
+plt.subplot(1, 2, 1)
+plt.title("Original")
+plt.imshow(letter, cmap='gray')
+plt.subplot(1, 2, 2)
+plt.title("Blurred")
+plt.imshow(blurredImg, cmap='gray')
+plt.show()
