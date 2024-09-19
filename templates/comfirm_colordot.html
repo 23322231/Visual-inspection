@@ -43,7 +43,7 @@
     </style>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
-        var socket = io.connect('https://8f84-114-34-178-54.ngrok-free.app/');
+        var socket = io.connect('http://192.168.50.209:5000/');
         // var socket = io();
 
         socket.on('connect', function() {
@@ -68,11 +68,11 @@
                         
                         // 獲取 URL 的后缀部分 從=的地方切 http://192.168.0.155:5000/comfirm_colordot?session=705c8991-e61c-4600-a5f7-f566330a6a5d
                         var urlSuffix = data.url.split('=').pop();
-                        alert('Sent1 urlSuffix: ' + urlSuffix);  //debug
+                        // alert('Sent1 urlSuffix: ' + urlSuffix);  //debug
                         // console.log('Emitting confirmDrawing with urlSuffix:', urlSuffix);
                         // 發送 WebSocket 消息通知 QRcode頁面更新
                         socket.emit('confirmDrawing', {'urlSuffix': urlSuffix});
-                        alert('Sent2 urlSuffix:'+ urlSuffix); 
+                        // alert('Sent2 urlSuffix:'+ urlSuffix); 
 
                         // 將瀏覽器重新定向到生成的唯一URL
                         window.location.href = data.url;

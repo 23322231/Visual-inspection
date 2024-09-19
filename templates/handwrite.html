@@ -30,7 +30,7 @@
             max-width: 400px;
         }
         canvas {
-            background-image: url(data:image/png;base64,{{data}});
+            background-image: url(data:image/jpeg;base64,{{data}});
             background-size: cover;
             border: 2px solid #004d40;
             border-radius: 10px;
@@ -74,12 +74,18 @@
 <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 <script>
     // 初始化 WebSocket 連接
-    var socket = io.connect('https://8f84-114-34-178-54.ngrok-free.app/');
+    // var socket = io.connect('http://192.168.50.209:5000');
+
+    var socket = io.connect('http://192.168.50.209:5000', {
+        pingInterval: 25000, // 25 seconds
+        pingTimeout: 60000,  // 60 seconds
+    });
+
 
     // 設定總題數
     var totalQuestions = 10;
     // 設定已完成的題數
-    var completedQuestions = 0;
+    var completedQuestions = 1;
 
     // 當視窗大小變化時，調整 canvas 的大小
     window.addEventListener('resize', resizeCanvas);
@@ -96,7 +102,7 @@
     // 更新顯示的題數狀態
     function updateStatus() {
         resizeCanvas(); // 確保 canvas 大小正確
-        document.getElementById('status').innerText = '完成題數: ' + completedQuestions + '/' + totalQuestions;
+        document.getElementById('status').innerText = '第' + completedQuestions + '題，還有' + (totalQuestions - completedQuestions) + '題';
     }
 
     // 獲取 canvas 元素和其上下文
@@ -194,6 +200,7 @@
                 context.clearRect(0, 0, canvas.width, canvas.height); // 清空 canvas
                 canvas.style.backgroundImage = 'url(' + data.nextImageUrl + ')'; // 設定新圖片作為背景
                 socket.emit('img-connect', {'background-image': data.nextImageUrl});
+                console.log("Next image URL received:", data.nextImageUrl);
             } else {
                 console.error('Error: no image URL returned');
             }

@@ -54,7 +54,7 @@
 <script>
 
     // 初始化 WebSocket 連接
-    var socket = io.connect('https://8f84-114-34-178-54.ngrok-free.app');
+    var socket = io.connect('http://192.168.50.209:5000');
     // var socket = io();
 
     // WebSocket 連接成功時的處理
@@ -97,7 +97,7 @@
         var newUrl = window.location.origin + '/color_blind_spot_map?session=' + message.urlSuffix;
         
         // debug
-        alert('New URL: ' + newUrl);
+        // alert('New URL: ' + newUrl);
         // 直接導航到新的 URL
         // window.location.href = newUrl;
         setTimeout(function() {
