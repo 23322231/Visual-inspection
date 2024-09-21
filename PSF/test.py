@@ -221,8 +221,17 @@ CartesianToPolar[{x_, y_}] := {Norm[{x, y}], ArcTan[x, y]}
 # print(R)
 # # 關閉 session
 # session.terminate()
-spectrum = np.array([[455,0.00477],[475,0.0727],[495,0.175],[515,0.22],[535,0.198],[555,0.143],[575,0.0896],
-            [595,0.0502],[615,0.0258],[635,0.0123],[655,0.00558],[675,0.0024]])
-print(spectrum[1:])
+# spectrum = np.array([[455,0.00477]])
+# spectrum=np.append(spectrum,[[475,0.0727],[495,0.175],[515,0.22],[535,0.198],[555,0.143],[575,0.0896],
+#             [595,0.0502],[615,0.0258],[635,0.0123],[655,0.00558],[675,0.0024]],axis=0)
+# print(spectrum)
 
-
+p = 1.68524
+q = 0.63346
+c = 0.21410
+diopter=0.0 # 設定近視(遠視)度數
+wavelength = 555
+print(p - q/(wavelength*0.001 - c) - diopter)
+print((q*(wavelength*0.001-c)/((wavelength*0.001-c)+q) + c )/0.001)
+focus=(q*(wavelength*0.001-c)/((wavelength*0.001-c)+q) + c )/0.001
+print( (q*(wavelength*0.001-c)/(diopter*(wavelength*0.001-c)+q) + c )/0.001)
