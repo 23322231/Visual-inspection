@@ -43,7 +43,7 @@
             font-size: 24px; /* 增大字體 */
             margin-bottom: 20px;
             font-weight: bold;
-            color: #00796b;
+            /* color: #00796b; */
         }
         button {
             padding: 12px 24px;
@@ -71,15 +71,22 @@
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
         // 初始化 WebSocket 連接
-        var socket = io.connect('https://e108-114-34-178-54.ngrok-free.app');
+        // var socket = io.connect('http://192.168.50.209:5000');
+        var socket = io.connect('http://192.168.50.209:5000', {
+            pingInterval: 25000, // 25 seconds
+            pingTimeout: 60000,  // 60 seconds
+        });
 
         // 設定總題數
         var totalQuestions = 10;
         // 設定已完成的題數
-        var completedQuestions = 0;
+        var completedQuestions = 1;
 
         // 當視窗大小變化時，調整 canvas 的大小
         window.addEventListener('resize', resizeCanvas);
+
+        
+
 
         // 調整 canvas 大小，使其保持正方形
         function resizeCanvas() {
@@ -93,39 +100,46 @@
         // 更新顯示的題數狀態
         function updateStatus() {
             resizeCanvas(); // 確保 canvas 大小正確
-            document.getElementById('status').innerText = '完成題數: ' + completedQuestions + '/' + totalQuestions;
+            document.getElementById('status').innerText = '第' + completedQuestions + '題，還有' + (totalQuestions - completedQuestions) + '題';
         }
 
-        // 載入下一張圖片
-        function loadNextImage() {
-            console.log("e04")
-            socket.on('update_image', function(message) {
-                console.log('Received message:', message.image);
-                console.log("e04e04")
-                if (message.image) {
-                    // 更新 canvas 背景圖片
-                    var canvas = document.getElementById('drawingCanvas');
-                    var context = canvas.getContext('2d');
-                    context.clearRect(0, 0, canvas.width, canvas.height); // 清空 canvas
-                    canvas.style.backgroundImage = 'url(' + message.image + ')'; // 設定新圖片作為背景
-                    completedQuestions++; //題數++
-                    updateStatus(); // 更新題數狀態
-                    if (completedQuestions < totalQuestions) {
-                        loadNextImage(); // 載入下一張圖片
-                    } else {
-                        alert("已完成所有題目！");
-                    }
-                } else {
-                    console.error('Error: no image URL');
+        // 捕捉所有事件
+        socket.onAny((event, ...args) => {
+            console.log(`Received event: ${event}`, args);
+        });
+
+
+        socket.on('connect', function() {
+            console.log("WebSocket 連接成功");
+        });
+
+        socket.on('disconnect', function() {
+            console.log("WebSocket 已斷開");
+        });
+
+        // 獲取 canvas 元素和其上下文
+        var canvas = document.getElementById('drawingCanvas');
+        var context = canvas.getContext('2d');
+
+        socket.on('update_image', function(message) {
+            console.log('Received message:', message.image);
+            if (message.image) {
+                // 更新 canvas 背景圖片
+                context.clearRect(0, 0, canvas.width, canvas.height); // 清空 canvas
+                canvas.style.backgroundImage = 'url(' + message.image + ')'; // 設定新圖片作為背景
+                console.log(completedQuestions);
+                completedQuestions++; // 題數++
+                updateStatus(); // 更新題數狀態
+                if (completedQuestions > totalQuestions) {
+                    alert("已完成所有題目！");
                 }
-            });
-        }
+            } else {
+                console.error('Error: no image URL');
+            }
+        });
 
         // 頁面載入完成後初始化
         window.onload = function() {
-            console.log("1111111111")
-            loadNextImage(); // 載入第一張圖片
-            console.log("2222222")
             updateStatus(); // 更新題數狀態
             resizeCanvas(); // 確保初始加載時 canvas 适应屏幕大小
         };

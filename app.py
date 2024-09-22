@@ -13,15 +13,18 @@ from psycopg2 import Binary
 import string
 from flask import Response,send_from_directory
 import psycopg2
+import re
+from hashlib import md5
+
+
+
+
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)  # 用於會話加密的密鑰
-
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-#第一次的資料庫
-#app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://april0909:c7CslksYkeusqcvAkMecoFDQPIFuiPKp@dpg-cqcj0sg8fa8c73crb3u0-a.oregon-postgres.render.com/data_uire"
-#第二次
-# app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://april0909:TevhMabtcGLrRlyn1rqrnfVcI5sVIKsH@dpg-cr1ljs5umphs73afhad0-a.oregon-postgres.render.com/data_0ol7"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:01057126@localhost/visual"
+
+app.secret_key = "apri25805645l01057126===+++++"  # 用於會話加密的密鑰
 
 # 連接到 PostgreSQL 資料庫
 conn = psycopg2.connect(
@@ -33,7 +36,7 @@ conn = psycopg2.connect(
 )
 
 db = SQLAlchemy(app)
-socketio = SocketIO(app , cors_allowed_origins="*") # cors_allowed_origins="*" 可以允許任何来源的跨域請求。
+socketio = SocketIO(app , ping_timeout=60, ping_interval=25,cors_allowed_origins="*") # cors_allowed_origins="*" 可以允許任何来源的跨域請求。
 
 current_image = None
 
@@ -61,7 +64,7 @@ class pic(db.Model):
 # 色盲點圖的答案圖片
 class ans(db.Model):
     __tablename__='color_blind_ans_pic'
-    id = db.Column(db.Integer, primary_key=True)
+    id_ans_cb = db.Column(db.Integer, primary_key=True)
     image_data = db.Column(db.LargeBinary)
 
     def __init__(self, image_data=None):
@@ -69,17 +72,23 @@ class ans(db.Model):
 
 # 使用者作答的圖片
 class user_ans(db.Model):
-    __tablename__='color_blind_user_ans_pic'
-    id = db.Column(db.Integer)# 使用者作答題目的編號
-    user_id = db.Column(db.String, primary_key=True) #每個使用者登入網頁的uuid都不一樣，拿來做primary_key
-    question_id = db.Column(db.Integer) # 紀錄使用者每一題題目是哪張
-    image_data = db.Column(db.LargeBinary, primary_key=True)# 使用者作答圖片的data
+    __tablename__ = 'color_blind_user_ans_pic'
+    
+    id = db.Column(db.Integer, primary_key=True)  # 使用者作答題目的編號
+    user_id = db.Column(db.String, primary_key=True)  # 使用者的 UUID
+    question_id = db.Column(db.Integer)  # 紀錄使用者每一題題目是哪張
+    image_data = db.Column(db.LargeBinary)  # 使用者作答圖片的 data
+    
+    __table_args__ = (
+        db.PrimaryKeyConstraint('id', 'user_id'),  # 定義複合主鍵
+    )
 
-    def __init__(self, id=None ,image_data=None,user_id=None,question_id=None):
+    def __init__(self, id=None, image_data=None, user_id=None, question_id=None):
         self.id = id
         self.user_id = user_id
         self.question_id = question_id
         self.image_data = image_data
+
         
 
 @app.route('/')
@@ -154,14 +163,36 @@ def upload_image():
         return jsonify({'error': 'No image data found'})
     
     image_data = data['image']
-    image_data = image_data.replace('data:image/png;base64,', '')
-    binary_image_data = base64.b64decode(image_data)
-    
+################################################################################
+
+    # 處理了圖片資料量太大，資料庫無法處理的問題
+    # 使用正則表達式處理不同圖片格式的前綴
+    image_data = re.sub(r'^data:image/\w+;base64,', '', image_data)
+
+    # 修正 base64 填充
+    def fix_base64_padding(base64_string):
+        # 根據長度缺少的部分，補足 `=` 符號
+        missing_padding = len(base64_string) % 4
+        if missing_padding:
+            base64_string += '=' * (4 - missing_padding)
+        return base64_string
+
+    image_data = fix_base64_padding(image_data)
+
+    # image_data = image_data.replace('data:image/jpeg;base64,', '')
+    # 解碼 base64 字符串
+
+    try:
+        binary_image_data = base64.b64decode(image_data)
+    except Exception as e:
+        return jsonify({'error': 'Invalid base64 data', 'message': str(e)})
+################################################################################
     # 获取 completedQuestions 数据
     completed_questions = data['completedQuestions']
 
     # 從session中獲取random_id
     random_id = session.get('random_id', None)
+    print(random_id)
     if random_id is None:
         return jsonify({'error': 'Random ID not found'}), 111
     print(f"User ID: {user_id}, Random ID: {random_id}, Image Data Length: {len(binary_image_data)}")
@@ -170,7 +201,12 @@ def upload_image():
     db.session.commit()
 
     image = Image.open(BytesIO(base64.b64decode(image_data)))
-    image.save('uploaded_image.png')
+
+    # 將 RGBA 圖像轉換為 RGB 格式
+    if image.mode == 'RGBA':
+        image = image.convert('RGB')
+
+    image.save('uploaded_image.jpg')
     
 
     return jsonify({'message': 'Image uploaded successfully'})
@@ -179,12 +215,14 @@ def upload_image():
 # 由handwrite.html發送'img-connect'加上下一張題目的圖片的Base64編碼資料 
 @socketio.on('img-connect')
 def handle_connect(data):
-    print("有喔喔 喔喔喔喔")
-    current_image=data.get('background-image')
+    print("收到 img-connect 事件")
+    current_image = data.get('background-image')
     if current_image:
-        print("發送!")
-        #發送圖片資料給電腦端
-        emit('update_image', {'image': current_image},broadcast=True)
+        # print("發送圖片 URL:", current_image)  # 確認收到的圖片 URL
+        emit('update_image', {'image': current_image}, broadcast=True)
+        print("圖片發送成功!")
+    else:
+        print("錯誤: 沒有圖片 URL")
     
 
 @socketio.on('confirmDrawing')
