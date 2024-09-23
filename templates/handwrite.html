@@ -1,4 +1,3 @@
-<!-- 色盲點圖作答頁面 -->
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -14,7 +13,7 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #e0f7fa;
+            background: linear-gradient(135deg, #e0f7fa, #80deea); /* 淡藍色背景漸變 */
             font-family: 'Arial', sans-serif;
             color: #333;
         }
@@ -22,42 +21,44 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #ffffff;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.8); /* 背景透明度 */
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* 增強陰影效果 */
             width: 90%;
-            max-width: 400px;
+            max-width: 500px; /* 調整容器寬度 */
         }
         canvas {
-            background-image: url(data:image/jpeg;base64,{{data}});
             background-size: cover;
-            border: 2px solid #004d40;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border: 4px solid #00796b; /* 更粗的綠框 */
+            border-radius: 15px; /* 圓角變大 */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* 更強的陰影效果 */
             width: 100%;
             height: auto;
             aspect-ratio: 1 / 1; /* 保持正方形 */
-            margin-bottom: 20px;
+            margin-bottom: 30px; /* 調整間距 */
         }
         button {
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 15px 30px; /* 增加按鈕內邊距 */
+            font-size: 18px; /* 增加按鈕字體大小 */
             color: #fff;
             background-color: #00796b;
             border: none;
-            border-radius: 20px;
+            border-radius: 25px; /* 更圓的按鈕 */
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 按鈕陰影加強 */
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
         button:hover {
-            background-color: #004d40;
+            background-color: #004d40; /* 按鈕懸停顏色 */
+            transform: scale(1.05); /* 懸停時微放大 */
         }
         .status {
-            font-size: 16px;
-            margin-bottom: 10px;
+            font-size: 22px; /* 更大字體 */
             font-weight: bold;
+            color: #00796b; /* 狀態文字顏色 */
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* 增加狀態文字陰影 */
         }
     </style>
 </head>
@@ -69,40 +70,74 @@
     <!-- 畫圖的 canvas 元素 -->
     <canvas id="drawingCanvas"></canvas>
     <!-- 確認送出的按鈕 -->
-    <button onclick="saveImage()">確認送出</button>
+    <button id="submitButton" onclick="handleButtonClick()">確認送出</button>
 </div>
+
 <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 <script>
-    // 初始化 WebSocket 連接
-    // var socket = io.connect('http://192.168.50.209:5000');
-
     var socket = io.connect('http://192.168.50.209:5000', {
         pingInterval: 25000, // 25 seconds
         pingTimeout: 60000,  // 60 seconds
     });
 
-
-    // 設定總題數
     var totalQuestions = 10;
-    // 設定已完成的題數
-    var completedQuestions = 1;
-
-    // 當視窗大小變化時，調整 canvas 的大小
-    window.addEventListener('resize', resizeCanvas);
+    var completedQuestions = 0;
 
     // 調整 canvas 大小，使其保持正方形
     function resizeCanvas() {
         var canvas = document.getElementById('drawingCanvas');
-        var currentBackgroundImage = canvas.style.backgroundImage;
         canvas.width = canvas.clientWidth;
         canvas.height = canvas.clientWidth;  // 保持 canvas 是正方形
-        canvas.style.backgroundImage = currentBackgroundImage;
     }
 
     // 更新顯示的題數狀態
     function updateStatus() {
-        resizeCanvas(); // 確保 canvas 大小正確
         document.getElementById('status').innerText = '第' + completedQuestions + '題，還有' + (totalQuestions - completedQuestions) + '題';
+    }
+
+    // 針對 completedQuestions 為 0 時的特殊情況
+    function handleIntroduction() {
+        // 修改狀態顯示文字
+        document.getElementById('status').innerText = '請在手機上用手指描出您看到的圖案';
+        
+        // 禁用畫圖功能
+        var canvas = document.getElementById('drawingCanvas');
+        canvas.removeEventListener('touchstart', startDrawing);
+        canvas.removeEventListener('touchmove', draw);
+        canvas.removeEventListener('touchend', stopDrawing);
+
+        // 移除 canvas 邊框
+        canvas.style.border = 'none';
+
+        // 修改按鈕文字
+        document.getElementById('submitButton').innerText = '知道啦';
+        document.getElementById('submitButton').onclick = function() {
+            completedQuestions++;
+            resetToDrawingMode(); // 恢復畫圖模式
+            loadNextImage(); // 載入第一題的圖片
+        };
+    }
+
+    // 恢復正常畫圖模式
+    function resetToDrawingMode() {
+        // 恢復狀態顯示
+        updateStatus();
+
+        // 恢復 canvas 邊框
+        var canvas = document.getElementById('drawingCanvas');
+        canvas.style.border = '4px solid #00796b'; // 恢復綠框
+
+        // 啟用畫圖功能
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        // 修改按鈕文字並恢復提交功能
+        var submitButton = document.getElementById('submitButton');
+        submitButton.innerText = '確認送出';
+        submitButton.onclick = function() {
+            saveImage();
+        };
     }
 
     // 獲取 canvas 元素和其上下文
@@ -114,8 +149,8 @@
     canvas.addEventListener('touchmove', draw);
     canvas.addEventListener('touchend', stopDrawing);
 
-    var isDrawing = false; // 確認是否正在畫圖
-    var lineCoordinates = []; // 儲存繪圖線條的座標
+    var isDrawing = false;
+    var lineCoordinates = [];
 
     // 獲取觸摸事件在 canvas 上的位置
     function getTouchPosition(canvas, touchEvent) {
@@ -126,7 +161,6 @@
         };
     }
 
-    // 開始繪圖
     function startDrawing(e) {
         isDrawing = true;
         var pos = getTouchPosition(canvas, e);
@@ -134,15 +168,14 @@
         draw(e);
     }
 
-    // 繪圖
     function draw(e) {
-        e.preventDefault(); // 防止觸摸事件的預設行為
+        e.preventDefault();
         if (!isDrawing) return;
 
-        context.lineWidth = 8; // 設定線條寬度
-        context.lineCap = 'round'; // 設定線條末端為圓形
-        context.lineJoin = 'round'; // 設定線條交接處為圓形
-        context.strokeStyle = 'black'; // 設定線條顏色為黑色
+        context.lineWidth = 8;
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+        context.strokeStyle = 'black';
 
         var pos = getTouchPosition(canvas, e);
         lineCoordinates.push(pos);
@@ -152,35 +185,31 @@
 
         for (var i = 1; i < lineCoordinates.length; i++) {
             context.lineTo(lineCoordinates[i].x, lineCoordinates[i].y);
-            context.stroke(); // 畫線
+            context.stroke();
         }
     }
 
-    // 停止繪圖
     function stopDrawing() {
         isDrawing = false;
-        lineCoordinates = []; // 清空座標數組
+        lineCoordinates = [];
     }
 
-    // 確認並送出圖像
     function saveImage() {
         if (confirm("您確定要送出嗎？")) {
-            var dataURL = canvas.toDataURL(); // 將 canvas 轉換為 Data URL
+            var dataURL = canvas.toDataURL();
             fetch('/upload', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ image: dataURL,
-                                       completedQuestions:completedQuestions
-                 }) // 將圖像數據發送到伺服器
+                body: JSON.stringify({ image: dataURL, completedQuestions: completedQuestions })
             })
             .then(response => response.json())
             .then(data => {
                 completedQuestions++;
-                updateStatus(); // 更新顯示的題數狀態
+                updateStatus();
                 if (completedQuestions < totalQuestions) {
-                    loadNextImage(); // 載入下一張圖片
+                    loadNextImage();
                 } else {
                     alert("已完成所有題目！");
                 }
@@ -191,14 +220,13 @@
         }
     }
 
-    // 載入下一張圖片
     function loadNextImage() {
         fetch('/next-image')
         .then(response => response.json())
         .then(data => {
             if (data.nextImageUrl) {
                 context.clearRect(0, 0, canvas.width, canvas.height); // 清空 canvas
-                canvas.style.backgroundImage = 'url(' + data.nextImageUrl + ')'; // 設定新圖片作為背景
+                canvas.style.backgroundImage = 'url(' + data.nextImageUrl + ')';
                 socket.emit('img-connect', {'background-image': data.nextImageUrl});
                 console.log("Next image URL received:", data.nextImageUrl);
             } else {
@@ -210,15 +238,27 @@
         });
     }
 
+    function handleButtonClick() {
+        if (completedQuestions === 0) {
+            handleIntroduction();
+        } else {
+            saveImage();
+        }
+    }
+
     // 頁面載入完成後初始化
     window.onload = function() {
-        loadNextImage(); // 載入第一張圖片
-        updateStatus(); // 更新題數狀態
-        resizeCanvas(); // 確保初始加載時 canvas 适应屏幕大小
+        if (completedQuestions === 0) {
+            var canvas = document.getElementById('drawingCanvas');
+            canvas.style.backgroundImage = 'url("/static/images/chart_demonstration.gif")'; // 設定 GIF 圖片
+            console.log("Loading GIF image for question 0");
+            handleIntroduction(); // 禁用繪畫功能和移除邊框
+        } else {
+            loadNextImage();
+        }
+        resizeCanvas();
     };
 
-    
-    
 </script>
 
 </body>
