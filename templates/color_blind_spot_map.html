@@ -72,7 +72,7 @@
     <script>
         // 初始化 WebSocket 連接
         // var socket = io.connect('http://192.168.50.209:5000');
-        var socket = io.connect('http://192.168.50.209:5000', {
+        var socket = io.connect('https://1661-114-34-178-54.ngrok-free.app', {
             pingInterval: 25000, // 25 seconds
             pingTimeout: 60000,  // 60 seconds
         });
@@ -100,7 +100,11 @@
         // 更新顯示的題數狀態
         function updateStatus() {
             resizeCanvas(); // 確保 canvas 大小正確
-            document.getElementById('status').innerText = '第' + completedQuestions + '題，還有' + (totalQuestions - completedQuestions) + '題';
+            if (completedQuestions === 0) {
+                document.getElementById('status').innerText = '作答說明'; // 當完成題數為 0 時，隱藏狀態顯示
+            } else {
+                document.getElementById('status').innerText = '第' + completedQuestions + '題，還有' + (totalQuestions - completedQuestions) + '題';
+    }
         }
 
         // 捕捉所有事件
