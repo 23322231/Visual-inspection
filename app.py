@@ -19,7 +19,8 @@ from hashlib import md5
 
 
 
-
+# 定義候選的數字列表
+numbers = [2, 3, 5, 6, 7, 8, 12, 15, 16, 26, 29, 35, 42, 45, 57, 73, 74, 96, 97, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110]
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:01057126@localhost/visual"
@@ -115,15 +116,15 @@ def choose():
 def myopia():
     return render_template('myopia.html')
 
-@app.route('/generic')
-def generic():
-    random_id = random.randint(1, 20)
-    colorblind_test = db.session.query(pic).filter(pic.id == random_id).first()
-    if colorblind_test:
-        base64_data = base64.b64encode(colorblind_test.image_data).decode('utf-8')
-        return render_template('handwrite.html', data=base64_data)
-    else:
-        return "No image found", 404
+# @app.route('/generic')
+# def generic():
+#     random_id = random.randint(1, 30)
+#     colorblind_test = db.session.query(pic).filter(pic.id == random_id).first()
+#     if colorblind_test:
+#         base64_data = base64.b64encode(colorblind_test.image_data).decode('utf-8')
+#         return render_template('handwrite.html', data=base64_data)
+#     else:
+#         return "No image found", 404
     
 #點圖製作功能頁面
 @app.route('/ishihara-test')
@@ -138,7 +139,7 @@ def comfirm_colordot():
 @app.route('/next-image')
 def next_image():
     print("執行了")
-    random_id = random.randint(1, 32)
+    random_id = random.randint(1, 30)
     session['random_id'] = random_id  # 将random_id存储到session中
 
     colorblind_test = db.session.query(pic).filter(pic.id == random_id).first()
