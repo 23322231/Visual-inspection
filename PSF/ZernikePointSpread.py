@@ -40,7 +40,6 @@ def zernikePointSpread(coefficients, spectrum=None, **kwargs):
     else:
         pupilSamples = PupilSamples(degrees, wavelength, pupil)        
     
-    print(pupilSamples)
     # ZernikeImage 的第三個參數，簡單來說，數值越大，準確率越高
     radius = pupilSamples/2
     ppd = imagesamples / degrees
@@ -362,6 +361,17 @@ zc_pupil_3 = [[0, 0, -0.100302], [1, -1, 0.137265], [1,
   0.0000190969], [6, 0, -0.000117895], [6, 2, -0.0000108239], [6, 4, 
   8.60172*10**(-6)], [6, 6, -0.000231797]]
 
+zc_pupil_4 = [[0, 0, -0.0918079], [1, -1, 0.130929], [1, 
+  1, -0.0268779], [2, -2, -0.0698653], [2, 0, 0.00924714], [2, 2, 
+  0.119573], [3, -3, 0.0339663], [3, -1, -0.0419831], [3, 1, 
+  0.00657061], [3, 3, -0.0280821], [4, -4, 0.00455807], [4, -2, 
+  0.00514093], [4, 0, 0.0107112], [4, 2, 0.00366791], [4, 4, 
+  0.0122822], [5, -5, 0.00657106], [5, -3, -0.00332352], [5, -1, 
+  0.000979937], [5, 1, 0.000204194], [5, 3, -0.00090398], [5, 5, 
+  0.00379865], [6, -6, 0.000215256], [6, -4, 0.00016237], [6, -2, 
+  0.000107299], [6, 0, -0.000662413], [6, 2, -0.0000608158], [6, 4, 
+  0.0000483301], [6, 6, -0.00130239]]
+
 # 不同的波長在 RGB 這三種顏色裡面各自所佔的比例(所以總合為 1 )
 spectra_R = np.array([[535,0.00986],[555,0.088],[575,0.163],[595,0.19],[615,0.176],[635,0.143],
                     [655,0.106],[675,0.0741],[695,0.0493]])
@@ -381,7 +391,7 @@ spectra_B = np.array([[415,0.000458],[435, 0.0503],[455, 0.157],[475, 0.217],[49
 #             [595,0.0502],[615,0.0258],[635,0.0123],[655,0.00558],[675,0.0024]])
 
 # Defocus 測試(近視遠視)
-diopter=0.0 # 設定近視(遠視)度數
+diopter=1.0 # 設定近視(遠視)度數
 
 # 有考慮到色差的
 p = 1.68524
@@ -451,12 +461,14 @@ focus_wavelength=(q*(wavelength*0.001-c)/(diopter*(wavelength*0.001-c)+q) + c )/
 # 單純計算單一波長的 PSF
 # degree 設定大一點，才可以包含住比較大的PSF
 degree=0.5
+# Defocus 測試(近視遠視)
+diopter=1.0 # 設定近視-(遠視+)度數
 
 # # 在計算 RGB 圖片時，在 zernikePointSpread 函式內就會加入 defocus，所以不用在這裡加
-# Defocus=InverseEquivalentDefocus(diopters=diopter,pupildiameter=6)
-# zc=np.append(zc,[[2,0,Defocus]],axis=0)
+Defocus=InverseEquivalentDefocus(diopters=diopter,pupildiameter=4)
+zc_pupil_4=np.append(zc_pupil_4,[[2,0,Defocus]],axis=0)
 
-psf=zernikePointSpread(zc_pupil_3, Degrees=degree, PupilDiameter=3)
+psf=zernikePointSpread(zc_pupil_4, Degrees=degree, PupilDiameter=4)
 psf_img = PSFPlot(psf=psf, Degrees=degree)
 plt.show()
 
