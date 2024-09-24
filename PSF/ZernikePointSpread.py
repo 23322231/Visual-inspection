@@ -18,7 +18,7 @@ from typing import List, Tuple, Union
 def zernikePointSpread(coefficients, spectrum=None, **kwargs):
     # Default values
     wavelength = kwargs.get('Wavelength', 555) # 設定要計算的 PSF 波長(是 in focus 的預設波長)
-    pupil = kwargs.get('PupilDiameter', 6) # 係數測量好的瞳孔直徑(mm)
+    pupil = kwargs.get('PupilDiameter', 6) # 係數配合的瞳孔直徑(mm)
     pupilSamples = kwargs.get('PupilSamples', 62.89) # 指瞳孔的直徑，和計算 PSF 的準確性有關
     imagesamples = kwargs.get('ImageSamples', 256) # PSF 的 img 大小
     degrees = kwargs.get('Degrees', 0.5) # 也是指 PSF 的 img 大小(以 degree 為單位)
@@ -304,50 +304,6 @@ def PSFPlot(psf, Degrees=0.5, Magnification=1, ScaleMark=True, **kwargs):
     plt.tight_layout()
     return fig
 
-def zernike_mode(n: int, m: int) -> int:
-    return (n * (n + 2) + m) // 2
-
-def zernike_indices(j: int) -> Tuple[int, int]:
-    n = int(np.floor(np.sqrt(2 * j - 1)))
-    m = 2 * j - n * (n + 2)
-    return n, m
-
-def zernike_coefficient(n: int, m: int, zlist: List[Tuple[int, int, float]]) -> float:
-    for item in zlist:
-        if item[0] == n and item[1] == m:
-            return item[2]
-    return 0.0
-
-def rz(np: int, n: int, ratio: float) -> float:
-    # This is a placeholder for the RZ function.
-    # The actual implementation would depend on the specific definition of RZ.
-    return np.random.random()
-
-def zernike_scaled_coefficient(n: int, m: int, zlist: List[Tuple[int, int, float]], ratio: float, max_order: int, method: str = "Janssen") -> float:
-    if method == "Janssen":
-        coeff = 0
-        for np in range(n, max_order + 1, 2):
-            coeff += np.sqrt(2 * (np + 1)) * zernike_coefficient(np, m, zlist) * (rz(np, n, ratio) - rz(np, n + 2, ratio))
-        return coeff / np.sqrt(2 * (n + 1))
-    else:
-        # Implement other methods here if needed
-        raise ValueError(f"Method {method} not implemented")
-
-def zernike_scale_pupil(zlist: List[Tuple[int, int, float]], ratio: float, order: Union[str, int] = "Automatic", method: str = "Janssen") -> List[Tuple[int, int, float]]:
-    if order == "Automatic":
-        max_order = max(item[0] for item in zlist)
-    else:
-        max_order = order
-    
-    result = []
-    for j in range(zernike_mode(max_order, max_order) + 1):
-        n, m = zernike_indices(j)
-        scaled_coeff = zernike_scaled_coefficient(n, m, zlist, ratio, max_order, method)
-        result.append((n, m, scaled_coeff))
-    
-    return result
-
-
 # np.set_printoptions(threshold=np.inf)
 # zc=np.array([[2,-2,-0.094629],[2,0,0.096927],[2,2,0.30527],[3,-3,0.045947],
 #              [3,-1,-0.12144],[3,1,0.026396],[3,3,-0.11346],[4,-4,0.029154],
@@ -395,21 +351,16 @@ zc=np.array([[2,-2,-0.0946],[2,0,0.0969],[2,2,0.305],[3,-3,0.0459],
              [6,-2,0.00122],[6,0,-0.00755],[6,2,-0.000693],[6,4,0.000551],
              [6,6,-0.0148]])
 
-######## 下次要debug #############################################
-# zc=[
-#     (2,-2,-0.0946),(2,0,0.0969),(2,2,0.305),(3,-3,0.0459),
-#     (3,-1,-0.121),(3,1,0.0264),(3,3,-0.113),(4,-4,0.0292),
-#     (4,-2,0.03),(4,0,0.0294),(4,2,0.0163),(4,4,0.064),
-#     (5,-5,0.0499),(5,-3,-0.0252),(5,-1,0.00744),(5,1,0.00155),
-#     (5,3,-0.00686),(5,5,0.0288),(6,-6,0.00245),(6,-4,0.00185),
-#     (6,-2,0.00122),(6,0,-0.00755),(6,2,-0.000693),(6,4,0.000551),
-#     (6,6,-0.0148)
-# ]
-# ratio = 3/6
-
-# result = zernike_scale_pupil(zc, ratio)
-# print(result)
-##############################################################
+zc_pupil_3 = [[0, 0, -0.100302], [1, -1, 0.137265], [1, 
+  1, -0.0262347], [2, -2, -0.0441613], [2, 0, -0.00524091], [2, 2, 
+  0.0637425], [3, -3, 0.0173347], [3, -1, -0.0185977], [3, 1, 
+  0.00258734], [3, 3, -0.0110297], [4, -4, 0.00130923], [4, -2, 
+  0.00153875], [4, 0, 0.00393156], [4, 2, 0.00121036], [4, 4, 
+  0.00384658], [5, -5, 0.00155934], [5, -3, -0.000788688], [5, -1, 
+  0.000232544], [5, 1, 0.0000484563], [5, 3, -0.000214519], [5, 5, 
+  0.000901438], [6, -6, 0.0000383109], [6, -4, 0.0000288984], [6, -2, 
+  0.0000190969], [6, 0, -0.000117895], [6, 2, -0.0000108239], [6, 4, 
+  8.60172*10**(-6)], [6, 6, -0.000231797]]
 
 # 不同的波長在 RGB 這三種顏色裡面各自所佔的比例(所以總合為 1 )
 spectra_R = np.array([[535,0.00986],[555,0.088],[575,0.163],[595,0.19],[615,0.176],[635,0.143],
@@ -445,19 +396,19 @@ focus_wavelength=(q*(wavelength*0.001-c)/(diopter*(wavelength*0.001-c)+q) + c )/
 # psf=zernikePointSpread(zc, np.array([spectrum[0][0]]))*spectrum[0][1]
 
 # degree 設定大一點，才可以包含住比較大的PSF
-degree=0.5
+# degree=0.5
 # 求 RGB 各自的 PSF 總和
-psf_r=zernikePointSpread(zc, spectrum=np.array([spectra_R[0][0]]), Degrees=degree, Wavelength=focus_wavelength)*spectra_R[0][1]
-for wavelength in spectra_R[1:]:
-    psf_r+=zernikePointSpread(zc, spectrum=np.array([wavelength[0]]), Degrees=degree, Wavelength=focus_wavelength)*wavelength[1]
+# psf_r=zernikePointSpread(zc, spectrum=np.array([spectra_R[0][0]]), Degrees=degree, Wavelength=focus_wavelength)*spectra_R[0][1]
+# for wavelength in spectra_R[1:]:
+#     psf_r+=zernikePointSpread(zc, spectrum=np.array([wavelength[0]]), Degrees=degree, Wavelength=focus_wavelength)*wavelength[1]
     
-psf_g=zernikePointSpread(zc, np.array([spectra_G[0][0]]),Degrees=degree, Wavelength=focus_wavelength)*spectra_G[0][1]
-for wavelength in spectra_G[1:]:
-    psf_g+=zernikePointSpread(zc, np.array([wavelength[0]]),Degrees=degree, Wavelength=focus_wavelength)*wavelength[1]
+# psf_g=zernikePointSpread(zc, np.array([spectra_G[0][0]]),Degrees=degree, Wavelength=focus_wavelength)*spectra_G[0][1]
+# for wavelength in spectra_G[1:]:
+#     psf_g+=zernikePointSpread(zc, np.array([wavelength[0]]),Degrees=degree, Wavelength=focus_wavelength)*wavelength[1]
     
-psf_b=zernikePointSpread(zc, np.array([spectra_B[0][0]]),Degrees=degree, Wavelength=focus_wavelength)*spectra_B[0][1]
-for wavelength in spectra_B[1:]:
-    psf_b+=zernikePointSpread(zc, np.array([wavelength[0]]),Degrees=degree, Wavelength=focus_wavelength)*wavelength[1]
+# psf_b=zernikePointSpread(zc, np.array([spectra_B[0][0]]),Degrees=degree, Wavelength=focus_wavelength)*spectra_B[0][1]
+# for wavelength in spectra_B[1:]:
+#     psf_b+=zernikePointSpread(zc, np.array([wavelength[0]]),Degrees=degree, Wavelength=focus_wavelength)*wavelength[1]
 
 # psf_img = PSFPlot(psf=psf_r, Degrees=degree)
 # plt.show()
@@ -466,34 +417,58 @@ for wavelength in spectra_B[1:]:
 # psf_img = PSFPlot(psf=psf_b, Degrees=degree)
 # plt.show()
 
+# psf_r=psf
+# psf_g=psf
+# psf_b=psf
+
+# # 讀取要處理的圖片
+# img_bgr=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\color_img.png")
+# img_rgb=cv2.cvtColor(img_bgr,cv2.COLOR_BGR2RGB)
+
+# # 圖片左右翻轉(因為文章中的 Basis 的 Image 有提到，卷積是從圖片的底部開始做的)
+# # 不知道為啥是左右翻轉
+# img_rgb_flip=cv2.flip(img_rgb, 1)
+
+# # 對圖片做處理
+# # 先將 RGB 三通道分開
+# R,G,B = cv2.split(img_rgb_flip)
+# R = cv2.filter2D(src=R,ddepth=-1,kernel=Wrap.wrap(psf_r))
+# G = cv2.filter2D(src=G,ddepth=-1,kernel=Wrap.wrap(psf_g))
+# B = cv2.filter2D(src=B,ddepth=-1,kernel=Wrap.wrap(psf_b))
+# img_blur = cv2.merge([R,G,B])
+
+# # 把圖片翻回來
+# img_blur=cv2.flip(img_blur,1)
+# plt.figure()
+# plt.subplot(1, 2, 1)
+# plt.title("Original")
+# plt.imshow(img_rgb)
+# plt.subplot(1, 2, 2)
+# plt.title("Blurred")
+# plt.imshow(img_blur)
+# plt.show()
+
 # 單純計算單一波長的 PSF
 # degree 設定大一點，才可以包含住比較大的PSF
-# degree=1
+degree=0.5
 
 # # 在計算 RGB 圖片時，在 zernikePointSpread 函式內就會加入 defocus，所以不用在這裡加
 # Defocus=InverseEquivalentDefocus(diopters=diopter,pupildiameter=6)
 # zc=np.append(zc,[[2,0,Defocus]],axis=0)
 
-# psf=zernikePointSpread(zc, Degrees=degree)
-# psf_r=psf
-# psf_g=psf
-# psf_b=psf
+psf=zernikePointSpread(zc_pupil_3, Degrees=degree, PupilDiameter=3)
+psf_img = PSFPlot(psf=psf, Degrees=degree)
+plt.show()
 
 # 讀取要處理的圖片
-img_bgr=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\color_img.png")
-img_rgb=cv2.cvtColor(img_bgr,cv2.COLOR_BGR2RGB)
+img_gray=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_z.png")
 
 # 圖片左右翻轉(因為文章中的 Basis 的 Image 有提到，卷積是從圖片的底部開始做的)
 # 不知道為啥是左右翻轉
-img_rgb_flip=cv2.flip(img_rgb, 1)
+img_gray_flip=cv2.flip(img_gray, 1)
 
 # 對圖片做處理
-# 先將 RGB 三通道分開
-R,G,B = cv2.split(img_rgb_flip)
-R = cv2.filter2D(src=R,ddepth=-1,kernel=Wrap.wrap(psf_r))
-G = cv2.filter2D(src=G,ddepth=-1,kernel=Wrap.wrap(psf_g))
-B = cv2.filter2D(src=B,ddepth=-1,kernel=Wrap.wrap(psf_b))
-img_blur = cv2.merge([R,G,B])
+img_blur = cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf))
 
 # 把圖片翻回來
 img_blur=cv2.flip(img_blur,1)
@@ -501,7 +476,7 @@ img_blur=cv2.flip(img_blur,1)
 plt.figure()
 plt.subplot(1, 2, 1)
 plt.title("Original")
-plt.imshow(img_rgb)
+plt.imshow(img_gray)
 plt.subplot(1, 2, 2)
 plt.title("Blurred")
 plt.imshow(img_blur)
