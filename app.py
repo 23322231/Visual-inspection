@@ -16,9 +16,6 @@ import psycopg2
 import re
 from hashlib import md5
 
-
-
-
 # 定義候選的數字列表
 numbers = [2, 3, 5, 6, 7, 8, 12, 15, 16, 26, 29, 35, 42, 45, 57, 73, 74, 96, 97, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110]
 app = Flask(__name__)
@@ -45,13 +42,6 @@ current_image = None
 @app.route('/static/assets/js/<path:filename>')
 def serve_js(filename):
     return send_from_directory('static/assets/js', filename, mimetype='text/javascript')
-
-# @app.route('/shape_factories.js')
-# def serve_js():
-#     with open('static/assets/js/shape_factories.js') as f:
-#         js_content = f.read()
-#     response = Response(js_content, mimetype='text/javascript')
-#     return response
 
 # 連線資料庫的table
 # 色盲點圖的題目圖片
@@ -115,16 +105,6 @@ def choose():
 @app.route('/myopia')
 def myopia():
     return render_template('myopia.html')
-
-# @app.route('/generic')
-# def generic():
-#     random_id = random.randint(1, 30)
-#     colorblind_test = db.session.query(pic).filter(pic.id == random_id).first()
-#     if colorblind_test:
-#         base64_data = base64.b64encode(colorblind_test.image_data).decode('utf-8')
-#         return render_template('handwrite.html', data=base64_data)
-#     else:
-#         return "No image found", 404
     
 #點圖製作功能頁面
 @app.route('/ishihara-test')
@@ -134,6 +114,14 @@ def elements():
 @app.route('/comfirm_colordot')
 def comfirm_colordot():
     return render_template('comfirm_colordot.html')
+
+@app.route('/finish')
+def finish():
+    return render_template('finish.html')
+
+@app.route('/result')
+def result():
+    return render_template('result.html')
 
 # 色盲點圖顯示題目圖片
 @app.route('/next-image')
@@ -149,6 +137,34 @@ def next_image():
         return jsonify({'nextImageUrl': next_image_url})
     else:
         return jsonify({'error': 'No image found'}), 404 
+
+@app.route('/result_cb', methods=['POST'])
+def result_cb():
+    data = request.get_json()  # 獲取前端傳來的 JSON 數據
+    user_id = data.get('user_id')  # 從 JSON 中獲取 user_id
+    index = data.get('index')  # 從 JSON 中獲取 index
+    if not user_id:
+        return jsonify({'error': 'User ID not provided'}), 400
+    if not index:
+        return jsonify({'error': 'Index not provided'}), 400
+    
+    print(f"Fetching images for user_id: {user_id}")
+    images = []
+    answer = user_ans.query.filter_by(user_id=user_id, id=index).first()
+        
+    if answer and answer.image_data:
+        # 將二進位圖片數據轉換為 base64
+        encoded_image = base64.b64encode(answer.image_data).decode('utf-8')
+        image_url = f"data:image/jpeg;base64,{encoded_image}"  # 圖片格式為 JPEG
+        print("--------------------")
+        print(f"Image {index} encoded")
+        images.append(image_url)
+    else:
+        images.append(None)
+    
+    return jsonify(images)  # 返回圖片的 JSON 列表
+
+
 
 # 上傳使用者作答圖片
 @app.route('/upload', methods=['POST'])
@@ -188,7 +204,7 @@ def upload_image():
     except Exception as e:
         return jsonify({'error': 'Invalid base64 data', 'message': str(e)})
 ################################################################################
-    # 获取 completedQuestions 数据
+    # 获取 completedQuestions 數據
     completed_questions = data['completedQuestions']
 
     # 從session中獲取random_id
@@ -212,7 +228,6 @@ def upload_image():
 
     return jsonify({'message': 'Image uploaded successfully'})
 
-# -------------------以下還沒debug結束---------------------- #
 # 由handwrite.html發送'img-connect'加上下一張題目的圖片的Base64編碼資料 
 @socketio.on('img-connect')
 def handle_connect(data):
@@ -225,7 +240,12 @@ def handle_connect(data):
     else:
         print("錯誤: 沒有圖片 URL")
     
+@socketio.on('finish_cb')
+def finish_cb():
+    emit('goto_result',broadcast=True)
+    
 
+# 確認進入色盲點圖頁面 傳送user uuid
 @socketio.on('confirmDrawing')
 def handle_confirm_drawing(data):
     print("Received confirmDrawing event")  # 確認事件觸發

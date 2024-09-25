@@ -72,7 +72,7 @@
     <script>
         // 初始化 WebSocket 連接
         // var socket = io.connect('http://192.168.50.209:5000');
-        var socket = io.connect('https://1661-114-34-178-54.ngrok-free.app', {
+        var socket = io.connect('https://7800-114-34-178-54.ngrok-free.app', {
             pingInterval: 25000, // 25 seconds
             pingTimeout: 60000,  // 60 seconds
         });
@@ -84,9 +84,6 @@
 
         // 當視窗大小變化時，調整 canvas 的大小
         window.addEventListener('resize', resizeCanvas);
-
-        
-
 
         // 調整 canvas 大小，使其保持正方形
         function resizeCanvas() {
@@ -103,7 +100,7 @@
             if (completedQuestions === 0) {
                 document.getElementById('status').innerText = '作答說明'; // 當完成題數為 0 時，隱藏狀態顯示
             } else {
-                document.getElementById('status').innerText = '第' + completedQuestions + '題，還有' + (totalQuestions - completedQuestions) + '題';
+                document.getElementById('status').innerText = '第' + completedQuestions + '題，還有' + (10 - completedQuestions) + '題';
     }
         }
 
@@ -134,9 +131,14 @@
                 console.log(completedQuestions);
                 completedQuestions++; // 題數++
                 updateStatus(); // 更新題數狀態
-                if (completedQuestions > totalQuestions) {
-                    alert("已完成所有題目！");
-                }
+                // if (completedQuestions  == 10) {
+                //     completedQuestions++;
+                //     alert("已完成所有題目！");
+                //     window.location.href = window.location.origin + '/result' + location.href.split('=').pop();
+                // }
+                socket.on('goto_result', function() {
+                    window.location.href = window.location.origin + '/result?session=' + location.href.split('=').pop();
+                });
             } else {
                 console.error('Error: no image URL');
             }
@@ -147,7 +149,6 @@
             updateStatus(); // 更新題數狀態
             resizeCanvas(); // 確保初始加載時 canvas 适应屏幕大小
             console.log(completedQuestions)
-
             // 如果 completedQuestions 是 0，顯示相同的 GIF 圖片
             if (completedQuestions === 0) {
                 var canvas = document.getElementById('drawingCanvas');

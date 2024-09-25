@@ -29,13 +29,14 @@
             max-width: 500px; /* 調整容器寬度 */
         }
         canvas {
-            background-size: cover;
+            background-size: cover; /* 背景圖片覆蓋整個 canvas */
+            background-position: center; /* 圖片居中 */
             border: 4px solid #00796b; /* 更粗的綠框 */
             border-radius: 15px; /* 圓角變大 */
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* 更強的陰影效果 */
             width: 100%;
             height: auto;
-            aspect-ratio: 1 / 1; /* 保持正方形 */
+            aspect-ratio: 1; /* 保持正方形 */
             margin-bottom: 30px; /* 調整間距 */
         }
         button {
@@ -65,74 +66,56 @@
 <body>
 
 <div class="container">
-    <!-- 顯示完成題數的狀態 -->
     <div class="status" id="status">完成題數: 0/10</div>
-    <!-- 畫圖的 canvas 元素 -->
     <canvas id="drawingCanvas"></canvas>
-    <!-- 確認送出的按鈕 -->
     <button id="submitButton" onclick="handleButtonClick()">確認送出</button>
 </div>
 
 <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 <script>
-    var socket = io.connect('https://1661-114-34-178-54.ngrok-free.app', {
+    var socket = io.connect('https://7800-114-34-178-54.ngrok-free.app', {
         pingInterval: 25000, // 25 seconds
         pingTimeout: 60000,  // 60 seconds
     });
 
-    var totalQuestions = 10;
+    var totalQuestions = 11;
     var completedQuestions = 0;
 
-    // 調整 canvas 大小，使其保持正方形
     function resizeCanvas() {
         var canvas = document.getElementById('drawingCanvas');
-        canvas.width = canvas.clientWidth;
-        canvas.height = canvas.clientWidth;  // 保持 canvas 是正方形
+        var computedStyle = window.getComputedStyle(canvas);
+
+        var width = Math.min(canvas.clientWidth, canvas.clientHeight) - parseInt(computedStyle.borderWidth) * 2;
+        canvas.width = width;  
+        canvas.height = width;  
     }
 
-    // 更新顯示的題數狀態
     function updateStatus() {
-        document.getElementById('status').innerText = '第' + completedQuestions + '題，還有' + (totalQuestions - completedQuestions) + '題';
+        document.getElementById('status').innerText = '第' + completedQuestions + '題，還有' + (10 - completedQuestions) + '題';
     }
 
-    // 針對 completedQuestions 為 0 時的特殊情況
     function handleIntroduction() {
-        // 修改狀態顯示文字
         document.getElementById('status').innerText = '請在手機上用手指描出您看到的圖案';
-        
-        // 禁用畫圖功能
         var canvas = document.getElementById('drawingCanvas');
         canvas.removeEventListener('touchstart', startDrawing);
         canvas.removeEventListener('touchmove', draw);
         canvas.removeEventListener('touchend', stopDrawing);
-
-        // 移除 canvas 邊框
         canvas.style.border = 'none';
-
-        // 修改按鈕文字
         document.getElementById('submitButton').innerText = '知道啦';
         document.getElementById('submitButton').onclick = function() {
             completedQuestions++;
-            resetToDrawingMode(); // 恢復畫圖模式
-            loadNextImage(); // 載入第一題的圖片
+            resetToDrawingMode();
+            loadNextImage();
         };
     }
 
-    // 恢復正常畫圖模式
     function resetToDrawingMode() {
-        // 恢復狀態顯示
         updateStatus();
-
-        // 恢復 canvas 邊框
         var canvas = document.getElementById('drawingCanvas');
-        canvas.style.border = '4px solid #00796b'; // 恢復綠框
-
-        // 啟用畫圖功能
+        canvas.style.border = '4px solid #00796b'; 
         canvas.addEventListener('touchstart', startDrawing);
         canvas.addEventListener('touchmove', draw);
         canvas.addEventListener('touchend', stopDrawing);
-
-        // 修改按鈕文字並恢復提交功能
         var submitButton = document.getElementById('submitButton');
         submitButton.innerText = '確認送出';
         submitButton.onclick = function() {
@@ -140,11 +123,9 @@
         };
     }
 
-    // 獲取 canvas 元素和其上下文
     var canvas = document.getElementById('drawingCanvas');
     var context = canvas.getContext('2d');
     
-    // 設定觸摸事件的處理函數
     canvas.addEventListener('touchstart', startDrawing);
     canvas.addEventListener('touchmove', draw);
     canvas.addEventListener('touchend', stopDrawing);
@@ -152,12 +133,11 @@
     var isDrawing = false;
     var lineCoordinates = [];
 
-    // 獲取觸摸事件在 canvas 上的位置
     function getTouchPosition(canvas, touchEvent) {
         var rect = canvas.getBoundingClientRect();
         return {
-            x: touchEvent.touches[0].clientX - rect.left,
-            y: touchEvent.touches[0].clientY - rect.top
+            x: (touchEvent.touches[0].clientX - rect.left) * (canvas.width / rect.width),
+            y: (touchEvent.touches[0].clientY - rect.top) * (canvas.height / rect.height)
         };
     }
 
@@ -172,7 +152,7 @@
         e.preventDefault();
         if (!isDrawing) return;
 
-        context.lineWidth = 8;
+        context.lineWidth = 12;  
         context.lineCap = 'round';
         context.lineJoin = 'round';
         context.strokeStyle = 'black';
@@ -212,6 +192,8 @@
                     loadNextImage();
                 } else {
                     alert("已完成所有題目！");
+                    var newUrl = window.location.origin + '/finish?session=' + location.href.split('=').pop();
+                    window.location.href = newUrl;
                 }
             })
             .catch(error => {
@@ -227,6 +209,8 @@
             if (data.nextImageUrl) {
                 context.clearRect(0, 0, canvas.width, canvas.height); // 清空 canvas
                 canvas.style.backgroundImage = 'url(' + data.nextImageUrl + ')';
+                canvas.style.backgroundSize = 'cover'; // 確保圖片覆蓋整個 canvas
+                canvas.style.backgroundPosition = 'center'; // 圖片居中
                 socket.emit('img-connect', {'background-image': data.nextImageUrl});
                 console.log("Next image URL received:", data.nextImageUrl);
             } else {
@@ -246,20 +230,21 @@
         }
     }
 
-    // 頁面載入完成後初始化
     window.onload = function() {
-        
         if (completedQuestions === 0) {
             var canvas = document.getElementById('drawingCanvas');
             canvas.style.backgroundImage = 'url("/static/images/chart_demonstration.gif")'; // 設定 GIF 圖片
             console.log("Loading GIF image for question 0");
-            handleIntroduction(); // 禁用繪畫功能和移除邊框
+            handleIntroduction(); 
         } else {
             loadNextImage();
         }
         resizeCanvas();
     };
 
+    window.onresize = function() {
+        resizeCanvas(); // 確保 canvas 在窗口大小變更時保持正方形
+    };
 </script>
 
 </body>
