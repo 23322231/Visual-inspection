@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>測驗完成</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f8ff; /* 淡藍色背景 */
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* .container {
+            text-align: center;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        } */
+
+        h1 {
+            color: #4CAF50; /* 綠色字體 */
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        img {
+            width: 300px;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        p {
+            font-size: 1.2em;
+            color: #555;
+            margin-top: 20px;
+        }
+    </style>
+    <script>
+        // 禁止返回上一頁的功能
+        window.onload = function() {
+            window.location.href = window.location.origin + '/';
+            window.onpopstate = function(event) {
+                window.location.href = window.location.origin + '/';
+            };
+        };
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>恭喜您完成測驗!</h1>
+        <img src="static/images/welldone.gif" alt="完成測驗" />
+        <p>請至電腦查看您的測驗結果~</p>
+        
+    </div>
+</body>
+</html>
