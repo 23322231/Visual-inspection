@@ -23,7 +23,8 @@
   "homepage": "https://github.com/PJCHENder/webapis-media-recorder#readme",
   "dependencies": {
     "micro": "latest",
-    "standard": "^14.3.3"
+    "standard": "^14.3.3",
+    "webapis-media-recorder": "file:"
   },
   "devDependencies": {
     "browser-sync": "^2.26.7",
