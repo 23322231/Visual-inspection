@@ -279,6 +279,13 @@ def NZ(n, m):
     else:
         return math.sqrt(2 * (n + 1))
     
+def SpheroCylindricalCoefficients(defocus, astigmatism, angle, pupil):
+    num=np.zeros([3])
+    num[0]=astigmatism*math.sin(2*angle)*pupil**2/(8*np.sqrt(6))
+    num[1]=defocus*pupil**2/(16*np.sqrt(3))
+    num[2]=astigmatism*math.cos(2*angle)*pupil**2/(8*np.sqrt(6))
+    return num
+    
 # 畫出PSF
 def PSFPlot(psf, Degrees=0.5, Magnification=1, ScaleMark=True, **kwargs):
     dim = psf.shape
@@ -392,76 +399,78 @@ spectra_B = np.array([[415,0.000458],[435, 0.0503],[455, 0.157],[475, 0.217],[49
 #             [595,0.0502],[615,0.0258],[635,0.0123],[655,0.00558],[675,0.0024]])
 
 # Defocus 測試(近視遠視)
-diopter=1.0 # 設定近視(遠視)度數
+# diopter=1.0 # 設定近視(遠視)度數
 
-# 有考慮到色差的
-p = 1.68524
-q = 0.63346
-c = 0.21410
-wavelength=589 # 預設正常是對焦在 555
-# 若要模擬不同近視(遠視)度數，就用此計算出在近視(遠視)為 diopter 度時，眼睛是對焦在哪種波長
-# focus_wavelength=(q*(wavelength*0.001-c)/(diopter*(wavelength*0.001-c)+q) + c )/0.001
-focus_wavelength=555
-# 要顯示不同波長的波長設定
-# wavelength=np.array([555])
-# psf=zernikePointSpread(zc, np.array([spectrum[0][0]]))*spectrum[0][1]
+########### 計算 RGB 的模擬 #######################
 
-# degree 設定大一點，才可以包含住比較大的PSF
-degree=0.5
-# 求 RGB 各自的 PSF 總和
-psf_r=zernikePointSpread(zc, spectrum=np.array([spectra_R[0][0]]), Degrees=degree, Wavelength=focus_wavelength)*spectra_R[0][1]
-for wavelength in spectra_R[1:]:
-    psf_r+=zernikePointSpread(zc, spectrum=np.array([wavelength[0]]), Degrees=degree, Wavelength=focus_wavelength)*wavelength[1]
+# # 有考慮到色差的
+# p = 1.68524
+# q = 0.63346
+# c = 0.21410
+# wavelength=589 # 預設正常是對焦在 555
+# # 若要模擬不同近視(遠視)度數，就用此計算出在近視(遠視)為 diopter 度時，眼睛是對焦在哪種波長
+# # focus_wavelength=(q*(wavelength*0.001-c)/(diopter*(wavelength*0.001-c)+q) + c )/0.001
+# focus_wavelength=555
+# # 要顯示不同波長的波長設定
+# # wavelength=np.array([555])
+# # psf=zernikePointSpread(zc, np.array([spectrum[0][0]]))*spectrum[0][1]
+
+# # degree 設定大一點，才可以包含住比較大的PSF
+# degree=0.5
+# # 求 RGB 各自的 PSF 總和
+# psf_r=zernikePointSpread(zc, spectrum=np.array([spectra_R[0][0]]), Degrees=degree, Wavelength=focus_wavelength)*spectra_R[0][1]
+# for wavelength in spectra_R[1:]:
+#     psf_r+=zernikePointSpread(zc, spectrum=np.array([wavelength[0]]), Degrees=degree, Wavelength=focus_wavelength)*wavelength[1]
     
-psf_g=zernikePointSpread(zc, np.array([spectra_G[0][0]]),Degrees=degree, Wavelength=focus_wavelength)*spectra_G[0][1]
-for wavelength in spectra_G[1:]:
-    psf_g+=zernikePointSpread(zc, np.array([wavelength[0]]),Degrees=degree, Wavelength=focus_wavelength)*wavelength[1]
+# psf_g=zernikePointSpread(zc, np.array([spectra_G[0][0]]),Degrees=degree, Wavelength=focus_wavelength)*spectra_G[0][1]
+# for wavelength in spectra_G[1:]:
+#     psf_g+=zernikePointSpread(zc, np.array([wavelength[0]]),Degrees=degree, Wavelength=focus_wavelength)*wavelength[1]
     
-psf_b=zernikePointSpread(zc, np.array([spectra_B[0][0]]),Degrees=degree, Wavelength=focus_wavelength)*spectra_B[0][1]
-for wavelength in spectra_B[1:]:
-    psf_b+=zernikePointSpread(zc, np.array([wavelength[0]]),Degrees=degree, Wavelength=focus_wavelength)*wavelength[1]
+# psf_b=zernikePointSpread(zc, np.array([spectra_B[0][0]]),Degrees=degree, Wavelength=focus_wavelength)*spectra_B[0][1]
+# for wavelength in spectra_B[1:]:
+#     psf_b+=zernikePointSpread(zc, np.array([wavelength[0]]),Degrees=degree, Wavelength=focus_wavelength)*wavelength[1]
 
-psf_img = PSFPlot(psf=psf_r, Degrees=degree)
-plt.show()
-psf_img = PSFPlot(psf=psf_g, Degrees=degree)
-plt.show()
-psf_img = PSFPlot(psf=psf_b, Degrees=degree)
-plt.show()
+# psf_img = PSFPlot(psf=psf_r, Degrees=degree)
+# plt.show()
+# psf_img = PSFPlot(psf=psf_g, Degrees=degree)
+# plt.show()
+# psf_img = PSFPlot(psf=psf_b, Degrees=degree)
+# plt.show()
 
-# psf_r=psf
-# psf_g=psf
-# psf_b=psf
+# # psf_r=psf
+# # psf_g=psf
+# # psf_b=psf
 
-# 讀取要處理的圖片
-img_bgr=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\color_img.png")
-img_rgb=cv2.cvtColor(img_bgr,cv2.COLOR_BGR2RGB)
+# # 讀取要處理的圖片
+# img_bgr=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\color_img.png")
+# img_rgb=cv2.cvtColor(img_bgr,cv2.COLOR_BGR2RGB)
 
-# 圖片左右翻轉(因為文章中的 Basis 的 Image 有提到，卷積是從圖片的底部開始做的)
-# 不知道為啥是左右翻轉
-img_rgb_flip=cv2.flip(img_rgb, 1)
+# # 圖片左右翻轉(因為文章中的 Basis 的 Image 有提到，卷積是從圖片的底部開始做的)
+# # 不知道為啥是左右翻轉
+# img_rgb_flip=cv2.flip(img_rgb, 1)
 
-# 對圖片做處理
-# 先將 RGB 三通道分開
-R,G,B = cv2.split(img_rgb_flip)
-R = cv2.filter2D(src=R,ddepth=-1,kernel=Wrap.wrap(psf_r))
-G = cv2.filter2D(src=G,ddepth=-1,kernel=Wrap.wrap(psf_g))
-B = cv2.filter2D(src=B,ddepth=-1,kernel=Wrap.wrap(psf_b))
-img_blur = cv2.merge([R,G,B])
+# # 對圖片做處理
+# # 先將 RGB 三通道分開
+# R,G,B = cv2.split(img_rgb_flip)
+# R = cv2.filter2D(src=R,ddepth=-1,kernel=Wrap.wrap(psf_r))
+# G = cv2.filter2D(src=G,ddepth=-1,kernel=Wrap.wrap(psf_g))
+# B = cv2.filter2D(src=B,ddepth=-1,kernel=Wrap.wrap(psf_b))
+# img_blur = cv2.merge([R,G,B])
 
-# 把圖片翻回來
-img_blur=cv2.flip(img_blur,1)
-plt.figure()
-plt.subplot(1, 2, 1)
-plt.title("Original")
-plt.imshow(img_rgb)
-plt.subplot(1, 2, 2)
-plt.title("Blurred")
-plt.imshow(img_blur)
-plt.show()
+# # 把圖片翻回來
+# img_blur=cv2.flip(img_blur,1)
+# plt.figure()
+# plt.subplot(1, 2, 1)
+# plt.title("Original")
+# plt.imshow(img_rgb)
+# plt.subplot(1, 2, 2)
+# plt.title("Blurred")
+# plt.imshow(img_blur)
+# plt.show()
 
-# 單純計算單一波長的 PSF
+########## 單純計算單一波長的 PSF #######################
 
-# degree 設定大一點，才可以包含住比較大的PSF
+# # degree 設定大一點，才可以包含住比較大的PSF
 # degree=0.5
 
 # diopter=1.0 # 設定近視-(遠視+)度數
@@ -550,3 +559,35 @@ plt.show()
 # img_blur_2=cv2.flip(img_blur_2,1) # 把圖片翻回來
 # plt.imshow(img_blur_2)
 # plt.show()
+
+########### 計算散光加 defocus #########################
+diopter=1.0 # 設定近視-(遠視+)度數
+degree=0.5
+astigmatism=0.1 # 散光度數
+angle=0.0
+zc = SpheroCylindricalCoefficients(defocus=diopter, astigmatism=astigmatism, angle=angle, pupil=6)  
+zc=[[2,-2,zc[0]],[2,0,zc[1]],[2,2,zc[2]]]
+print(zc)
+psf=zernikePointSpread(coefficients=zc, Degrees=degree, PupilDiameter=6)
+psf_img = PSFPlot(psf=psf, Degrees=degree)
+plt.show()
+
+# 讀取要處理的圖片
+img_gray=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_e.png")
+
+# 圖片左右翻轉(因為文章中的 Basis 的 Image 有提到，卷積是從圖片的底部開始做的)
+# 不知道為啥是左右翻轉
+img_gray_flip=cv2.flip(img_gray, 1)
+
+plt.figure()
+img_blur= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf))
+
+plt.subplot(1, 2, 1)
+plt.title("Blur")
+img_blur=cv2.flip(img_blur,1) # 把圖片翻回來
+plt.imshow(img_blur)
+
+plt.subplot(1, 2, 2)
+plt.title("Original")
+plt.imshow(img_gray)
+plt.show()
