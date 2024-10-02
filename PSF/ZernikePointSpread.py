@@ -561,10 +561,10 @@ spectra_B = np.array([[415,0.000458],[435, 0.0503],[455, 0.157],[475, 0.217],[49
 # plt.show()
 
 ########### 計算散光加 defocus #########################
-diopter=1.0 # 設定近視-(遠視+)度數
-degree=0.5
-astigmatism=0.1 # 散光度數
-angle=0.0
+diopter=0.5 # 設定近視-(遠視+)度數
+degree=0.5 #設定 PSF 大小
+astigmatism=0.2 # 散光度數
+angle=np.pi #散光角度(以弧度為單位 in radians)
 zc = SpheroCylindricalCoefficients(defocus=diopter, astigmatism=astigmatism, angle=angle, pupil=6)  
 zc=[[2,-2,zc[0]],[2,0,zc[1]],[2,2,zc[2]]]
 print(zc)
