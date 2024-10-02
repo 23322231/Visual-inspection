@@ -68,11 +68,15 @@
     </style>
 </head>
 <body>
-    <div id="imagesContainer"></div>
+    <div class="container">
+        <h1>測驗結果</h1>
+        <p id="scoreDisplay">分數: 計算中...</p> <!-- 用來顯示分數 -->
+        <div id="imagesContainer"></div>
+    </div>
 
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
-        var socket = io.connect('https://b181-114-34-178-54.ngrok-free.app', {
+        var socket = io.connect('https://2c54-114-34-178-54.ngrok-free.app', {
             pingInterval: 25000, // 25 seconds
             pingTimeout: 60000,  // 60 seconds
         });
@@ -80,44 +84,75 @@
     <script>
         // 頁面載入完成後初始化
         window.onload = function() {
+
+            var user_id = location.href.split('=').pop();
+            fetch('/calculate-score', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ user_id: user_id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error:', data.error);
+                } else {
+                    console.log('Score:', data.score);
+                    // Display the score on the frontend
+                    document.getElementById('scoreDisplay').innerText = `Score: ${data.score}`;
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+            
+            
             const imagesContainer = document.getElementById('imagesContainer');
             if (!imagesContainer) {
                 console.error('Element with ID "imagesContainer" not found in the DOM.');
                 return;  // 退出，以避免調用 null 對象的 appendChild
             }
-            var user_id = location.href.split('=').pop();
-            for (var i = 1; i <= 10; i++) {
-                fetch('/result_cb', {
-                    method: 'POST', 
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({'user_id': user_id,"index": i})
-                })
-                .then(response => {
-                    if (!response.ok) {  // 檢查回應是否成功
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(images => {
-                    images.forEach((image_url, index) => {
-                        if (image_url) {
-                            // 創建一個新的圖片元素
-                            const img = document.createElement('img');
-                            img.src = image_url;  // 設置圖片的 src
-                            imagesContainer.appendChild(img);  // 添加到容器中
-                        } else {
-                            // 顯示錯誤訊息
-                            const errorElement = document.createElement('p');
-                            errorElement.textContent = `圖片 ${index + 1} 未找到`;
-                            errorElement.classList.add('error');
-                            imagesContainer.appendChild(errorElement);
-                        }
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching images:', error);
-                });
-            }
+            
+            // for (var i = 1; i <= 10; i++) {
+            //     fetch('/result_cb', {
+            //         method: 'POST', 
+            //         headers: {'Content-Type': 'application/json'},
+            //         body: JSON.stringify({'user_id': user_id,"index": i})
+            //     })
+            //     .then(response => {
+            //         if (!response.ok) {
+            //             throw new Error(`HTTP error! status: ${response.status}`);
+            //         }
+            //         return response.json();
+            //     })
+
+            //     .then(response => {
+            //         if (!response.ok) {  // 檢查回應是否成功
+            //             throw new Error('Network response was not ok');
+            //         }
+            //         return response.json();
+            //     })
+            //     .then(images => {
+            //         images.forEach((image_url, index) => {
+            //             if (image_url) {
+            //                 // 創建一個新的圖片元素
+            //                 const img = document.createElement('img');
+            //                 img.src = image_url;  // 設置圖片的 src
+            //                 imagesContainer.appendChild(img);  // 添加到容器中
+            //             } else {
+            //                 // 顯示錯誤訊息
+            //                 const errorElement = document.createElement('p');
+            //                 errorElement.textContent = `圖片 ${index + 1} 未找到`;
+            //                 errorElement.classList.add('error');
+            //                 imagesContainer.appendChild(errorElement);
+            //             }
+            //         });
+            //     })
+            //     .catch(error => {
+            //         console.error('Error fetching images:', error);
+            //     });
+            // }
         };
     </script>
 </body>

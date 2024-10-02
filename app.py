@@ -15,15 +15,23 @@ from flask import Response,send_from_directory
 import psycopg2
 import re
 from hashlib import md5
+import subprocess
+import json
+import numpy as np
+import cv2
+from score_edit import Score_calculation
+
+
 
 # 定義候選的數字列表
 numbers = [2, 3, 5, 6, 7, 8, 12, 15, 16, 26, 29, 35, 42, 45, 57, 73, 74, 96, 97, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110]
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:01057126@localhost/visual"
-
 app.secret_key = "apri25805645l01057126===+++++"  # 用於會話加密的密鑰
-
+# db = db.init_app(app)
+db = SQLAlchemy(app)
+# from database_model import pic, ans, user_ans  # 從 models.py 中導入模型
 # 連接到 PostgreSQL 資料庫
 conn = psycopg2.connect(
     dbname="visual", 
@@ -33,7 +41,7 @@ conn = psycopg2.connect(
     port="5432"
 )
 
-db = SQLAlchemy(app)
+
 socketio = SocketIO(app , ping_timeout=60, ping_interval=25,cors_allowed_origins="*") # cors_allowed_origins="*" 可以允許任何来源的跨域請求。
 
 current_image = None
@@ -52,6 +60,7 @@ class pic(db.Model):
 
     def __init__(self, image_data):
         self.image_data = image_data
+        
 # 色盲點圖的答案圖片
 class ans(db.Model):
     __tablename__='color_blind_ans_pic'
@@ -164,6 +173,75 @@ def result_cb():
     
     return jsonify(images)  # 返回圖片的 JSON 列表
 
+# 計算色盲點圖分數
+@app.route('/calculate-score', methods=['POST'])
+def calculate_score():
+    print("進來了 !!!!!!!!!!!!!!!")
+    width = 12  #可容許誤差寬度
+    data = request.get_json()
+    user_id = data.get('user_id')
+    final_score = 0.0
+
+    if not user_id:
+        return jsonify({'error': 'User ID not provided'}), 400
+
+    try:
+        for i in range(1, 11):  # 假設有 10 個問題
+            id = i
+            # 從資料庫獲取答案和用戶提交的圖像
+            # get_image_from_db
+            user_answer = db.session.query(user_ans).filter_by(user_id=user_id, id=id).first()
+            question_id = user_answer.question_id
+            answer_image = db.session.query(ans).filter_by(id_ans_cb=question_id).first()
+
+            if not user_answer:
+                # 如果用户的回答不存在，记录错误并继续
+                print(f"User answer not found for question {question_id}")
+                continue
+
+            if not answer_image:
+                # 如果答案不存在，记录错误并继续
+                print(f"Answer image not found for question {question_id}")
+                continue
+            
+            # 從資料庫中提取二進制數據
+            image_user_data = user_answer.image_data
+            image_ans_data = answer_image.image_data
+
+            # 將二進制數據轉換為 NumPy 數組
+            image_user_array = np.frombuffer(image_user_data, np.uint8)
+            image_ans_array = np.frombuffer(image_ans_data, np.uint8)
+
+            # 使用 OpenCV 解碼為圖片
+            image_user = cv2.imdecode(image_user_array, cv2.IMREAD_UNCHANGED)
+            image_ans = cv2.imdecode(image_ans_array, cv2.IMREAD_UNCHANGED)
+
+            # 確認圖片是否解碼成功
+            if image_user is None or image_ans is None:
+                print(f"Failed to decode images for question {question_id}")
+                continue
+
+            # 調整圖像大小，使它們相同
+            height, width = image_ans.shape[:2]  # 获取答案图像的尺寸
+            image_user_resized = cv2.resize(image_user, (width, height))  # 调整用户图像到相同大小
+
+            
+            # 計算每一張圖像的分數
+            score = Score_calculation(image_ans, image_user_resized)
+            final_score += score
+            print(final_score)
+
+        # 確認是否至少成功處理了一些問題
+        if final_score == 0.0:
+            return jsonify({'error': 'No valid answers or images found'}), 400
+        
+        average_final_score = final_score / 10.0  # 計算平均分數
+        print(f"User {user_id} - Average Score: {average_final_score}")
+        return jsonify({'score': average_final_score})
+    
+    except Exception as e:
+        print(f"Error calculating score for user {user_id}: {e}")
+        return jsonify({'error': 'Failed to calculate score'}), 500
 
 
 # 上傳使用者作答圖片
@@ -204,7 +282,7 @@ def upload_image():
     except Exception as e:
         return jsonify({'error': 'Invalid base64 data', 'message': str(e)})
 ################################################################################
-    # 获取 completedQuestions 數據
+    # 獲取 completedQuestions 數據
     completed_questions = data['completedQuestions']
 
     # 從session中獲取random_id
@@ -224,7 +302,6 @@ def upload_image():
         image = image.convert('RGB')
 
     image.save('uploaded_image.jpg')
-    
 
     return jsonify({'message': 'Image uploaded successfully'})
 
@@ -240,6 +317,7 @@ def handle_connect(data):
     else:
         print("錯誤: 沒有圖片 URL")
     
+# finish.html 禁止返回上一頁的功能
 @socketio.on('finish_cb')
 def finish_cb():
     emit('goto_result',broadcast=True)
@@ -259,7 +337,7 @@ def handle_confirm_drawing(data):
 
 @app.route('/handwrite')
 def handwrite():
-    user_uuid = request.args.get('session')  # 从查询参数中获取 session ID
+    user_uuid = request.args.get('session')  # 從查詢参數中獲取session ID
     if user_uuid:
         return render_template('handwrite.html', user_uuid=user_uuid)
     else:
@@ -267,7 +345,7 @@ def handwrite():
 
 @app.route('/color_blind_spot_map')
 def color_blind_spot_map():
-    user_uuid = request.args.get('session')  # 从查詢参數中獲取 session ID
+    user_uuid = request.args.get('session')  # 從查詢参數中獲取session ID
     if user_uuid:
         return render_template('/color_blind_spot_map.html', user_uuid=user_uuid)
     else:
@@ -287,6 +365,30 @@ def generate_url_qrcode():
     session_id = str(uuid.uuid4())  # 生成唯一的sessionID
     unique_url = f"{request.host_url}comfirm_colordot?session={session_id}"
     return jsonify(url=unique_url)
+
+#生成醫囑
+@app.route('/generate-advice', methods=['POST'])
+def generate_advice():
+    data = request.json
+    symptoms = data.get('symptoms')
+    print(symptoms)
+    # 使用 Ollama CLI 調用 Llama 3 來生成醫囑
+    try:
+        prompt = f"請根據以下症狀生成，一段約300字的中文醫療建議，不需要講太多細節，要中文的{symptoms}"
+        result = subprocess.run(
+            ['ollama', 'run', 'llama3', ], input=prompt,
+            capture_output=True, text=True, #stderr=subprocess.PIPE,
+            encoding='utf-8',  # 指定使用 utf-8 編碼
+            errors='ignore'    # 忽略無法編碼的字符
+        )
+        if result.stderr:
+            app.logger.error(f"Subprocess error: {result.stderr}")
+        advice = result.stdout.strip()
+        return jsonify({'advice': advice})
+
+    except Exception as e:
+            app.logger.error(f"Exception: {e}")
+            return jsonify({'error': str(e)}), 500
 
 @socketio.on('connect')
 def handle_connect():

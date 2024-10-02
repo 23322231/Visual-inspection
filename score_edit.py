@@ -3,127 +3,93 @@ from PIL import Image
 import cv2
 import numpy as np
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer, LargeBinary
-from io import BytesIO
+width = 12  #可容許誤差寬度
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://april0909:TevhMabtcGLrRlyn1rqrnfVcI5sVIKsH@dpg-cr1ljs5umphs73afhad0-a.oregon-postgres.render.com/data_0ol7"
-
-db = SQLAlchemy(app)
-
-class pic(db.Model):
-    __tablename__ = 'color_blind_ans_pic'
-    id = db.Column(db.Integer, primary_key=True)
-    image_data = db.Column(db.LargeBinary)
-
-    def __init__(self, image_data):
-        self.image_data = image_data
-
-class user(db.Model):
-    __tablename__ = 'user_ans'
-    id = db.Column(db.Integer, primary_key=True)
-    image_data = db.Column(db.LargeBinary)
-
-    def __init__(self, image_data):
-        self.image_data = image_data
-
-def rgba_to_rgb(image, background_color=(255, 255, 255)):
-    if image.shape[2] == 4:  # Check if image has alpha channel
-        # Create a white background image
-        background = np.full((image.shape[0], image.shape[1], 3), background_color, dtype=np.uint8)
-        # Separate alpha channel from the image
-        alpha_channel = image[:, :, 3] / 255.0
+def rgba_to_rgb(image):
+    # 假設圖像帶有 alpha 通道，將其轉換為 RGB
+    background_color = (255, 255, 255)
+    new_img = np.full((image.shape[0], image.shape[1], 3), background_color, dtype=np.uint8)
+    if image.shape[2] == 4:  # 檢查是否有 alpha 通道
+        alpha = image[:, :, 3]
         for c in range(3):
-            image[:, :, c] = image[:, :, c] * alpha_channel + background[:, :, c] * (1 - alpha_channel)
-        return image[:, :, :3]  # Return RGB image
-    else:
-        return image
+            new_img[:, :, c] = (1.0 - alpha / 255.0) * background_color[c] + (alpha / 255.0) * image[:, :, c]
+        return new_img
+    return image[:, :, :3]  # 如果沒有 alpha 通道，直接返回 RGB
 
-def Score_calculation():
-    width = 12  # Tolerance width
-    # 从数据库中读取正确答案图片
-    colorblind_test = db.session.query(pic).filter(pic.id == 2).first()
-    if not colorblind_test:
-        return "Answer image not found in the database."
+def Score_calculation(image_ans, image_user):
+    # image_ans = cv2.cvtColor(image_ans, cv2.COLOR_BGR2GRAY)
+    # image_user = rgba_to_rgb(image_user)
+    # image_user = cv2.cvtColor(image_user, cv2.COLOR_BGR2GRAY)
 
-    user_test = db.session.query(user).filter(user.id == 85).first()
-    if not user_test:
-        return "User image not found in the database."
+    if len(image_ans.shape) == 3 and image_ans.shape[2] == 3:  # 3 通道表示 BGR
+        image_ans = cv2.cvtColor(image_ans, cv2.COLOR_BGR2GRAY)
 
-    # 将二进制数据转换为 NumPy 数组
-    img_array_ans = np.frombuffer(colorblind_test.image_data, dtype=np.uint8)
-    img_array_user = np.frombuffer(user_test.image_data, dtype=np.uint8)
-
-    # 使用 OpenCV 解码图片
-    image_ans = cv2.imdecode(img_array_ans, cv2.IMREAD_UNCHANGED)
-    image_user = cv2.imdecode(img_array_user, cv2.IMREAD_UNCHANGED)
-
-    # 检查解码后的图像是否为空
-    if image_ans is None:
-        return "Failed to decode answer image."
-    if image_user is None:
-        return "Failed to decode user image."
-
-    # 转换 RGBA 为 RGB（如果需要）
-    image_ans = rgba_to_rgb(image_ans)
-    image_user = rgba_to_rgb(image_user)
-
-    # 显示从数据库中读取的图像
-    cv2.imshow("Answer Image", image_ans)
-    cv2.imshow("User Image", image_user)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-    # 转换为灰度图像
-    image_ans = cv2.cvtColor(image_ans, cv2.COLOR_BGR2GRAY)
-    image_user = cv2.cvtColor(image_user, cv2.COLOR_BGR2GRAY)
-
-    # 进行二值化处理
+    # 如果使用者圖片不是灰度圖，則轉換為灰度圖
+    if len(image_user.shape) == 3 and image_user.shape[2] == 4:  # 4 通道表示 RGBA
+        image_user = rgba_to_rgb(image_user)
+    if len(image_user.shape) == 3 and image_user.shape[2] == 3:  # 3 通道表示 RGB
+        image_user = cv2.cvtColor(image_user, cv2.COLOR_BGR2GRAY)
+    
+    # 進行二值化處理
     _, image_ans = cv2.threshold(image_ans, 127, 255, cv2.THRESH_BINARY)
     _, image_user = cv2.threshold(image_user, 127, 255, cv2.THRESH_BINARY)
 
-    # 进行XOR操作(找出没有与答案吻合的部分)
+    # 進行 XOR 操作 (找出沒有與答案吻合的部分)
     xor_result = np.bitwise_xor(image_ans, image_user)
-    # 与答案进行AND操作(只留下吻合的黑色轨迹,把做XOR改变的黑色背景变回白色,防止不吻合的部分与背景做 distance transform)
+
+    # 與答案進行 AND 操作 (只留下吻合的黑色軌跡)
     and_result = np.bitwise_or(image_ans, xor_result)
 
-    # 找出黑色像素(与答案吻合的轨迹)、计算数量
+    # 找出黑色像素 (與答案吻合的軌跡) 計算數量
     black_pixels = np.where(and_result == 0)
     black_pixel_count = len(black_pixels[0])
-    # 找出答案黑色像素(答案轨迹)、计算数量
+
+    # 找出答案黑色像素 (答案軌跡) 計算數量
     black_pixels_ans = np.where(image_ans == 0)
     black_pixel_count_ans = len(black_pixels_ans[0])
 
-    # 检查答案图片中是否有黑色像素，避免除以零错误
-    if black_pixel_count_ans == 0:
-        return 0  # 或者其他适合的分数或错误处理
-
-    # 计算吻合度(与答案吻合的轨迹/答案轨迹)
+    # 計算吻合度 (與答案吻合的軌跡 / 答案軌跡)
     similarity = black_pixel_count / black_pixel_count_ans
 
-    # 计算与最近的吻合轨迹的距离
+    # 計算與最近吻合軌跡的距離
     distance_transform = cv2.distanceTransform(and_result, cv2.DIST_L2, 3)
 
-    unmatched_pixel = np.where(xor_result == 255)  # 找出所有不吻合像素
-    score = 100  # 满分100
-    if similarity < 0.4:  # 吻合度<0.4,分数直接设为0分(色盲)
+    # 找出所有不吻合像素
+    unmatched_pixel = np.where(xor_result == 255)
+    score = 100  # 滿分 100
+
+    if similarity < 0.4:  # 吻合度 < 0.4，直接設為 0 分 (色盲)
         score = 0
 
     for y, x in zip(unmatched_pixel[0], unmatched_pixel[1]):
         unmatched = distance_transform[y, x]
-        if unmatched > width and unmatched <= width * 3:  # 超過容許寬度1-3倍,扣0.03分   
+        if width < unmatched <= width * 3:  # 超過容許寬度 1-3 倍，扣 0.03 分
             score -= 0.03
-        elif unmatched > width * 3:  # 超過容許寬度3倍以上,扣0.08分
+        elif unmatched > width * 3:  # 超過容許寬度 3 倍以上，扣 0.08 分
             score -= 0.08
 
-    if score < 0:  # 分數最低為0分
-        score = 0
+    return max(score, 0)  # 分數最低為 0 分
 
-    return score
+# def get_image_from_db(user_id, question_id):
+#     from app import user_ans, ans # 在函数内部导入，避免循环导入
+#     from app import db # 從主應用程序導入已初始化的 db
+#     # 假設這裡已經有連接到資料庫，並且有 ORM 類別 user_ans
+#     user_answer = db.session.query(user_ans).filter_by(user_id=user_id, question_id=question_id).first()
+#     answer_image = db.session.query(ans).filter_by(id_ans_cb=question_id).first()
 
-if __name__ == '__main__':
-    with app.app_context():
-        score = Score_calculation()
-        print(f"Score: {score}")
+#     if not user_answer or not answer_image:
+#         return None, None
+    
+#     # 從資料庫中提取二進制數據
+#     image_user_data = user_answer.image_data
+#     image_ans_data = answer_image.image_data
+
+#     # 將二進制數據轉換為 NumPy 數組
+#     image_user_array = np.frombuffer(image_user_data, np.uint8)
+#     image_ans_array = np.frombuffer(image_ans_data, np.uint8)
+
+#     # 使用 OpenCV 解碼為圖片
+#     image_user = cv2.imdecode(image_user_array, cv2.IMREAD_UNCHANGED)
+#     image_ans = cv2.imdecode(image_ans_array, cv2.IMREAD_UNCHANGED)
+
+#     return image_ans, image_user
