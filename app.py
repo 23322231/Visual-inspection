@@ -152,26 +152,54 @@ def result_cb():
     data = request.get_json()  # 獲取前端傳來的 JSON 數據
     user_id = data.get('user_id')  # 從 JSON 中獲取 user_id
     index = data.get('index')  # 從 JSON 中獲取 index
+
     if not user_id:
         return jsonify({'error': 'User ID not provided'}), 400
     if not index:
         return jsonify({'error': 'Index not provided'}), 400
     
     print(f"Fetching images for user_id: {user_id}")
-    images = []
+
+    
     answer = user_ans.query.filter_by(user_id=user_id, id=index).first()
-        
+    if not answer or not answer.image_data:
+        return jsonify({'error': 'Answer image not found'}), 404
+
+    # 從資料庫獲取題目圖片
+    # question = pic.query.filter_by(id=index).first()
+    # if not question or not question.image_data:
+    #     return jsonify({'error': 'Question image not found'}), 404
+    
+    # # 使用 PIL 打開作答圖片和題目圖片
+    # answer_image = Image.open(BytesIO(answer.image_data))
+    # question_image = Image.open(BytesIO(question.image_data))
+
+    # # 確保兩張圖片尺寸相同，如果不同則調整大小
+    # question_image = question_image.resize(answer_image.size)
+
+    # # 將兩張圖片疊加在一起
+    # combined_image = Image.blend(question_image, answer_image, alpha=0.5)
+    
     if answer and answer.image_data:
         # 將二進位圖片數據轉換為 base64
         encoded_image = base64.b64encode(answer.image_data).decode('utf-8')
         image_url = f"data:image/jpeg;base64,{encoded_image}"  # 圖片格式為 JPEG
         print("--------------------")
         print(f"Image {index} encoded")
-        images.append(image_url)
+        return jsonify({'image_url': image_url})  # 直接返回單一圖片的 URL
+        
     else:
-        images.append(None)
+        return jsonify({'error': 'Image not found'}), 404
+
+    # 將合成的圖片保存為二進位數據，並轉換為 base64
+    # buffered = BytesIO()
+    # combined_image.save(buffered, format="JPEG")
+    # encoded_combined_image = base64.b64encode(buffered.getvalue()).decode('utf-8')
+    # image_url = f"data:image/jpeg;base64,{encoded_combined_image}"
+
+    # return jsonify({'image_url': image_url})  # 返回合成後的圖片 URL
     
-    return jsonify(images)  # 返回圖片的 JSON 列表
+    
 
 # 計算色盲點圖分數
 @app.route('/calculate-score', methods=['POST'])
@@ -222,14 +250,17 @@ def calculate_score():
                 continue
 
             # 調整圖像大小，使它們相同
-            height, width = image_ans.shape[:2]  # 获取答案图像的尺寸
-            image_user_resized = cv2.resize(image_user, (width, height))  # 调整用户图像到相同大小
+            height, width = image_ans.shape[:2]  # 獲取答案圖像的尺寸
+            # print(height, width)
 
+            image_user_resized = cv2.resize(image_user, (width, height))  # 调整用户圖像到相同大小
             
             # 計算每一張圖像的分數
             score = Score_calculation(image_ans, image_user_resized)
+            # score = Score_calculation(image_ans, image_user)
+            # print(score)
             final_score += score
-            print(final_score)
+            # print(final_score)
 
         # 確認是否至少成功處理了一些問題
         if final_score == 0.0:

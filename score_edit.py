@@ -70,26 +70,3 @@ def Score_calculation(image_ans, image_user):
 
     return max(score, 0)  # 分數最低為 0 分
 
-# def get_image_from_db(user_id, question_id):
-#     from app import user_ans, ans # 在函数内部导入，避免循环导入
-#     from app import db # 從主應用程序導入已初始化的 db
-#     # 假設這裡已經有連接到資料庫，並且有 ORM 類別 user_ans
-#     user_answer = db.session.query(user_ans).filter_by(user_id=user_id, question_id=question_id).first()
-#     answer_image = db.session.query(ans).filter_by(id_ans_cb=question_id).first()
-
-#     if not user_answer or not answer_image:
-#         return None, None
-    
-#     # 從資料庫中提取二進制數據
-#     image_user_data = user_answer.image_data
-#     image_ans_data = answer_image.image_data
-
-#     # 將二進制數據轉換為 NumPy 數組
-#     image_user_array = np.frombuffer(image_user_data, np.uint8)
-#     image_ans_array = np.frombuffer(image_ans_data, np.uint8)
-
-#     # 使用 OpenCV 解碼為圖片
-#     image_user = cv2.imdecode(image_user_array, cv2.IMREAD_UNCHANGED)
-#     image_ans = cv2.imdecode(image_ans_array, cv2.IMREAD_UNCHANGED)
-
-#     return image_ans, image_user
