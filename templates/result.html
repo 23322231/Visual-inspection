@@ -76,7 +76,7 @@
 
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
-        var socket = io.connect('https://920e-114-34-178-54.ngrok-free.app', {
+        var socket = io.connect('https://e787-114-34-178-54.ngrok-free.app', {
             pingInterval: 25000, // 25 seconds
             pingTimeout: 60000,  // 60 seconds
         });
@@ -110,7 +110,7 @@
             const imagesContainer = document.getElementById('imagesContainer');
             if (!imagesContainer) {
                 console.error('Element with ID "imagesContainer" not found in the DOM.');
-                return;  // 退出，以避免調用 null 對象的 appendChild
+                return;  //退出，以避免調用null對象的appendChild
             }
             
             for (var i = 1; i <= 10; i++) {

@@ -41,7 +41,6 @@ conn = psycopg2.connect(
     port="5432"
 )
 
-
 socketio = SocketIO(app , ping_timeout=60, ping_interval=25,cors_allowed_origins="*") # cors_allowed_origins="*" 可以允許任何来源的跨域請求。
 
 current_image = None
@@ -160,46 +159,69 @@ def result_cb():
     
     print(f"Fetching images for user_id: {user_id}")
 
-    
     answer = user_ans.query.filter_by(user_id=user_id, id=index).first()
+    id_for__question = answer.question_id #從使用者作答圖片中獲取題目的編號
     if not answer or not answer.image_data:
         return jsonify({'error': 'Answer image not found'}), 404
 
     # 從資料庫獲取題目圖片
-    # question = pic.query.filter_by(id=index).first()
-    # if not question or not question.image_data:
-    #     return jsonify({'error': 'Question image not found'}), 404
+    question = pic.query.filter_by(id=id_for__question).first()
+    if not question or not question.image_data:
+        print("NOOOOOOOOOOOOOOOOOOO\n")
+        # return jsonify({'error': 'Question image not found'}), 404
+    else:
+        print("Yessssssssssssssssssssss\n")
     
-    # # 使用 PIL 打開作答圖片和題目圖片
-    # answer_image = Image.open(BytesIO(answer.image_data))
-    # question_image = Image.open(BytesIO(question.image_data))
+    #將使用者作答圖片和題目圖片疊在一起
+    #使用 PIL 打開作答圖片和題目圖片
+    answer_image = Image.open(BytesIO(answer.image_data))
+    question_image = Image.open(BytesIO(question.image_data))
 
-    # # 確保兩張圖片尺寸相同，如果不同則調整大小
-    # question_image = question_image.resize(answer_image.size)
+    #確保兩張圖片尺寸相同，如果不同則調整大小
+    if question_image.size != answer_image.size:
+        answer_image = answer_image.resize(question_image.size)
 
-    # # 將兩張圖片疊加在一起
-    # combined_image = Image.blend(question_image, answer_image, alpha=0.5)
-    
-    if answer and answer.image_data:
-        # 將二進位圖片數據轉換為 base64
-        encoded_image = base64.b64encode(answer.image_data).decode('utf-8')
-        image_url = f"data:image/jpeg;base64,{encoded_image}"  # 圖片格式為 JPEG
-        print("--------------------")
-        print(f"Image {index} encoded")
+    # 如果answer_image 没有透明度通道，先轉換為'RGBA'
+    if answer_image.mode != 'RGBA':
+        answer_image = answer_image.convert('RGBA')
+
+    # 如果question_image不是 'RGBA'，也轉換為'RGBA'
+    if question_image.mode != 'RGBA':
+        question_image = question_image.convert('RGBA')
+
+    # 將answer_image 交叠在 question_image 上，黏貼時使用answer_image的透明度作為mask
+    question_image.paste(answer_image, (0, 0), answer_image)
+
+    # 显示合成后的图片
+    # question_image.show()
+
+    if question_image:
+
+        # 確保 question_image是PIL.Image對象
+        if question_image:
+            # 如果图像是 'RGBA' 模式，先转换为 'RGB'，去除透明通道
+            if question_image.mode == 'RGBA':
+                question_image = question_image.convert('RGB')
+
+        # 创建一个字节流缓冲区
+        buffered = BytesIO()
+
+        # 將圖像保存到字節流緩衝區中，格式為 JPEG（或根據你的圖像格式調整）
+        question_image.save(buffered, format="JPEG")
+
+        #獲取字節流中的二進制數據
+        image_bytes = buffered.getvalue()
+
+        #將二進制數據轉換為 base64
+        encoded_image = base64.b64encode(image_bytes).decode('utf-8')
+
+        #生成 Base64 URL，指定圖像格式為JPEG
+        image_url = f"data:image/jpeg;base64,{encoded_image}"
+
         return jsonify({'image_url': image_url})  # 直接返回單一圖片的 URL
         
     else:
         return jsonify({'error': 'Image not found'}), 404
-
-    # 將合成的圖片保存為二進位數據，並轉換為 base64
-    # buffered = BytesIO()
-    # combined_image.save(buffered, format="JPEG")
-    # encoded_combined_image = base64.b64encode(buffered.getvalue()).decode('utf-8')
-    # image_url = f"data:image/jpeg;base64,{encoded_combined_image}"
-
-    # return jsonify({'image_url': image_url})  # 返回合成後的圖片 URL
-    
-    
 
 # 計算色盲點圖分數
 @app.route('/calculate-score', methods=['POST'])
