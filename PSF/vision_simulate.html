@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>視力模擬</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .image-box {
+            width: 45%;
+            height: 300px;
+            border: 1px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>視力模擬</h1>
+    
+    <div class="container">
+        <div class="image-box" id="beforeImage">
+            <img src="letter_e.png" alt="E字圖" id="leftImage">
+        </div>
+        <div class="image-box" id="afterImage">
+            <img src="letter_e.png" alt="E字圖" id="rightImage">
+        </div>
+    </div>
+
+    <div class="controls">
+        <button onclick="uploadImage()">上傳圖片</button>
+        <button onclick="downloadImage()">下載圖片</button>
+    </div>
+
+    <div class="ranges" style="width:500px;">
+        <div class="control-item" style="width:500px;">
+            <label for="myopia">近視度數</label>
+            <input type="range" id="myopia" min="0" max="200" step="25" value="0" onchange="adjustImage()" style="width:400px;"/>
+            <label>遠視度數</label>
+        </div>
+        <div class="control-item">
+            <label for="degree">散光角度</label>
+            <input type="range" id="degree" min="0" max="180" step="15" value="0" onchange="adjustImage()">
+        </div>
+        <div class="control-item">
+            <label for="astigmatism">散光度數</label>
+            <input type="range" id="astigmatism" min="0" max="200" step="25" value="0" onchange="adjustImage()">
+        </div>
+    </div>
+
+    <script>
+        function uploadImage() {
+            alert("上傳視窗尚未實作，請選擇圖片。");
+            // TODO: 在這裡實現圖片上傳功能
+        }
+
+        function downloadImage() {
+            const image = document.getElementById('rightImage');
+            const link = document.createElement('a');
+            link.href = image.src;
+            link.download = 'downloaded_image.png';
+            link.click();
+        }
+
+        function adjustImage() {
+            const myopia = document.getElementById('myopia').value;
+            const degree = document.getElementById('degree').value;
+            const astigmatism = document.getElementById('astigmatism').value;
+
+            const rightImage = document.getElementById('rightImage');
+            if(myopia){
+                document.elementFromPoint
+            }
+            if (myopia == 0 && degree == 0 && astigmatism == 0) {
+                rightImage.src = "letter_e.png";  // 如果滑桿皆為0，顯示原圖
+            } else {
+                // 根據滑桿值來模擬不同的視覺變化
+                // 這裡可以實現你的圖片處理邏輯
+                rightImage.src = "e_blur.png";  // 模擬不同度數時的圖片(替代圖片)
+            }
+        }
+    </script>
+
+</body>
+</html>
