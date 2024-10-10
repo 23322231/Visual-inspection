@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E字視力表</title>
+    <style>
+        /* 設定E字的容器 */
+        #e-chart-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        /* 設定E字圖片 */
+        #e-chart {
+            width: 100px; /* 預設寬度，會根據距離調整 */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="e-chart-container">
+        <img id="e-chart" src="e-letter.png" alt="E字圖片">
+    </div>
+
+    <script>
+        // 獲取螢幕解析度
+        const screenWidth = window.screen.width;
+        const screenHeight = window.screen.height;
+        console.log(`螢幕寬度: ${screenWidth}px`);
+        console.log(`螢幕高度: ${screenHeight}px`);
+
+        // 假設我們有一個函數用來取得人與顯示器之間的距離
+        function getUserDistance() {
+            // 這裡你可以將距離量測的程式碼插入，這是一個模擬值，實際應用會返回真實距離
+            return 100; // 單位：公分
+        }
+
+        // 根據使用者距離與解析度調整E字圖片大小
+        function adjustImageSize() {
+            const distance = getUserDistance(); // 假設單位是公分
+            const eChart = document.getElementById('e-chart');
+
+            // 設定標準大小和標準距離
+            const standardDistance = 600; // 6公尺為標準距離
+            const standardSizeCm = 8.73; // 標準E字大小（單位：公分）
+            const pixelsPerCm = 37.8; // 近似的解析度：1公分約等於37.8像素
+
+            // 計算標準E字大小在像素中的大小
+            const standardSizePixels = standardSizeCm * pixelsPerCm;
+
+            // 計算根據距離縮放後的E字大小
+            const newSize = (distance / standardDistance) * standardSizePixels;
+
+            // 調整圖片的寬度
+            eChart.style.width = `${newSize}px`;
+
+            console.log(`距離: ${distance} 公分, 調整後E字大小: ${newSize}px`);
+        }
+
+        // 當頁面載入時執行
+        window.onload = function() {
+            adjustImageSize();
+
+            // 每隔幾秒鐘重新檢查距離並調整大小
+            setInterval(adjustImageSize, 5000); // 每5秒更新一次
+        };
+    </script>
+
+</body>
+</html>
