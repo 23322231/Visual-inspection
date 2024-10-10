@@ -63,7 +63,7 @@ def Score_calculation(image_ans, image_user):
 
     for y, x in zip(unmatched_pixel[0], unmatched_pixel[1]):
         unmatched = distance_transform[y, x]
-        if width < unmatched <= width * 3:  # 超過容許寬度 1-3 倍，扣 0.03 分
+        if width * 1.5  < unmatched <= width * 3:  # 超過容許寬度 1-3 倍，扣 0.03 分
             score -= 0.03
         elif unmatched > width * 3:  # 超過容許寬度 3 倍以上，扣 0.08 分
             score -= 0.08
