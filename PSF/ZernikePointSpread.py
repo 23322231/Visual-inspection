@@ -495,76 +495,76 @@ for i in np.arange(-2,2.25,0.25):
     img_blur=cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,psf_num]))
     img_blur=cv2.flip(img_blur,1) # 把圖片翻回來
     img_num=i*100
-    s=str(img_num)+'_img.png'
-    cv2.imwrite(s, img_blur)  # 存成 png
+    s=str(img_num)+'_img.jpg'
+    cv2.imwrite(s, img_blur)  # 存成 jpg
     psf_num+=1
         
 
-# 輸出 PSF 圖片
-# for i in range(9):
-#     plt.title(i/2-2)
-#     psf_img = PSFPlot(psf=psf[:,:,i], Degrees=degree)
-#     plt.show()
+# # 輸出 PSF 圖片
+# # for i in range(9):
+# #     plt.title(i/2-2)
+# #     psf_img = PSFPlot(psf=psf[:,:,i], Degrees=degree)
+# #     plt.show()
 
 
-plt.figure()
-# 對圖片做處理
+# plt.figure()
+# # 對圖片做處理
 
-img_blur_n2= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,0]))
-img_blur_n1_5= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,1]))
-img_blur_n1= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,2]))
-img_blur_n0_5= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,3]))
-img_blur_0= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,4]))
-img_blur_0_5= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,5]))
-img_blur_1= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,6]))
-img_blur_1_5= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,7]))
-img_blur_2= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,8]))
+# img_blur_n2= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,0]))
+# img_blur_n1_5= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,1]))
+# img_blur_n1= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,2]))
+# img_blur_n0_5= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,3]))
+# img_blur_0= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,4]))
+# img_blur_0_5= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,5]))
+# img_blur_1= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,6]))
+# img_blur_1_5= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,7]))
+# img_blur_2= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,8]))
 
-plt.subplot(2, 5, 1)
-plt.title(-2)
-img_blur_n2=cv2.flip(img_blur_n2,1) # 把圖片翻回來
-plt.imshow(img_blur_n2)
+# plt.subplot(2, 5, 1)
+# plt.title(-2)
+# img_blur_n2=cv2.flip(img_blur_n2,1) # 把圖片翻回來
+# plt.imshow(img_blur_n2)
 
-plt.subplot(2, 5, 2)
-plt.title(-1.5)
-img_blur_n1_5=cv2.flip(img_blur_n1_5,1) # 把圖片翻回來
-plt.imshow(img_blur_n1_5)
+# plt.subplot(2, 5, 2)
+# plt.title(-1.5)
+# img_blur_n1_5=cv2.flip(img_blur_n1_5,1) # 把圖片翻回來
+# plt.imshow(img_blur_n1_5)
 
-plt.subplot(2, 5, 3)
-plt.title(-1)
-img_blur_n1=cv2.flip(img_blur_n1,1) # 把圖片翻回來
-plt.imshow(img_blur_n1)
+# plt.subplot(2, 5, 3)
+# plt.title(-1)
+# img_blur_n1=cv2.flip(img_blur_n1,1) # 把圖片翻回來
+# plt.imshow(img_blur_n1)
 
-plt.subplot(2, 5, 4)
-plt.title(-0.5)
-img_blur_n0_5=cv2.flip(img_blur_n0_5,1) # 把圖片翻回來
-plt.imshow(img_blur_n0_5)
+# plt.subplot(2, 5, 4)
+# plt.title(-0.5)
+# img_blur_n0_5=cv2.flip(img_blur_n0_5,1) # 把圖片翻回來
+# plt.imshow(img_blur_n0_5)
 
-plt.subplot(2, 5, 5)
-plt.title("normal")
-img_blur_0=cv2.flip(img_blur_0,1) # 把圖片翻回來
-plt.imshow(img_blur_0)
+# plt.subplot(2, 5, 5)
+# plt.title("normal")
+# img_blur_0=cv2.flip(img_blur_0,1) # 把圖片翻回來
+# plt.imshow(img_blur_0)
 
-plt.subplot(2, 5, 6)
-plt.title(0.5)
-img_blur_0_5=cv2.flip(img_blur_0_5,1) # 把圖片翻回來
-plt.imshow(img_blur_0_5)
+# plt.subplot(2, 5, 6)
+# plt.title(0.5)
+# img_blur_0_5=cv2.flip(img_blur_0_5,1) # 把圖片翻回來
+# plt.imshow(img_blur_0_5)
 
-plt.subplot(2, 5, 7)
-plt.title(1)
-img_blur_1=cv2.flip(img_blur_1,1) # 把圖片翻回來
-plt.imshow(img_blur_1)
+# plt.subplot(2, 5, 7)
+# plt.title(1)
+# img_blur_1=cv2.flip(img_blur_1,1) # 把圖片翻回來
+# plt.imshow(img_blur_1)
 
-plt.subplot(2, 5, 8)
-plt.title(1.5)
-img_blur_1_5=cv2.flip(img_blur_1_5,1) # 把圖片翻回來
-plt.imshow(img_blur_1_5)
+# plt.subplot(2, 5, 8)
+# plt.title(1.5)
+# img_blur_1_5=cv2.flip(img_blur_1_5,1) # 把圖片翻回來
+# plt.imshow(img_blur_1_5)
 
-plt.subplot(2, 5, 9)
-plt.title(2)
-img_blur_2=cv2.flip(img_blur_2,1) # 把圖片翻回來
-plt.imshow(img_blur_2)
-plt.show()
+# plt.subplot(2, 5, 9)
+# plt.title(2)
+# img_blur_2=cv2.flip(img_blur_2,1) # 把圖片翻回來
+# plt.imshow(img_blur_2)
+# plt.show()
 
 ########### 計算散光加 defocus #########################
 # diopter=0.5 # 設定近視-(遠視+)度數
