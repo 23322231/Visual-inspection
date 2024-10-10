@@ -470,12 +470,113 @@ spectra_B = np.array([[415,0.000458],[435, 0.0503],[455, 0.157],[475, 0.217],[49
 
 ########## 單純計算單一波長的 PSF #######################
 
-# # degree 設定大一點，才可以包含住比較大的PSF
-# degree=0.5
+# degree 設定大一點，才可以包含住比較大的PSF
+degree=0.5
 
-# diopter=1.0 # 設定近視-(遠視+)度數
+diopter=1.0 # 設定近視-(遠視+)度數
 
-# psf=np.zeros([256,256,10])
+psf=np.zeros([256,256,20])
+
+# 讀取要處理的圖片
+img_gray=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_e.png")
+
+# 圖片左右翻轉(因為文章中的 Basis 的 Image 有提到，卷積是從圖片的底部開始做的)
+# 不知道為啥是左右翻轉
+img_gray_flip=cv2.flip(img_gray, 1)
+psf_num=0
+# 在 zernike 參數內加 Defocus，計算近視(遠視)
+for i in np.arange(-2,2.25,0.25):
+    print(psf_num, i)
+    # Defocus 計算近視(遠視)係數
+    Defocus=InverseEquivalentDefocus(diopters=i,pupildiameter=4)
+    zc_pupil_4_defocus=np.append(zc_pupil_4,[[2,0,Defocus]],axis=0)
+    # 計算PSF(模糊 kernel)
+    psf[:,:,psf_num]=zernikePointSpread(zc_pupil_4_defocus, Degrees=degree, PupilDiameter=4)
+    img_blur=cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,psf_num]))
+    img_blur=cv2.flip(img_blur,1) # 把圖片翻回來
+    img_num=i*100
+    s=str(img_num)+'_img.png'
+    cv2.imwrite(s, img_blur)  # 存成 png
+    psf_num+=1
+        
+
+# 輸出 PSF 圖片
+# for i in range(9):
+#     plt.title(i/2-2)
+#     psf_img = PSFPlot(psf=psf[:,:,i], Degrees=degree)
+#     plt.show()
+
+
+plt.figure()
+# 對圖片做處理
+
+img_blur_n2= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,0]))
+img_blur_n1_5= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,1]))
+img_blur_n1= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,2]))
+img_blur_n0_5= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,3]))
+img_blur_0= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,4]))
+img_blur_0_5= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,5]))
+img_blur_1= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,6]))
+img_blur_1_5= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,7]))
+img_blur_2= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,8]))
+
+plt.subplot(2, 5, 1)
+plt.title(-2)
+img_blur_n2=cv2.flip(img_blur_n2,1) # 把圖片翻回來
+plt.imshow(img_blur_n2)
+
+plt.subplot(2, 5, 2)
+plt.title(-1.5)
+img_blur_n1_5=cv2.flip(img_blur_n1_5,1) # 把圖片翻回來
+plt.imshow(img_blur_n1_5)
+
+plt.subplot(2, 5, 3)
+plt.title(-1)
+img_blur_n1=cv2.flip(img_blur_n1,1) # 把圖片翻回來
+plt.imshow(img_blur_n1)
+
+plt.subplot(2, 5, 4)
+plt.title(-0.5)
+img_blur_n0_5=cv2.flip(img_blur_n0_5,1) # 把圖片翻回來
+plt.imshow(img_blur_n0_5)
+
+plt.subplot(2, 5, 5)
+plt.title("normal")
+img_blur_0=cv2.flip(img_blur_0,1) # 把圖片翻回來
+plt.imshow(img_blur_0)
+
+plt.subplot(2, 5, 6)
+plt.title(0.5)
+img_blur_0_5=cv2.flip(img_blur_0_5,1) # 把圖片翻回來
+plt.imshow(img_blur_0_5)
+
+plt.subplot(2, 5, 7)
+plt.title(1)
+img_blur_1=cv2.flip(img_blur_1,1) # 把圖片翻回來
+plt.imshow(img_blur_1)
+
+plt.subplot(2, 5, 8)
+plt.title(1.5)
+img_blur_1_5=cv2.flip(img_blur_1_5,1) # 把圖片翻回來
+plt.imshow(img_blur_1_5)
+
+plt.subplot(2, 5, 9)
+plt.title(2)
+img_blur_2=cv2.flip(img_blur_2,1) # 把圖片翻回來
+plt.imshow(img_blur_2)
+plt.show()
+
+########### 計算散光加 defocus #########################
+# diopter=0.5 # 設定近視-(遠視+)度數
+# degree=0.5 #設定 PSF 大小
+# astigmatism=0.2 # 散光度數
+# angle=np.pi #散光角度(以弧度為單位 in radians)
+# zc = SpheroCylindricalCoefficients(defocus=diopter, astigmatism=astigmatism, angle=angle, pupil=6)  
+# zc=[[2,-2,zc[0]],[2,0,zc[1]],[2,2,zc[2]]]
+# print(zc)
+# psf=zernikePointSpread(coefficients=zc, Degrees=degree, PupilDiameter=6)
+# psf_img = PSFPlot(psf=psf, Degrees=degree)
+# plt.show()
 
 # # 讀取要處理的圖片
 # img_gray=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_e.png")
@@ -484,110 +585,15 @@ spectra_B = np.array([[415,0.000458],[435, 0.0503],[455, 0.157],[475, 0.217],[49
 # # 不知道為啥是左右翻轉
 # img_gray_flip=cv2.flip(img_gray, 1)
 
-# # 在 zernike 參數內加 Defocus，計算近視(遠視)
-# for i in np.arange(-2,2.5,0.5):
-#     print((i+2)*2)
-#     num=int((i+2)*2)
-#     # Defocus 計算近視(遠視)係數
-#     Defocus=InverseEquivalentDefocus(diopters=i,pupildiameter=4)
-#     zc_pupil_4_defocus=np.append(zc_pupil_4,[[2,0,Defocus]],axis=0)
-#     # 計算PSF(模糊 kernel)
-#     psf[:,:,num]=zernikePointSpread(zc_pupil_4_defocus, Degrees=degree, PupilDiameter=4)
-    
-
-# # 輸出 PSF 圖片
-# # for i in range(9):
-# #     plt.title(i/2-2)
-# #     psf_img = PSFPlot(psf=psf[:,:,i], Degrees=degree)
-# #     plt.show()
-
-
 # plt.figure()
-# # 對圖片做處理
-# img_blur_n2= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,0]))
-# img_blur_n1_5= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,1]))
-# img_blur_n1= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,2]))
-# img_blur_n0_5= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,3]))
-# img_blur_0= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,4]))
-# img_blur_0_5= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,5]))
-# img_blur_1= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,6]))
-# img_blur_1_5= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,7]))
-# img_blur_2= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,8]))
+# img_blur= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf))
 
-# plt.subplot(2, 5, 1)
-# plt.title(-2)
-# img_blur_n2=cv2.flip(img_blur_n2,1) # 把圖片翻回來
-# plt.imshow(img_blur_n2)
+# plt.subplot(1, 2, 1)
+# plt.title("Blur")
+# img_blur=cv2.flip(img_blur,1) # 把圖片翻回來
+# plt.imshow(img_blur)
 
-# plt.subplot(2, 5, 2)
-# plt.title(-1.5)
-# img_blur_n1_5=cv2.flip(img_blur_n1_5,1) # 把圖片翻回來
-# plt.imshow(img_blur_n1_5)
-
-# plt.subplot(2, 5, 3)
-# plt.title(-1)
-# img_blur_n1=cv2.flip(img_blur_n1,1) # 把圖片翻回來
-# plt.imshow(img_blur_n1)
-
-# plt.subplot(2, 5, 4)
-# plt.title(-0.5)
-# img_blur_n0_5=cv2.flip(img_blur_n0_5,1) # 把圖片翻回來
-# plt.imshow(img_blur_n0_5)
-
-# plt.subplot(2, 5, 5)
-# plt.title("normal")
-# img_blur_0=cv2.flip(img_blur_0,1) # 把圖片翻回來
-# plt.imshow(img_blur_0)
-
-# plt.subplot(2, 5, 6)
-# plt.title(0.5)
-# img_blur_0_5=cv2.flip(img_blur_0_5,1) # 把圖片翻回來
-# plt.imshow(img_blur_0_5)
-
-# plt.subplot(2, 5, 7)
-# plt.title(1)
-# img_blur_1=cv2.flip(img_blur_1,1) # 把圖片翻回來
-# plt.imshow(img_blur_1)
-
-# plt.subplot(2, 5, 8)
-# plt.title(1.5)
-# img_blur_1_5=cv2.flip(img_blur_1_5,1) # 把圖片翻回來
-# plt.imshow(img_blur_1_5)
-
-# plt.subplot(2, 5, 9)
-# plt.title(2)
-# img_blur_2=cv2.flip(img_blur_2,1) # 把圖片翻回來
-# plt.imshow(img_blur_2)
+# plt.subplot(1, 2, 2)
+# plt.title("Original")
+# plt.imshow(img_gray)
 # plt.show()
-
-########### 計算散光加 defocus #########################
-diopter=0.5 # 設定近視-(遠視+)度數
-degree=0.5 #設定 PSF 大小
-astigmatism=0.2 # 散光度數
-angle=np.pi #散光角度(以弧度為單位 in radians)
-zc = SpheroCylindricalCoefficients(defocus=diopter, astigmatism=astigmatism, angle=angle, pupil=6)  
-zc=[[2,-2,zc[0]],[2,0,zc[1]],[2,2,zc[2]]]
-print(zc)
-psf=zernikePointSpread(coefficients=zc, Degrees=degree, PupilDiameter=6)
-psf_img = PSFPlot(psf=psf, Degrees=degree)
-plt.show()
-
-# 讀取要處理的圖片
-img_gray=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_e.png")
-
-# 圖片左右翻轉(因為文章中的 Basis 的 Image 有提到，卷積是從圖片的底部開始做的)
-# 不知道為啥是左右翻轉
-img_gray_flip=cv2.flip(img_gray, 1)
-
-plt.figure()
-img_blur= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf))
-
-plt.subplot(1, 2, 1)
-plt.title("Blur")
-img_blur=cv2.flip(img_blur,1) # 把圖片翻回來
-plt.imshow(img_blur)
-
-plt.subplot(1, 2, 2)
-plt.title("Original")
-plt.imshow(img_gray)
-plt.show()
