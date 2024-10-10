@@ -250,3 +250,5 @@ a=np.append(zc_pupil_4,[[2,0,0]],axis=0)
 i=-150
 s=str(i)+'_img'
 print(s)
+for angle in range(0,13):
+  print(angle)
