@@ -20,8 +20,18 @@ import json
 import numpy as np
 import cv2
 from score_edit import Score_calculation
+import pyrealsense2 as rs
+import numpy as np
+import cv2
+import time
+import tensorflow as tf
+import detect_face
+
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 
+
+global depth_value, remaining_time
 
 # 定義候選的數字列表
 numbers = [2, 3, 5, 6, 7, 8, 12, 15, 16, 26, 29, 35, 42, 45, 57, 73, 74, 96, 97, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110]
@@ -102,6 +112,10 @@ def start():
 def qrcode():
     return render_template('qrcode.html')
 
+@app.route('/eye_test')
+def eye_test():
+    return render_template('eye_test.html')
+
 @app.route('/open_pic')
 def open_pic():
     return render_template('open_pic.html')
@@ -131,6 +145,252 @@ def finish():
 def result():
     return render_template('result.html')
 
+@app.route('/eye_distance')
+def eye_distance():
+    return render_template('eye_distance.html')
+
+# 初始化全局變量
+time_remaining = 5
+depth_value = 0
+
+#視力檢測 測距離
+@app.route('/video_feed')
+def video_feed():
+    def generate_frames():
+        global time_remaining, depth_value
+        
+        try:
+            # 設置深度與彩色流
+            pipeline = rs.pipeline()
+            rs_config = rs.config()
+
+            # 啟用攝影機的深度與彩色流
+            rs_config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+            rs_config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+
+            # 開始串流
+            pipeline.start(rs_config)
+            align_to = rs.stream.color
+            align = rs.align(align_to)
+
+            # 初始化MTCNN
+            color = (0,255,0)
+            minsize = 20  # 偵測人臉的最小尺寸
+            threshold = [0.6, 0.7, 0.7]  # 三階段門檻
+            factor = 0.709  # 縮放因子
+            depth_value = 0  # 記錄眼睛中心的深度距離
+            start_time = None
+
+            # 建立TensorFlow圖與會話
+            with tf.Graph().as_default():
+                config = tf.compat.v1.ConfigProto(log_device_placement=False, allow_soft_placement=True)
+                config.gpu_options.per_process_gpu_memory_fraction = 0.5
+                sess = tf.compat.v1.Session(config=config)
+                with sess.as_default():
+                    pnet, rnet, onet = detect_face.create_mtcnn(sess, None)
+
+            frame_counter = 0  # 增加跳幀機制
+            while True:
+                frames = pipeline.wait_for_frames()
+                frame_counter += 1
+                if frame_counter % 5 != 0:  # 每五幀處理一次來減少負載
+                    continue
+
+            
+                # 取得RealSense畫面
+                frames = pipeline.wait_for_frames()
+                frames = align.process(frames)
+                depth_frame = frames.get_depth_frame()
+                color_frame = frames.get_color_frame()
+
+                if not depth_frame or not color_frame:
+                    continue
+
+                # 將影像轉換為NumPy陣列
+                depth_image = np.asanyarray(depth_frame.get_data())
+                color_image = np.asanyarray(color_frame.get_data())
+
+                # MTCNN人臉偵測
+                bounding_boxes, points = detect_face.detect_face(color_image, minsize, pnet, rnet, onet, threshold, factor)
+                nrof_faces = bounding_boxes.shape[0]
+
+                if nrof_faces > 0:
+                    if start_time is None:
+                        start_time = time.time()  # 記錄第一次偵測到人臉的時間
+
+                    # 取得眼睛位置
+                    points = np.array(points).transpose([1, 0]).astype(np.int16)
+
+                    det = bounding_boxes[:, 0:4]#(左上角 x, 左上角 y, 右下角 x, 右下角 y)
+                    det_arr = []
+                    img_size = np.asarray(color_image.shape)[0:2]#得到圖像的高度和寬度
+                    detect_multiple_faces=False#處理多個檢測到的人臉或僅處理其中的一個
+
+                    det_arr.append(np.squeeze(det))#det_arr 中的每個元素都是一個表示邊界框的一維陣列
+
+                    det_arr = np.array(det_arr)
+                    det_arr = det_arr.astype(np.int16)
+
+                    for i, det in enumerate(det_arr):#遍歷 det_arr 中的每個邊界框
+                        if len(det) > 0  and len(det) == 4:
+                            cv2.rectangle(color_image, (det[0],det[1]), (det[2],det[3]), color, 2)#在原始影像上繪製一個矩形
+
+                        #在人臉上繪製 5 個特徵點
+                        facial_points = points[i]
+                        for j in range(0,5,1):
+                            #cv2.circle(影像, 圓心座標, 半徑, 顏色, 線條寬度)
+                            cv2.circle(color_image, (facial_points[j], facial_points[j + 5]), 2, (0, 0, 255), -1, 1)
+
+                        # 取出左右眼的位置座標
+                        left_eye_x, left_eye_y = facial_points[0], facial_points[1]
+                        right_eye_x, right_eye_y = facial_points[2], facial_points[3]
+                        # print("Left eye coordinates:", (left_eye_x, left_eye_y))
+                        # print("Right eye coordinates:", (right_eye_x, right_eye_y))
+                        # print("eye_center_x",(right_eye_x + left_eye_x)//2)
+                        # print("eye_center_y",(right_eye_y + left_eye_y)//2)
+                        eye_center_x=(right_eye_x + left_eye_x)//2
+                        eye_center_y=(right_eye_y + left_eye_y)//2
+
+                        if 0 <= eye_center_x < depth_image.shape[1] and 0 <= eye_center_y < depth_image.shape[0]:
+                            # 從深度影像中獲取眼睛中心點的深度值
+                            depth_value = depth_frame.get_distance(eye_center_y, eye_center_x)
+                            # 眼睛中心點與相機的距離
+                            print("Distance from camera to eye center (in meters):", depth_value)
+                        else:
+                            print("Eye center point is out of bounds of depth image.")
+
+                    # 計算已經偵測到人臉的時間
+                    elapsed_time = time.time() - start_time
+                    time_remaining = max(0, 5 - int(elapsed_time))  # 更新剩餘時間
+
+                    if elapsed_time >= 5:
+                        break  # 如果超過5秒，停止串流
+
+                else:
+                    start_time = None  # 沒有偵測到人臉時，重置計時
+
+                # 將畫面編碼為JPEG格式，傳送到前端
+                ret, buffer = cv2.imencode('.jpg', color_image)
+                frame = buffer.tobytes()
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+            # 結束串流
+            pipeline.stop()
+
+        except Exception as e:
+            print(f"Error: {e}")
+
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+# 視力檢測 傳送倒數時間和最終量測的深度值
+@app.route('/data_feed')
+def data_feed():
+    
+    return jsonify(time=time_remaining, depth=round(depth_value, 2))
+
+
+@app.route('/start_eye_dis', methods=['POST'])
+def start_eye_dis():
+    try:
+        # Configure depth and color streams
+        pipeline = rs.pipeline()
+        rs_config = rs.config()
+        
+        # Initialize MTCNN
+        minsize = 20  # Minimum size of the face
+        threshold = [0.6, 0.7, 0.7]  # Three-step threshold
+        factor = 0.709  # Scale factor
+        color = (0, 255, 0)
+        
+
+        
+        with tf.Graph().as_default():
+            config = tf.compat.v1.ConfigProto(log_device_placement=True, allow_soft_placement=True)
+            config.gpu_options.per_process_gpu_memory_fraction = 0.5
+            sess = tf.compat.v1.Session(config=config)
+            with sess.as_default():
+                pnet, rnet, onet = detect_face.create_mtcnn(sess, None)
+
+        # Setup RealSense Camera
+        pipeline_wrapper = rs.pipeline_wrapper(pipeline)
+        pipeline_profile = rs_config.resolve(pipeline_wrapper)
+        device = pipeline_profile.get_device()
+
+        found_rgb = False
+        for s in device.sensors:
+            if s.get_info(rs.camera_info.name) == 'RGB Camera':
+                found_rgb = True
+                break
+        if not found_rgb:
+            return jsonify({"status": "error", "message": "This demo requires a camera with a color sensor."})
+
+        rs_config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+        rs_config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+
+        # Start streaming
+        pipeline.start(rs_config)
+        align_to = rs.stream.color
+        align = rs.align(align_to)
+
+        start_time = None  # To track when the face is first detected
+        depth_value = 0    # To store the distance to the face
+
+        # Main loop
+        while True:
+            frames = pipeline.wait_for_frames()
+            frames = align.process(frames)
+            depth_frame = frames.get_depth_frame()
+            color_frame = frames.get_color_frame()
+
+            if not depth_frame or not color_frame:
+                continue
+
+            # Convert frames to numpy arrays
+            depth_image = np.asanyarray(depth_frame.get_data())
+            color_image = np.asanyarray(color_frame.get_data())
+
+            # Face detection
+            bounding_boxes, points = detect_face.detect_face(color_image, minsize, pnet, rnet, onet, threshold, factor)
+            nrof_faces = bounding_boxes.shape[0]
+
+            if nrof_faces > 0:
+                if start_time is None:
+                    start_time = time.time()  # Start the timer when the face is first detected
+
+                # Get facial points and calculate eye center
+                points = np.array(points)
+                points = np.transpose(points, [1, 0])
+                points = points.astype(np.int16)
+                
+                left_eye_x, left_eye_y = points[0][0], points[0][1]
+                right_eye_x, right_eye_y = points[0][2], points[0][3]
+                eye_center_x = (left_eye_x + right_eye_x) // 2
+                eye_center_y = (left_eye_y + right_eye_y) // 2
+
+                if 0 <= eye_center_x < depth_image.shape[1] and 0 <= eye_center_y < depth_image.shape[0]:
+                    depth_value = depth_frame.get_distance(eye_center_y, eye_center_x)  # Get depth value of eye center
+
+                # Check if 15 seconds have passed
+                elapsed_time = time.time() - start_time
+                if elapsed_time >= 15:
+                    break  # Exit the loop after 15 seconds
+
+            else:
+                start_time = None  # Reset the timer if no face is detected
+
+        # Stop streaming
+        pipeline.stop()
+
+        # Return the final distance value
+        return jsonify({
+            "status": "success",
+            "message": f"Face detected. Distance to eye center: {depth_value} meters"
+        })
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
 # 色盲點圖顯示題目圖片
 @app.route('/next-image')
 def next_image():
@@ -146,6 +406,7 @@ def next_image():
     else:
         return jsonify({'error': 'No image found'}), 404 
 
+#電腦端色盲點圖功能顯示結果
 @app.route('/result_cb', methods=['POST'])
 def result_cb():
     data = request.get_json()  # 獲取前端傳來的 JSON 數據
@@ -245,7 +506,7 @@ def calculate_score():
             answer_image = db.session.query(ans).filter_by(id_ans_cb=question_id).first()
 
             if not user_answer:
-                # 如果用户的回答不存在，记录错误并继续
+                # 如果用戶的回答不存在，記錄錯誤並繼續
                 print(f"User answer not found for question {question_id}")
                 continue
 

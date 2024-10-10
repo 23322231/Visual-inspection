@@ -1,0 +1,42 @@
+<!-- 視力檢測量距離 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L515 Camera Stream</title>
+</head>
+<body>
+    <h1>L515 Camera Live Feed</h1>
+    <!-- 用於顯示影像流 -->
+    <img src="{{ url_for('video_feed') }}" alt="Camera Stream" width="320" height="240">
+
+    <h2>Eye Center Distance:</h2>
+    <p id="distance">Calculating...</p>
+
+    <h2>Time Remaining:</h2>
+    <p id="timer">5</p>
+
+    <script>
+        const dataFeedUrl = "{{ url_for('data_feed') }}";  // 獲取數據的 URL
+
+        // Function to handle the updating of time and distance values
+        function updateTimeAndDistance(time, distance) {
+            document.getElementById('timer').innerText = time;
+            if (time === 0) {
+                document.getElementById('distance').innerText = distance + ' meters';
+            }
+        }
+
+        // Fetch data from the correct API endpoint for time and distance
+        setInterval(() => {
+            fetch(dataFeedUrl)  // 使用 Flask 生成的路徑
+                .then(response => response.json())
+                .then(data => {
+                    const { time, depth } = data;
+                    updateTimeAndDistance(time, depth);
+                });
+        }, 1000);  // 每秒更新一次
+    </script>
+</body>
+</html>

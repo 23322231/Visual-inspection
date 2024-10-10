@@ -7,6 +7,8 @@ import time
 import tensorflow as tf
 import detect_face
 
+
+
 # Configure depth and color streams
 pipeline = rs.pipeline()
 rs_config = rs.config()
@@ -25,13 +27,13 @@ with tf.Graph().as_default():
                             allow_soft_placement=True,  # 允許當找不到設備時自動轉換成有支援的設備
                             )
 
-    config.gpu_options.per_process_gpu_memory_fraction = 0.1
+    config.gpu_options.per_process_gpu_memory_fraction = 0.5
     sess = tf.compat.v1.Session(config=config)
     with sess.as_default():
         pnet, rnet, onet = detect_face.create_mtcnn(sess, None)
 
 # Get device product line for setting a supporting resolution
-pipeline_wrapper = rs.pipeline_wrapper(pipeline)#將pipeline 封裝成一個包裝器
+pipeline_wrapper = rs.pipeline_wrapper(pipeline)#將pipeline 封裝成一個包裝器       
 pipeline_profile = rs_config.resolve(pipeline_wrapper)#獲取相機配置檔案的相關資訊
 device = pipeline_profile.get_device()
 

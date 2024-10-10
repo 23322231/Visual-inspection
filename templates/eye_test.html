@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>啟動鏡頭並執行後端程式</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        video {
+            width: 640px;
+            height: 480px;
+            border: 2px solid black;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>啟動鏡頭並執行後端程式</h1>
+    <video id="cameraFeed" autoplay></video>
+    <button id="startButton">啟動鏡頭</button>
+    <p id="status"></p>
+
+    <script>
+        let videoElement = document.getElementById('cameraFeed');
+        let streamInterval;
+
+        // Access the user's webcam
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoElement.srcObject = stream;
+            } catch (err) {
+                document.getElementById('status').innerText = '無法啟動鏡頭: ' + err.message;
+            }
+        }
+
+        // Capture frames and send to the backend for face detection
+        function captureFrameAndSend() {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+            // Send frame to backend
+            canvas.toBlob(function (blob) {
+                let formData = new FormData();
+                formData.append('frame', blob);
+                fetch('/start_eye_dis', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('status').innerText = data.message;
+                    if (data.status === 'face_detected') {
+                        startTimerForDistance(data);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    document.getElementById('status').innerText = '啟動失敗';
+                });
+            }, 'image/jpeg');
+        }
+
+        // Start the 15-second timer when a face is detected
+        function startTimerForDistance(data) {
+            let countdown = 15;
+            const intervalId = setInterval(() => {
+                document.getElementById('status').innerText = `距離數據計算中，剩餘時間: ${countdown} 秒`;
+                countdown--;
+
+                if (countdown < 0) {
+                    clearInterval(intervalId);
+                    fetch('/result') // Fetch distance data after 15 seconds
+                    .then(response => response.json())
+                    .then(resultData => {
+                        document.getElementById('status').innerText = `距離數據: ${resultData.distance} 公尺`;
+                    });
+                }
+            }, 1000);
+        }
+
+        document.getElementById('startButton').addEventListener('click', function() {
+            startCamera();
+            streamInterval = setInterval(captureFrameAndSend, 1000);  // Capture frame every second
+        });
+    </script>
+
+</body>
+</html>
