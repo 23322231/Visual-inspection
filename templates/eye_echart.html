@@ -1,72 +1,105 @@
+<!-- 顯示視力表的頁面 -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E字視力表</title>
+    <title>調整視力測驗圖片大小</title>
     <style>
-        /* 設定E字的容器 */
-        #e-chart-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
         }
-        /* 設定E字圖片 */
-        #e-chart {
-            width: 100px; /* 預設寬度，會根據距離調整 */
+        #referenceObject {
+            border: 2px solid #000;
+            width: 100px; /* 初始寬度，可調整 */
+            height: 54mm; /* 信用卡的標準高度 (5.4公分) */
+            resize: both; /* 允許水平和垂直調整 */
+            overflow: auto;
+            margin: 20px auto;
+        }
+        .instruction {
+            margin-top: 20px;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
-
-    <div id="e-chart-container">
-        <img id="e-chart" src="e-letter.png" alt="E字圖片">
+    <h1>調整視力測驗圖片大小</h1>
+    <p class="instruction">將信用卡（或已知尺寸的物品）放在螢幕上，並調整黑框使其尺寸與物品相符。</p>
+    
+    <!-- 可調整的參考物 -->
+    <div id="referenceObject"></div>
+    
+    <p class="instruction">調整後的寬度：<span id="widthDisplay">100</span> 像素</p>
+    <p class="instruction">調整後的高度：<span id="heightDisplay">54</span> 像素</p>
+    <button onclick="calculatePPI()">設定圖片大小</button>
+    
+    <!-- 顯示 PPI 和螢幕尺寸計算結果 -->
+    <p class="instruction">計算出的 PPI：<span id="ppiDisplay">尚未計算</span></p>
+    <p class="instruction">計算出的螢幕尺寸：<span id="screenSizeDisplay">尚未計算</span> 英吋</p>
+    
+    <!-- 視力測驗的圖片 -->
+    <div>
+        <p class="instruction">視力測驗圖片：</p>
+        <img id="testImage" src="static/e_chart/E_right.jpg" style="display:none;" />
     </div>
 
     <script>
-        // 獲取螢幕解析度
-        const screenWidth = window.screen.width;
-        const screenHeight = window.screen.height;
-        console.log(`螢幕寬度: ${screenWidth}px`);
-        console.log(`螢幕高度: ${screenHeight}px`);
+        const referenceObject = document.getElementById('referenceObject');
+        const widthDisplay = document.getElementById('widthDisplay');
+        const heightDisplay = document.getElementById('heightDisplay');
+        const ppiDisplay = document.getElementById('ppiDisplay');
+        const screenSizeDisplay = document.getElementById('screenSizeDisplay');
+        const errorDisplay = document.getElementById('errorDisplay');
+        const testImage = document.getElementById('testImage');
+        const knownWidthCm = 8.56; // 信用卡的寬度（公分）
+        const knownHeightCm = 5.4; // 信用卡的高度（公分）
+        
 
-        // 假設我們有一個函數用來取得人與顯示器之間的距離
-        function getUserDistance() {
-            // 這裡你可以將距離量測的程式碼插入，這是一個模擬值，實際應用會返回真實距離
-            return 100; // 單位：公分
+        // 更新顯示寬度和高度
+        referenceObject.addEventListener('mousemove', updateSize);
+        function updateSize() {
+            const width = referenceObject.offsetWidth;
+            const height = referenceObject.offsetHeight;
+            widthDisplay.textContent = width;
+            heightDisplay.textContent = height;
         }
 
-        // 根據使用者距離與解析度調整E字圖片大小
-        function adjustImageSize() {
-            const distance = getUserDistance(); // 假設單位是公分
-            const eChart = document.getElementById('e-chart');
+        // 計算 PPI 並顯示螢幕尺寸和誤差
+        function calculatePPI() {
+            const widthPx = referenceObject.offsetWidth;
+            const heightPx = referenceObject.offsetHeight;
 
-            // 設定標準大小和標準距離
-            const standardDistance = 600; // 6公尺為標準距離
-            const standardSizeCm = 8.73; // 標準E字大小（單位：公分）
-            const pixelsPerCm = 37.8; // 近似的解析度：1公分約等於37.8像素
+            const widthInch = knownWidthCm / 2.54; // 將公分轉換為英吋
+            const heightInch = knownHeightCm / 2.54; // 將公分轉換為英吋
 
-            // 計算標準E字大小在像素中的大小
-            const standardSizePixels = standardSizeCm * pixelsPerCm;
+            const ppi = widthPx / widthInch;
 
-            // 計算根據距離縮放後的E字大小
-            const newSize = (distance / standardDistance) * standardSizePixels;
+            // 顯示計算出的 PPI
+            ppiDisplay.textContent = ppi.toFixed(2);
 
-            // 調整圖片的寬度
-            eChart.style.width = `${newSize}px`;
+            // 取得螢幕解析度（寬度和高度）
+            const screenWidthPx = window.screen.width;
+            const screenHeightPx = window.screen.height;
+            console.log(screenWidthPx, screenHeightPx);
 
-            console.log(`距離: ${distance} 公分, 調整後E字大小: ${newSize}px`);
+            // 計算螢幕的寬度和高度（英吋）
+            const screenWidthInch = screenWidthPx / ppi;
+            const screenHeightInch = screenHeightPx / ppi;
+
+            // 計算螢幕的對角線尺寸（英吋）
+            const screenSizeInch = Math.sqrt(screenWidthInch ** 2 + screenHeightInch ** 2);
+
+            // 顯示螢幕尺寸
+            screenSizeDisplay.textContent = screenSizeInch.toFixed(2);
+
+            // 調整視力測驗圖片的大小（假設測驗圖片需要10cm寬）
+            const targetWidthCm = 7.37; // 測驗圖片目標寬度
+            const targetWidthPx = (targetWidthCm / 2.54) * ppi;
+            testImage.style.width = `${targetWidthPx}px`;
+            testImage.style.display = 'block';
         }
-
-        // 當頁面載入時執行
-        window.onload = function() {
-            adjustImageSize();
-
-            // 每隔幾秒鐘重新檢查距離並調整大小
-            setInterval(adjustImageSize, 5000); // 每5秒更新一次
-        };
     </script>
-
 </body>
 </html>
