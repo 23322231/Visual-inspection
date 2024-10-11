@@ -149,6 +149,10 @@ def result():
 def eye_distance():
     return render_template('eye_distance.html')
 
+@app.route('/eye_echart')
+def eye_echart():
+    return render_template('eye_echart.html')
+
 # 初始化全局變量
 time_remaining = 5
 depth_value = 0
