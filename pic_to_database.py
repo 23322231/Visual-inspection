@@ -120,10 +120,10 @@ if __name__ == "__main__":
     # ]
 
     image_paths = [
-        "static/e_chart/E_up.jpg",
-        "static/e_chart/E_down.jpg",
-        "static/e_chart/E_left.jpg",
-        "static/e_chart/E_right.jpg"
+        "static/e_chart/up.jpg",
+        "static/e_chart/down.jpg",
+        "static/e_chart/left.jpg",
+        "static/e_chart/right.jpg"
     ]
     # answers = [2,3,5,6,7,8,12,15,16,26,29,35,42,45,57,73,74,96,97,100,101,102,103,104,105,106,107,108,109,110 ]  # 對應的答案列表 #不是數字的填100
 
