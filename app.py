@@ -290,10 +290,14 @@ def video_feed():
 # 視力檢測 傳送倒數時間和最終量測的深度值
 @app.route('/data_feed')
 def data_feed():
-    
     return jsonify(time=time_remaining, depth=round(depth_value, 2))
 
+# 回傳量測到的距離給eye_echart.html 去調整圖片大小
+@app.route('/get_eye_distance')
+def get_eye_distance():
+    return jsonify(depth=round(depth_value, 2))
 
+# 啟動L515深度相機
 @app.route('/start_eye_dis', methods=['POST'])
 def start_eye_dis():
     try:
@@ -307,7 +311,6 @@ def start_eye_dis():
         factor = 0.709  # Scale factor
         color = (0, 255, 0)
         
-
         
         with tf.Graph().as_default():
             config = tf.compat.v1.ConfigProto(log_device_placement=True, allow_soft_placement=True)
@@ -468,10 +471,10 @@ def result_cb():
             if question_image.mode == 'RGBA':
                 question_image = question_image.convert('RGB')
 
-        # 创建一个字节流缓冲区
+        # 創建一个字節流緩衝區
         buffered = BytesIO()
 
-        # 將圖像保存到字節流緩衝區中，格式為 JPEG（或根據你的圖像格式調整）
+        # 將圖像保存到字節流緩衝區中
         question_image.save(buffered, format="JPEG")
 
         #獲取字節流中的二進制數據
@@ -641,15 +644,25 @@ def finish_cb():
     emit('goto_result',broadcast=True)
     
 
-# 確認進入色盲點圖頁面 傳送user uuid
+# 確認進入色盲點圖頁面 傳送user uuid 讓兩個頁面統一
 @socketio.on('confirmDrawing')
 def handle_confirm_drawing(data):
     print("Received confirmDrawing event")  # 確認事件觸發
     url_suffix = data.get('urlSuffix')
     if url_suffix:
-        # print("=======")
         print(f'Received urlSuffix: {url_suffix}')
-        emit('confirm', {'urlSuffix': url_suffix},broadcast=True)
+        emit('confirm', {'urlSuffix': url_suffix},broadcast=True) #傳給qrcode.html 告訴她可以跳轉到顯示題目的畫面了
+    else:
+        print('No URL suffix provided.')
+
+# 視力檢測量完距離後確認進入顯示題目的畫面
+@socketio.on('confirmEyeDistance')
+def confirmEyeDistance(data):
+    print("Received confirmDrawing event")  # 確認事件觸發
+    url_suffix = data.get('urlSuffix')
+    if url_suffix:
+        print(f'Received urlSuffix: {url_suffix}')
+        # emit('confirm_eye_test', {'urlSuffix': url_suffix},broadcast=True) 
     else:
         print('No URL suffix provided.')
 
@@ -677,6 +690,16 @@ def generate_url():
     session['user_id']=user_id
     session['unique_url'] = unique_url  # 存儲到會話中
     return jsonify({'url': unique_url})
+
+# 產生唯一的網址 eye_distance?session=  從quiz.html 進入
+@app.route('/generate-eye_distance-url', methods=['GET'])
+def generate_eye_distance_url():
+    user_id = str(uuid.uuid4())  # 生成UUID
+    unique_url = f"{request.host_url}eye_distance?session={user_id}"
+    session['user_id']=user_id
+    session['unique_url'] = unique_url  # 存儲到會話中
+    return jsonify({'url': unique_url})
+
 
 @app.route('/generate-url-qrcode')
 def generate_url_qrcode():
