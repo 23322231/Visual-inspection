@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="grammarly" content="false">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>醫囑生成器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>醫囑生成器</h1>
+
+    <form id="quizForm">
+        <label for="symptoms">輸入你的症狀描述：</label><br>
+        <textarea id="symptoms" name="symptoms" rows="4" cols="50" placeholder="請描述你的症狀..."></textarea><br><br>
+        <button type="submit">生成醫囑</button>
+    </form>
+
+    <h2>生成的醫囑：</h2>
+    <div id="advice" class="result">醫囑將顯示在這裡...</div>
+
+    <script>
+        document.getElementById('quizForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // 阻止表單默認提交行為
+
+            const symptoms = document.getElementById('symptoms').value; // 取得使用者輸入的症狀描述
+
+            // 清空之前的結果並顯示 "生成中..."
+            const adviceDiv = document.getElementById('advice');
+            adviceDiv.innerText = "生成中...";
+
+            try {
+                // 發送 POST 請求到後端以生成醫囑
+                const response = await fetch('/generate-advice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ symptoms }) // 將症狀描述傳遞到後端
+                });
+
+                if (!response.ok) {
+                    throw new Error("發生錯誤，請重試。");
+                }
+
+                const data = await response.json();
+                if (data.advice) {
+                    adviceDiv.innerText = data.advice; // 顯示生成的醫囑
+                } else {
+                    adviceDiv.innerText = "未能生成醫囑。";
+                }
+            } catch (error) {
+                adviceDiv.innerText = `錯誤：${error.message}`;
+            }
+        });
+    </script>
+
+</body>
+</html>
