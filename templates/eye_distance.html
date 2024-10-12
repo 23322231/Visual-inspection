@@ -1,4 +1,3 @@
-<!-- 視力檢測量距離 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +7,7 @@
 </head>
 <body>
     <h1>L515 Camera Live Feed</h1>
+
     <!-- 用於顯示影像流 -->
     <img src="{{ url_for('video_feed') }}" alt="Camera Stream" width="320" height="240">
 
@@ -17,25 +17,34 @@
     <h2>Time Remaining:</h2>
     <p id="timer">5</p>
 
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
         const dataFeedUrl = "{{ url_for('data_feed') }}";  // 獲取數據的 URL
-
+        // 初始化 WebSocket 連接
+        var socket = io.connect('http://192.168.1.179:5000');
         // Function to handle the updating of time and distance values
         function updateTimeAndDistance(time, distance) {
             document.getElementById('timer').innerText = time;
-            if (time === 0) {
-                document.getElementById('distance').innerText = distance + ' meters';
+
+            if (time === 0) {  // 當計時器歸零
+                document.getElementById('distance').innerText = `${distance} meters`;
+
+                //確保獲得有效距離後跳轉到 eye_echart.html
+                if (distance > 0) {  //確保獲得有效距離
+                    window.location.href = window.location.origin + '/eye_echart?session=' + location.href.split('=').pop();
+                }
             }
         }
 
-        // Fetch data from the correct API endpoint for time and distance
+        // Fetch data from the API endpoint every second
         setInterval(() => {
-            fetch(dataFeedUrl)  // 使用 Flask 生成的路徑
+            fetch(dataFeedUrl)
                 .then(response => response.json())
                 .then(data => {
-                    const { time, depth } = data;
+                    const { time, depth } = data;  // 假設 API 回傳 { time, depth }
                     updateTimeAndDistance(time, depth);
-                });
+                })
+                .catch(error => console.error('Error fetching data:', error));
         }, 1000);  // 每秒更新一次
     </script>
 </body>
