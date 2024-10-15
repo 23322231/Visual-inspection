@@ -48,15 +48,15 @@
     </div>
 
     <div class="controls">
-        <button onclick="uploadImage()">上傳圖片</button>
         <button onclick="downloadImage()">下載圖片</button>
     </div>
 
     <div class="ranges" style="width:500px;">
         <div class="control-item" style="width:500px;">
-            <label for="myopia">近視度數</label>
-            <input type="range" id="myopia" min="0" max="200" step="25" value="0" onchange="adjustImage()" style="width:400px;"/>
-            <label>遠視度數</label>
+            <label for="myopia" style="width:250px;">近視度數</label><label style="width:250px;">遠視度數</label>
+            
+            <input type="range" id="myopia" min="-200" max="200" step="25" value="0" onchange="adjustImage()" style="width:400px;"/>
+            
         </div>
         <div class="control-item">
             <label for="degree">散光角度</label>
