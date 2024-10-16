@@ -95,11 +95,6 @@
 
         // 新的URL
         var newUrl = window.location.origin + '/color_blind_spot_map?session=' + message.urlSuffix;
-        
-        // debug
-        // alert('New URL: ' + newUrl);
-        // 直接導航到新的 URL
-        // window.location.href = newUrl;
         setTimeout(function() {
             window.location.href = newUrl;
         }, 3000);  // 3秒后跳转
