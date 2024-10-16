@@ -178,7 +178,7 @@ def video_feed():
             align = rs.align(align_to)
 
             # 初始化MTCNN
-            color = (0,255,0)
+            color = (0,255,0)#框框顏色
             minsize = 20  # 偵測人臉的最小尺寸
             threshold = [0.6, 0.7, 0.7]  # 三階段門檻
             factor = 0.709  # 縮放因子
