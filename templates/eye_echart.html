@@ -12,7 +12,7 @@
         #referenceObject {
             border: 2px solid #000;
             width: 100px;
-            height: 54mm; /* 信用卡高度 */
+            height: 54mm;
             resize: both;
             overflow: auto;
             margin: 20px auto;
@@ -25,95 +25,55 @@
 </head>
 <body>
     <h1>調整視力測驗圖片大小</h1>
-    <p class="instruction">將信用卡（或已知尺寸的物品）放在螢幕上，並調整黑框使其尺寸與物品相符。</p>
-    
+    <p class="instruction">
+        將信用卡（或已知尺寸的物品）放在螢幕上，並調整黑框使其尺寸與物品相符。
+    </p>
+
+
     <div id="referenceObject"></div>
-    
     <p class="instruction">調整後的寬度：<span id="widthDisplay">100</span> 像素</p>
     <p class="instruction">調整後的高度：<span id="heightDisplay">54</span> 像素</p>
-    <button onclick="calculatePPI()">設定圖片大小</button>
-    
-    <p class="instruction">計算出的 PPI：<span id="ppiDisplay">尚未計算</span></p>
-    <p class="instruction">計算出的螢幕尺寸：<span id="screenSizeDisplay">尚未計算</span> 英吋</p>
-    
-    <div>
-        <p class="instruction">視力測驗圖片：</p>
-        <img id="testImage" src="static/e_chart/right.jpg" style="display:none;" />
-    </div>
+    <button onclick="confirmAndRedirect()">確認</button>
 
+    <!-- <h1>請輸入螢幕尺寸(英寸)</h1>
+    <label for="ppiInput">螢幕尺寸：</label>
+    <input type="number" id="screen" required><br><br> -->
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
+        
+         // 初始化 WebSocket 連接
+         var socket = io.connect('http://192.168.1.179:5000');
+    
+        // WebSocket 連接成功時的處理
+        socket.on('connect', function() {
+            console.log('WebSocket 連接已打開');
+        });
+
         const referenceObject = document.getElementById('referenceObject');
         const widthDisplay = document.getElementById('widthDisplay');
         const heightDisplay = document.getElementById('heightDisplay');
-        const ppiDisplay = document.getElementById('ppiDisplay');
-        const screenSizeDisplay = document.getElementById('screenSizeDisplay');
-        const testImage = document.getElementById('testImage');
-        const knownWidthCm = 8.56; // 信用卡寬度
-        const knownHeightCm = 5.4;  // 信用卡高度
-
-        // E 字圖片尺寸：最大 7.27 cm，比例 14:1
-        const maxWidthCm = 7.27;  // 最大 E 字寬度
-        const ratios = Array.from({ length: 14 }, (_, i) => 14 - i); // 比例 [14, 13, ..., 1]
 
         // 更新寬度和高度顯示
         referenceObject.addEventListener('mousemove', updateSize);
         function updateSize() {
-            const width = referenceObject.offsetWidth;
-            const height = referenceObject.offsetHeight;
-            widthDisplay.textContent = width;
-            heightDisplay.textContent = height;
+            widthDisplay.textContent = referenceObject.offsetWidth;
+            heightDisplay.textContent = referenceObject.offsetHeight;
         }
 
-        // 計算 PPI 並顯示螢幕尺寸
-        function calculatePPI() {
+        // 按下確認鍵跳轉到顯示 E 字圖片的頁面，並傳遞寬度作為參數
+        function confirmAndRedirect() {
+            // const screen_size = parseFloat(document.getElementById('screen').value);
+            // console.log(screen_size);
             const widthPx = referenceObject.offsetWidth;
-            const widthInch = knownWidthCm / 2.54; // 公分轉英吋
-            const ppi = widthPx / widthInch;  // 計算 PPI
-
-            ppiDisplay.textContent = ppi.toFixed(2);
-
-            const screenWidthPx = window.screen.width;
-            const screenHeightPx = window.screen.height;
-
-            const screenWidthInch = screenWidthPx / ppi;
-            const screenHeightInch = screenHeightPx / ppi;
-            const screenSizeInch = Math.sqrt(screenWidthInch ** 2 + screenHeightInch ** 2);
-
-            screenSizeDisplay.textContent = screenSizeInch.toFixed(2);
-
-            // 隨機顯示一種尺寸的 E 字圖片
-            adjustTestImage(ppi);
-        }
-
-        function adjustTestImage(ppi) {
-            fetch('get_eye_distance')
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data['depth']);
-                })
-                .catch(error => {
-                    console.error('Error loading distance:', error);
-                });
-
-            const targetWidthPx = (maxWidthCm / 2.54) * ppi;  // 最大 E 字的像素寬度
-
-            // 隨機選擇比例
-            const randomIndex = Math.floor(Math.random() * ratios.length);
-            const selectedRatio = ratios[randomIndex];
-
-            // 根據比例調整 E 字寬度
-            const adjustedWidthPx = targetWidthPx * (selectedRatio / 14);
-
-            testImage.style.width = `${adjustedWidthPx}px`;
-            testImage.style.display = 'block';
-        }
-
-        
-
-        // 頁面載入時自動隨機顯示 E 字圖片
-        window.onload = calculatePPI() ;
+            const heightPx = referenceObject.offsetHeight;
+            // socket.emit('send_width_height', { 'width': widthPx, 'height': heightPx,'screen_size':screen_size });
+            socket.emit('send_width_height', { 'width': widthPx, 'height': heightPx });
            
-        
+            var newUrl = window.location.origin +'/eye_Etest?session='+ location.href.split('=').pop(); 
+            window.location.href = newUrl;
+        }
     </script>
 </body>
 </html>

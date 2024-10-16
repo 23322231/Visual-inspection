@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>視力測驗</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        #testImage {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>視力測驗 E 字圖片</h1>
+    <!-- <img id="testImage" src="static/e_chart/right.jpg" /> -->
+    <button onclick="getallsizeAndsend()">確認</button>
+
+    <div id="imageContainer">
+        <img id="eImage" src="" style="display:none;" />
+    </div> <!-- 用來顯示 E 字圖片的區域 -->
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+        // 初始化 WebSocket 連接
+        var socket = io.connect('http://192.168.1.179:5000');
+    
+        // WebSocket 連接成功時的處理
+        socket.on('connect', function() {
+            console.log('WebSocket 連接已打開');
+        });
+    
+        var widthPx,heightPx,screenSizeInch,depth;
+        function getallsizeAndsend() {
+
+            // // 當頁面加載時請求數據
+            socket.emit('request_width_height');
+            socket.on('get_width_height', function(data) {
+                console.log("????????:)??????????????????");
+                screenSizeInch = data.screen_size;  // 螢幕尺寸
+                widthPx = data.screen_width;  // 取得參考物件的寬度（像素）
+                heightPx = data.screen_height;
+                
+                console.log(widthPx, heightPx, screenSizeInch);
+            });
+
+            // 获取深度数据
+            fetch('get_eye_distance') // 向後端請求眼睛距離資料
+                .then(response => response.json()) // 將回應轉換為 JSON 格式
+                .then(data => {
+                    console.log(data['depth']);  // 在控制台顯示深度資料
+                    depth = data['depth'];  // 取得深度資料
+                    console.log(depth);
+    
+                    // 确保 depth 和 screenSizeInch 都准备好后再进行计算
+                    if (depth) {
+                        calculateAndSendSizes();
+                    }
+                    else{
+                        console.log(depth, screenSizeInch);
+                        console.log('depth or screenSizeInch is not ready');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading distance:', error);  // 若請求失敗則顯示錯誤
+                });
+        }
+    
+        function calculateAndSendSizes() {
+            const knownWidthCm =8.56;//信用卡的寬度(CM)
+            const knownHeightCm =5.4;//信用卡的高度(CM)
+            const maxWidthCm = 7.27; //最大E字寬度(CM)
+    
+            const widthInch = knownWidthCm / 2.54; //將公分轉換為英吋
+            const heightInch = knownHeightCm / 2.54; //將公分轉換為英吋
+            const diagonalInch = Math.sqrt(Math.pow(widthInch, 2) + Math.pow(heightInch, 2));
+            const ppi = Math.sqrt(widthPx ** 2 + heightPx ** 2) / diagonalInch;  // 計算 PPI
+            console.log(ppi);
+            const screenWidthPx = window.screen.width;  // 取得螢幕的寬度（像素）
+            const screenHeightPx = window.screen.height;  // 取得螢幕的高度（像素）
+            console.log("screen",screenWidthPx, screenHeightPx);
+            
+    
+            const screenWidthInch = screenWidthPx / ppi;  // 計算螢幕寬度（英吋）
+            const screenHeightInch = screenHeightPx / ppi;  // 計算螢幕高度（英吋）
+    
+            console.log(`PPI: ${ppi}, Depth: ${depth}`);
+    
+            // 傳送 PPI 和距離到後端
+            socket.emit('calculate_sizes', { 'ppi': ppi, 'depth': depth });
+    
+            // 接收後端計算的 E 字圖片尺寸，依序顯示
+            socket.on('display_sizes', (data) => {
+                const imageContainer = document.getElementById('imageContainer');
+                imageContainer.innerHTML = '';  // 清空舊內容
+    
+                data.sizes.forEach((size, index) => {
+                    const img = document.createElement('img');
+                    img.src = 'static/e_chart/right.jpg';  
+                    img.style.width = `${size}px`;  // 設定圖片的寬度
+                    img.style.display = 'block';
+                    img.style.margin = '10px auto';
+                    imageContainer.appendChild(img);
+                });
+            });
+        }
+        
+        window.onload = function() {
+            getallsizeAndsend();
+        }
+        
+    </script>
+    
+</body>
+</html>

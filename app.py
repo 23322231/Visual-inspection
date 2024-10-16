@@ -153,6 +153,10 @@ def eye_distance():
 def eye_echart():
     return render_template('eye_echart.html')
 
+@app.route('/eye_Etest')
+def eye_Etest():
+    return render_template('eye_Etest.html')
+
 # 初始化全局變量
 time_remaining = 5
 depth_value = 0
@@ -666,13 +670,72 @@ def confirmEyeDistance(data):
     else:
         print('No URL suffix provided.')
 
-@app.route('/handwrite')
-def handwrite():
-    user_uuid = request.args.get('session')  # 從查詢参數中獲取session ID
-    if user_uuid:
-        return render_template('handwrite.html', user_uuid=user_uuid)
+#計算視力測驗E字圖片的大小並傳回前端
+@socketio.on('calculate_sizes')
+def calculate_sizes(data):
+    print("innnnnnnnnnnnnnnnnnnnnnnnnnnnn")
+    ppi = data.get('ppi')
+    distance = data.get('depth')
+    if ppi is None or distance is None:
+        emit('error', {'message': 'Missing PPI or distance data'}, broadcast=True)
+        print("Missing PPI or distance dataooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
+        return
+
+    print(f"Received PPI: {ppi}, Distance: {distance}")
+
+    # 确保 PPI 和 distance 是有效的数值
+    try:
+        ppi = float(ppi)
+        distance = float(distance)
+    except ValueError:
+        emit('error', {'message': 'Invalid PPI or distance value'}, broadcast=True)
+        return
+
+    # 計算縮放比例
+    scale_factor = distance / 6  
+
+    # 計算 14 種 E 字圖片的像素寬度
+    sizes = [(7.27 / 2.54) * ppi * (ratio / 14) * scale_factor for ratio in range(14, 0, -1)]
+
+    # 傳送計算結果給前端
+    emit('display_sizes', {'sizes': sizes}, broadcast=True)
+
+#將eye_echart.html量到的卡片長寬傳給eye_Etest.html
+# @app.route('/store_dimensions', methods=['POST'])
+# def store_dimensions():
+#     data = request.get_json()
+#     width= data['width']
+#     height = data['height']
+#     emit('get_width_height', {'width': width, 'height': height}, broadcast=True)
+
+
+@socketio.on('send_width_height')
+def send_width_height(data):
+    print(":))))))))))))))))))))))))))))))))))))))))))))))")  # 確認事件觸發
+    global screen_width 
+    global screen_height
+    # global screen_size
+    screen_width = data.get('width')
+    screen_height = data.get('height')
+    # screen_size = data.get('screen_size')
+    
+
+@socketio.on('request_width_height')
+def handle_request_width_height():
+    # global data_store
+    if screen_width:
+        # emit('get_width_height', {'screen_width': screen_width, 'screen_height': screen_height,'screen_size':screen_size},broadcast=True) 
+        emit('get_width_height', {'screen_width': screen_width, 'screen_height': screen_height},broadcast=True) 
     else:
-        return "User UUID not provided", 400
+        print("沒有找到數據")
+
+# @app.route('/handwrite')
+# def handwrite():
+#     user_uuid = request.args.get('session')  # 從查詢参數中獲取session ID
+#     if user_uuid:
+#         return render_template('handwrite.html', user_uuid=user_uuid)
+#     else:
+#         return "User UUID not provided", 400
 
 @app.route('/color_blind_spot_map')
 def color_blind_spot_map():
@@ -682,7 +745,11 @@ def color_blind_spot_map():
     else:
         return "User UUID not provided", 400
 
-# 產生唯一的網址 handwrite?session=
+
+    
+
+
+# 產生唯一的網址 handwrite?session= 色盲點圖測驗手機端確認button按下後呼叫的API
 @app.route('/generate-url', methods=['GET'])
 def generate_url():
     user_id = str(uuid.uuid4())  # 生成UUID
@@ -699,6 +766,8 @@ def generate_eye_distance_url():
     session['user_id']=user_id
     session['unique_url'] = unique_url  # 存儲到會話中
     return jsonify({'url': unique_url})
+
+
 
 
 @app.route('/generate-url-qrcode')
