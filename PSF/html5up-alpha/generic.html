@@ -69,21 +69,18 @@
 						<!-- 拉條部分 -->
 						<div class="ranges" >
 							<div class="row gtr-50 gtr-uniform">
-								<div class="col-6"><span class="image fit">
-									<div  style="text-align:center;">
-										<h4>近視度數</h4>
-									</div>
-								</span></div>
-								<div class="col-6"><span class="image fit">
-									<div  style="text-align:center;">
-										<h4>遠視度數</h4>
-									</div>
-								</span></div>
-								<label for="myopia" style="width:250px;">近視度數</label><label style="width:250px;">遠視度數</label>
+								<!-- <p for="myopia" style="width:250px;">近視度數</p> -->
+								<!-- <p style="width:250px;" text-align="right">遠視度數</p> -->
+								<div  style="text-align:left;width:260px;">
+									<h4>近視度數</h4>
+								</div>
+								<div  style="text-align:right;width:260px;">
+									<h4>遠視度數</h4>
+								</div>
 							</div>
 							<div>
 								<input type="range" id="myopia" min="-200" max="200" step="25" value="0" onchange="adjustImage()" 
-								style="width: 400px;"/>
+								style="width: 500px;"/>
 							</div>
 							<div class="control-item">
 								<label for="degree">散光角度</label>
