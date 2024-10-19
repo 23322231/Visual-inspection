@@ -10,7 +10,6 @@ mp_hands = mp.solutions.hands
 cap = cv2.VideoCapture(0)
 
 def calculate_direction(finger_tip, finger_root):
-    """計算食指方向，回傳對應的方向名稱"""
     # 計算向量 (指尖 - 指根)
     direction_vector = np.array(finger_tip) - np.array(finger_root)
 
@@ -55,7 +54,7 @@ with mp_hands.Hands(
             print("Cannot receive frame")
             break
 
-        # 影像處理：BGR 轉 RGB
+        #BGR 轉 RGB
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         results = hands.process(img_rgb)
 
@@ -68,7 +67,7 @@ with mp_hands.Hands(
                 #     mp_drawing_styles.get_default_hand_connections_style()
                 # )
 
-                # 取得食指指尖 (8) 和指根 (5) 的座標
+                #取得食指(8)和(5)的座標
                 finger_tip = [
                     hand_landmarks.landmark[8].x * img.shape[1],
                     hand_landmarks.landmark[8].y * img.shape[0]
@@ -86,7 +85,7 @@ with mp_hands.Hands(
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA
                     )
 
-        # 顯示影像
+        #顯示影像
         cv2.imshow('Hand Direction Detection', img)
         if cv2.waitKey(5) == ord('q'):
             break  # 按下 q 鍵退出
