@@ -1,0 +1,122 @@
+<!-- 掃描進入頁面的畫面 -->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>掃描 QR Code 進入測距頁面</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-image: url('static/images/eye_qrcode_background3.jpg'); /* 替換為你的背景圖像URL */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+        }
+        h1 {
+            color: #fff;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+        #qrcode {
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1>請掃描以下 QR Code 進入測距頁面</h1>
+<div id="qrcode"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+<script>
+
+    // 初始化 WebSocket 連接
+    var socket = io.connect('http://192.168.1.179:5000');
+    // var socket = io();
+
+    // WebSocket 連接成功時的處理
+    socket.on('connect', function() {
+        console.log('WebSocket 連接已打開');
+    });
+
+    
+
+    //獲取唯一URL
+    async function fetchUniqueURL() {
+        try {
+            const response = await fetch('/generate-url-eye-qrcode');
+            const data = await response.json();
+            console.log('Fetched URL:', data.url);
+            return data.url;
+        } catch (error) {
+            console.error('Error fetching unique URL:', error);
+        }
+    }
+
+    // 獲取顯示唯一URL的QR Code
+    fetchUniqueURL().then(url => {
+        if (url) {
+            generateQRCode(url);
+        } else {
+            console.error('URL 未能生成');
+        }
+    });
+
+    // 生成 QR Code 的函數
+    function generateQRCode(url) {
+        var qrcodeContainer = document.getElementById('qrcode');
+        qrcodeContainer.innerHTML = ""; //確保容器是空的
+        new QRCode(qrcodeContainer, url); //在指定的容器內生成QRCode
+        console.log('QR Code generated with URL:', url);
+    }
+    
+
+    // WebSocket連接錯誤時的處理
+    socket.on('connect_error', function(error) {
+        console.error('WebSocket 連接錯誤:', error);
+    });
+
+    // 收到更新頁面消息時 跳轉至等待測量距離頁面
+    socket.on('eye_confirm', function(message) {
+        console.log('Received message:'+ JSON.stringify (message));
+
+        // 新的URL 跳轉到等待測距的畫面
+        var newUrl = window.location.origin + '/eye_dis_computer?session=' + message.eye_user_id;
+        setTimeout(function() {
+            window.location.href = newUrl;
+        }, 2000);  //3秒後跳轉
+    });
+
+    //WebSocket連接關閉時的處理
+    socket.on('disconnect', function() {
+        console.log('WebSocket 連接已關閉');
+    });
+
+    
+</script>
+
+</body>
+</html>

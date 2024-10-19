@@ -12,14 +12,50 @@
         #referenceObject {
             border: 2px solid #000;
             width: 100px;
-            height: 54mm;
-            resize: both;
-            overflow: auto;
+            height: calc(100px / 1.618); /* 根據黃金比例計算高度 */
             margin: 20px auto;
         }
         .instruction {
             margin-top: 20px;
             font-size: 16px;
+        }
+        #sliderContainer {
+            margin-top: 20px;
+            width: 300px;
+            margin: 0 auto;
+        }
+        /* 美化滑桿 */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(90deg, #e1afaf, #cd9797);
+            outline: none;
+            border-radius: 5px;
+            opacity: 0.9;
+            transition: opacity 0.3s;
+        }
+        input[type="range"]:hover {
+            opacity: 1;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #eff5ef;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #eff5ef;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
@@ -29,22 +65,22 @@
         將信用卡（或已知尺寸的物品）放在螢幕上，並調整黑框使其尺寸與物品相符。
     </p>
 
-
     <div id="referenceObject"></div>
     <p class="instruction">調整後的寬度：<span id="widthDisplay">100</span> 像素</p>
-    <p class="instruction">調整後的高度：<span id="heightDisplay">54</span> 像素</p>
-    <button onclick="confirmAndRedirect()">確認</button>
+    <p class="instruction">調整後的高度：<span id="heightDisplay">62</span> 像素</p>
 
-    <!-- <h1>請輸入螢幕尺寸(英寸)</h1>
-    <label for="ppiInput">螢幕尺寸：</label>
-    <input type="number" id="screen" required><br><br> -->
+    <div id="sliderContainer">
+        <label for="sizeSlider">調整大小:</label>
+        <input type="range" id="sizeSlider" min="50" max="500" value="100">
+    </div>
+
+    <button onclick="confirmAndRedirect()">確認</button>
 
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
-        
-         // 初始化 WebSocket 連接
-         var socket = io.connect('http://192.168.1.179:5000');
+        // 初始化 WebSocket 連接
+        var socket = io.connect('http://192.168.1.179:5000');
     
         // WebSocket 連接成功時的處理
         socket.on('connect', function() {
@@ -54,24 +90,38 @@
         const referenceObject = document.getElementById('referenceObject');
         const widthDisplay = document.getElementById('widthDisplay');
         const heightDisplay = document.getElementById('heightDisplay');
+        const sizeSlider = document.getElementById('sizeSlider');
 
-        // 更新寬度和高度顯示
-        referenceObject.addEventListener('mousemove', updateSize);
+        const goldenRatio = 1.618; // 固定長寬比
+
+        // 根據滑桿更新方框大小
+        sizeSlider.addEventListener('input', updateSize);
+
         function updateSize() {
-            widthDisplay.textContent = referenceObject.offsetWidth;
-            heightDisplay.textContent = referenceObject.offsetHeight;
+            const widthPx = sizeSlider.value;
+            const heightPx = widthPx / goldenRatio;
+
+            referenceObject.style.width = widthPx + 'px';
+            referenceObject.style.height = heightPx + 'px';
+
+            widthDisplay.textContent = widthPx;
+            heightDisplay.textContent = Math.round(heightPx);
         }
 
         // 按下確認鍵跳轉到顯示 E 字圖片的頁面，並傳遞寬度作為參數
         function confirmAndRedirect() {
-            // const screen_size = parseFloat(document.getElementById('screen').value);
-            // console.log(screen_size);
             const widthPx = referenceObject.offsetWidth;
             const heightPx = referenceObject.offsetHeight;
-            // socket.emit('send_width_height', { 'width': widthPx, 'height': heightPx,'screen_size':screen_size });
-            socket.emit('send_width_height', { 'width': widthPx, 'height': heightPx });
-           
-            var newUrl = window.location.origin +'/eye_Etest?session='+ location.href.split('=').pop(); 
+            // socket.emit('send_width_height', { 'width': widthPx, 'height': heightPx });
+            // 發送數據到後端
+            fetch('/send_width_height', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 'widthPx': widthPx, 'heightPx': heightPx })
+            }).then(response => {
+                console.log('Data saved to session');
+            });
+            var newUrl = window.location.origin +'/eye_qrcode?session='+ location.href.split('=').pop(); 
             window.location.href = newUrl;
         }
     </script>

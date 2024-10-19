@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>距離測量中</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f9f4ef;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+        }
+
+        .container {
+            text-align: center;
+            background-color: #e99980;
+            padding: 50px;
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 3em;
+            margin: 0;
+            color: #ffffff;
+        }
+
+        .loading {
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: #ffffff;
+            font-style: italic;
+        }
+
+        /* 添加一個簡單的動畫效果 */
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .loading::after {
+            content: '...';
+            animation: blink 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>距離測量中</h1>
+        <p class="loading">請稍候</p>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+<script>
+
+    // 初始化 WebSocket 連接
+    var socket = io.connect('http://192.168.1.179:5000');
+    // var socket = io();
+
+    // 收到更新頁面消息時的處理
+    socket.on('eye_into_test_confirm', function(message) {
+        console.log('Received message:'+ JSON.stringify (message));
+
+        // 新的URL
+        var newUrl = window.location.origin + '/eye_Etest?session=' + message.eye_user_id;
+        window.location.href = newUrl;
+        // setTimeout(function() {
+            // window.location.href = newUrl;
+        // }, 3000);  // 3秒后跳转
+    });
+    // WebSocket 連接成功時的處理
+    socket.on('connect', function() {
+        console.log('WebSocket 連接已打開');
+    });
+</script>
+</body>
+</html>

@@ -31,7 +31,9 @@
 
                 //確保獲得有效距離後跳轉到 eye_echart.html
                 if (distance > 0) {  //確保獲得有效距離
-                    window.location.href = window.location.origin + '/eye_echart?session=' + location.href.split('=').pop();
+                    var urlSuffix = window.location.href.split('=').pop();
+                    socket.emit('eye_into_test', {'urlSuffix': urlSuffix});
+                    window.location.href = window.location.origin + '/eye_user_check?session=' + location.href.split('=').pop();
                 }
             }
         }
@@ -41,11 +43,17 @@
             fetch(dataFeedUrl)
                 .then(response => response.json())
                 .then(data => {
-                    const { time, depth } = data;  // 假設 API 回傳 { time, depth }
+                    
+                    const { time, depth } = data;  // 假設API回傳{time,depth }
                     updateTimeAndDistance(time, depth);
                 })
                 .catch(error => console.error('Error fetching data:', error));
         }, 1000);  // 每秒更新一次
+
+        window.onload = function() {
+            var urlSuffix = window.location.href.split('=').pop();
+            socket.emit('confirm_eye_dis', {'urlSuffix': urlSuffix});
+        };
     </script>
 </body>
 </html>

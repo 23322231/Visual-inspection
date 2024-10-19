@@ -105,10 +105,10 @@
 										</article>
 										<article>
 											<a href="#" class="image"><img src="static/images/pic02.jpg" alt="" /></a>
-											<h3>視力檢測表test</h3>
+											<h3>視力測距test</h3>
 											<p>此測驗大綱.........</p>
 											<ul class="actions">
-												<li><a href="http://192.168.1.179:5000/eye_echart" class="button">More</a></li>
+												<li><a href="http://192.168.1.179:5000/eye_distance" class="button">More</a></li>
 											</ul>
 										</article>
 										<article>
@@ -117,17 +117,17 @@
 											<p>Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore. Proin aliquam facilisis ante interdum. Sed nulla amet lorem feugiat tempus aliquam.</p>
 											<ul class="actions">
 												<!-- <li><a href="http://192.168.1.165:5000/generic" class="button">More</a></li> -->
-												<li><button id="eye_distance_button" class="button">More</a></li>
+												<li><button id="eye_echart_button" class="button">More</a></li>
 											</ul>
 										</article>
 										<script>
 											// 選取按鈕
-											const button = document.getElementById('eye_distance_button');
+											const button = document.getElementById('eye_echart_button');
 										
 											// 綁定按鈕點擊事件
 											button.addEventListener('click', async () => {
 												try {
-													const response = await fetch('/generate-eye_distance-url'); // 呼叫後端 API
+													const response = await fetch('/generate-eye_echart-url'); // 呼叫後端 API
 													const data = await response.json();  // 取得回傳的 JSON 資料
 													const uniqueUrl = data.url;  // 從回傳的資料中提取 URL
 										
