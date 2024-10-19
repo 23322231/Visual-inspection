@@ -24,6 +24,7 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 import time
+import mediapipe as mp
 import tensorflow as tf
 import detect_face
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
@@ -49,7 +50,7 @@ conn = psycopg2.connect(
 )
 
 socketio = SocketIO(app , ping_timeout=60, ping_interval=25,cors_allowed_origins="*") # cors_allowed_origins="*" 可以允許任何来源的跨域請求。
-current_image = None
+# current_image = None
 
 # 這裡是提供靜態檔案的路由，將內容類型指定為 JavaScript
 @app.route('/static/assets/js/<path:filename>')
@@ -680,13 +681,13 @@ def confirm_eye_dis(data):
     else:
         print('No URL suffix provided.')
 
-# @app.route('/handwrite')
-# def handwrite():
-#     user_uuid = request.args.get('session')  # 從查詢参數中獲取session ID
-#     if user_uuid:
-#         return render_template('handwrite.html', user_uuid=user_uuid)
-#     else:
-#         return "User UUID not provided", 400
+@app.route('/handwrite')
+def handwrite():
+    user_uuid = request.args.get('session')  # 從查詢参數中獲取session ID
+    if user_uuid:
+        return render_template('handwrite.html', user_uuid=user_uuid)
+    else:
+        return "User UUID not provided", 400
 
 @app.route('/color_blind_spot_map')
 def color_blind_spot_map():
