@@ -112,7 +112,6 @@
         function confirmAndRedirect() {
             const widthPx = referenceObject.offsetWidth;
             const heightPx = referenceObject.offsetHeight;
-            // socket.emit('send_width_height', { 'width': widthPx, 'height': heightPx });
             // 發送數據到後端
             fetch('/send_width_height', {
                 method: 'POST',

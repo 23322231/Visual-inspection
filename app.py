@@ -26,16 +26,13 @@ import cv2
 import time
 import tensorflow as tf
 import detect_face
-
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
-
-
-global depth_value, remaining_time
 
 # 定義候選的數字列表
 numbers = [2, 3, 5, 6, 7, 8, 12, 15, 16, 26, 29, 35, 42, 45, 57, 73, 74, 96, 97, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110]
 app = Flask(__name__)
+# app.app_context().push()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:01057126@localhost/visual"
 app.secret_key = "apri25805645l01057126===+++++"  # 用於會話加密的密鑰
@@ -169,16 +166,11 @@ def eye_user_check():
     return render_template('eye_user_check.html')
 
 
-
-#初始化全域變數 把相機的畫面串流到網頁上用的
-time_remaining =5
-depth_value = 0
-
 #視力檢測 把相機的畫面串流到網頁上
 @app.route('/video_feed')
 def video_feed():
     def generate_frames():
-        global time_remaining, depth_value
+        # global time_remaining, depth_value
         
         try:
             # 設置深度與彩色流
@@ -235,7 +227,7 @@ def video_feed():
                 bounding_boxes, points = detect_face.detect_face(color_image, minsize, pnet, rnet, onet, threshold, factor)
                 nrof_faces = bounding_boxes.shape[0]
 
-                if nrof_faces > 0:
+                if nrof_faces > 0:#如果偵測到人臉
                     if start_time is None:
                         start_time = time.time()  #記錄第一次偵測到人臉的時間
 
@@ -283,12 +275,20 @@ def video_feed():
                     # 計算已經偵測到人臉的時間
                     elapsed_time = time.time() - start_time
                     time_remaining = max(0, 5 - int(elapsed_time))  #更新剩餘時間
+                    # emit('data_feed', {'time': time_remaining, 'depth': round(depth_value, 2)})  # 傳送剩餘時間和深度值
+                    # 使用 emit 傳送數據
+                    socketio.emit('data_feed', {
+                        'time': time_remaining,
+                        'depth': round(depth_value, 2)
+                    }) 
 
                     if elapsed_time >= 5:
                         break  # 超過5秒停止 要跳轉到下一個葉面
 
                 else:
                     start_time = None  # 沒有偵測到人臉時，重置計時
+                    # emit('data_feed', {'time': time_remaining, 'depth': round(depth_value, 2)})  # 傳送剩餘時間和深度值
+                    # user_data[socket_id]['start_time'] = None  # 如果中途人臉消失，重置時間
 
                 # 將畫面編碼為jpg格式，傳送到前端
                 ret, buffer = cv2.imencode('.jpg', color_image)
@@ -303,21 +303,6 @@ def video_feed():
             print(f"Error: {e}")
 
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-
-
-
-
-
-# 視力檢測 傳送倒數時間和最終量測的深度值
-@app.route('/data_feed')
-def data_feed():
-    return jsonify(time=time_remaining, depth=round(depth_value, 2))
-
-# 回傳量測到的距離給eye_echart.html 去調整圖片大小
-@app.route('/get_eye_distance')
-def get_eye_distance():
-    return jsonify(depth=round(depth_value, 2))
 
 
 # 色盲點圖顯示題目圖片
@@ -588,6 +573,17 @@ def confirmEyeDistance(data):
     else:
         print('No URL suffix provided.')
 
+
+
+#將eye_echart.html量到的卡片長寬傳給eye_Etest.html
+# @app.route('/store_dimensions', methods=['POST'])
+# def store_dimensions():
+#     data = request.get_json()
+#     width= data['width']
+#     height = data['height']
+#     emit('get_width_height', {'width': width, 'height': height}, broadcast=True)
+
+
 #計算視力測驗E字圖片的大小並傳回前端
 @socketio.on('calculate_sizes')
 def calculate_sizes(data):
@@ -618,27 +614,29 @@ def calculate_sizes(data):
     # 傳送計算結果給前端
     emit('display_sizes', {'sizes': sizes}, broadcast=True)
 
-#將eye_echart.html量到的卡片長寬傳給eye_Etest.html
-# @app.route('/store_dimensions', methods=['POST'])
-# def store_dimensions():
-#     data = request.get_json()
-#     width= data['width']
-#     height = data['height']
-#     emit('get_width_height', {'width': width, 'height': height}, broadcast=True)
+@app.route('/send_width_height', methods=['POST'])
+def send_width_height():
+    data = request.json
+    print(":))))))))))))))))))))))))))))))))))))))))))))))")  # 確認事件觸發
+    # 將數據存入 session
+    session['widthPx'] = data.get('widthPx')#存信用卡在螢幕上佔的像素(寬)
+    session['heightPx'] = data.get('heightPx')#存信用卡在螢幕上佔的像素(高)
+    return jsonify({"message": "Width and height saved successfully!"}), 200
 
+@app.route('/get_eye_distance')
+def get_eye_distance():
+    return jsonify(depth=round(depth_value, 2))
 
-
-   
-    
-
-# @socketio.on('request_width_height')
-# def handle_request_width_height():
-#     # global data_store
-#     if screen_width:
-#         # emit('get_width_height', {'screen_width': screen_width, 'screen_height': screen_height,'screen_size':screen_size},broadcast=True) 
-#         emit('get_width_height', {'screen_width': screen_width, 'screen_height': screen_height},broadcast=True) 
-#     else:
-#         print("沒有找到數據")
+@socketio.on('request_width_height')
+def handle_request_width_height():
+    # global data_store
+    widthPx = session['widthPx']
+    heightPx = session['heightPx']
+    if widthPx:
+        # emit('get_width_height', {'screen_width': screen_width, 'screen_height': screen_height,'screen_size':screen_size},broadcast=True) 
+        emit('get_width_height', {'screen_width': widthPx, 'screen_height': heightPx},broadcast=True) 
+    else:
+        print("沒有找到數據")
 
 # @app.route('/handwrite')
 # def handwrite():
@@ -709,14 +707,7 @@ def confirm_eye_dis(data):
     
 
 
-@app.route('/send_width_height', methods=['POST'])
-def send_width_height():
-    data = request.json
-    print(":))))))))))))))))))))))))))))))))))))))))))))))")  # 確認事件觸發
-    # 將數據存入 session
-    session['widthPx'] = data.get('widthPx')#存信用卡在螢幕上佔的像素(寬)
-    session['heightPx'] = data.get('heightPx')#存信用卡在螢幕上佔的像素(高)
-    return jsonify({"message": "Width and height saved successfully!"}), 200
+
 
 
 
@@ -769,108 +760,6 @@ def handle_start_session(data):
     print(f"Session started: {session_id}")
 
 if __name__ == '__main__':
+    # with app.app_context():
     app.run(host='0.0.0.0', port=5000, debug=True)
     # socketio.run(app,host='0.0.0.0', port=5000, debug=True)
-
-
-
-# 啟動L515深度相機
-# @app.route('/start_eye_dis', methods=['POST'])
-# def start_eye_dis():
-#     try:
-#         #配置depth and color streams
-#         pipeline = rs.pipeline()
-#         rs_config = rs.config()
-        
-#         #初始化MTCNN
-#         minsize = 20  # Minimum size of the face
-#         threshold = [0.6, 0.7, 0.7]  # Three-step threshold
-#         factor = 0.709  # Scale factor
-#         color = (0, 255, 0)
-        
-        
-#         with tf.Graph().as_default():
-#             config = tf.compat.v1.ConfigProto(log_device_placement=True, allow_soft_placement=True)
-#             config.gpu_options.per_process_gpu_memory_fraction = 0.5
-#             sess = tf.compat.v1.Session(config=config)
-#             with sess.as_default():
-#                 pnet, rnet, onet = detect_face.create_mtcnn(sess, None)
-
-        
-#         pipeline_wrapper = rs.pipeline_wrapper(pipeline)#將pipeline 封裝成一個包裝器 
-#         pipeline_profile = rs_config.resolve(pipeline_wrapper)#獲取相機配置檔案的相關資訊
-#         device = pipeline_profile.get_device()
-
-#         found_rgb = False
-#         for s in device.sensors:
-#             if s.get_info(rs.camera_info.name) == 'RGB Camera':
-#                 found_rgb = True
-#                 break
-#         if not found_rgb:
-#             return jsonify({"status": "error", "message": "This demo requires a camera with a color sensor."})
-
-#         rs_config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)#啟用depth stream，設置解析度為 640x480，像素格式為 z16（16 位深度值），幀率為 30 幀/秒
-#         rs_config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)#啟用color stream，設置解析度為 960x540，像素格式為 bgr8（8 位 RGB 彩色），幀率為 30 幀/秒
-
-#         #開始stream
-#         pipeline.start(rs_config)
-#         align_to = rs.stream.color
-#         align = rs.align(align_to)
-
-#         start_time = None  #追蹤到臉部時開始計時
-#         depth_value = 0    #存距離
-
-        
-#         while True:
-#             frames = pipeline.wait_for_frames()
-#             frames = align.process(frames)
-#             depth_frame = frames.get_depth_frame()
-#             color_frame = frames.get_color_frame()
-
-#             if not depth_frame or not color_frame:
-#                 continue
-
-#             # Convert frames to numpy arrays
-#             depth_image = np.asanyarray(depth_frame.get_data())
-#             color_image = np.asanyarray(color_frame.get_data())
-
-#             # Face detection
-#             bounding_boxes, points = detect_face.detect_face(color_image, minsize, pnet, rnet, onet, threshold, factor)
-#             nrof_faces = bounding_boxes.shape[0]
-
-#             if nrof_faces > 0:
-#                 if start_time is None:
-#                     start_time = time.time()  # Start the timer when the face is first detected
-
-#                 # Get facial points and calculate eye center
-#                 points = np.array(points)
-#                 points = np.transpose(points, [1, 0])
-#                 points = points.astype(np.int16)
-                
-#                 left_eye_x, left_eye_y = points[0][0], points[0][1]
-#                 right_eye_x, right_eye_y = points[0][2], points[0][3]
-#                 eye_center_x = (left_eye_x + right_eye_x) // 2
-#                 eye_center_y = (left_eye_y + right_eye_y) // 2
-
-#                 if 0 <= eye_center_x < depth_image.shape[1] and 0 <= eye_center_y < depth_image.shape[0]:
-#                     depth_value = depth_frame.get_distance(eye_center_y, eye_center_x)  # Get depth value of eye center
-
-#                 # Check if 15 seconds have passed
-#                 elapsed_time = time.time() - start_time
-#                 if elapsed_time >= 15:
-#                     break  # Exit the loop after 15 seconds
-
-#             else:
-#                 start_time = None  #沒有偵測到人臉 重新計時
-
-#         # Stop streaming
-#         pipeline.stop()
-
-#         # Return the final distance value
-#         return jsonify({
-#             "status": "success",
-#             "message": f"Face detected. Distance to eye center: {depth_value} meters"
-#         })
-
-#     except Exception as e:
-#         return jsonify({"status": "error", "message": str(e)})
