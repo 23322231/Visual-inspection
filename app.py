@@ -165,146 +165,6 @@ def eye_dis_computer():
 def eye_user_check():
     return render_template('eye_user_check.html')
 
-
-#視力檢測 把相機的畫面串流到網頁上
-@app.route('/video_feed')
-def video_feed():
-    def generate_frames():
-        # global time_remaining, depth_value
-        
-        try:
-            # 設置深度與彩色流
-            pipeline = rs.pipeline()
-            rs_config = rs.config()
-
-            # 啟用攝影機的深度與彩色流
-            rs_config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-            rs_config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-
-            # 開始串流
-            pipeline.start(rs_config)
-            align_to = rs.stream.color
-            align = rs.align(align_to)
-
-            # 初始化MTCNN
-            color = (0,255,0)#框框顏色
-            minsize = 20  # 偵測人臉的最小尺寸
-            threshold = [0.6, 0.7, 0.7]  # 三階段門檻
-            factor = 0.709  # 縮放因子
-            depth_value = 0  # 記錄眼睛中心的深度距離
-            start_time = None
-
-            # 建立TensorFlow圖與會話
-            with tf.Graph().as_default():
-                config = tf.compat.v1.ConfigProto(log_device_placement=False, allow_soft_placement=True)
-                config.gpu_options.per_process_gpu_memory_fraction = 0.5
-                sess = tf.compat.v1.Session(config=config)
-                with sess.as_default():
-                    pnet, rnet, onet = detect_face.create_mtcnn(sess, None)
-
-            frame_counter = 0  # 增加跳幀機制
-            while True:
-                frames = pipeline.wait_for_frames()
-                frame_counter += 1
-                if frame_counter % 5 != 0:  # 每五幀處理一次來減少負載
-                    continue
-
-            
-                # 取得RealSense畫面
-                frames = pipeline.wait_for_frames()
-                frames = align.process(frames)
-                depth_frame = frames.get_depth_frame()
-                color_frame = frames.get_color_frame()
-
-                if not depth_frame or not color_frame:
-                    continue
-
-                # 將影像轉換為NumPy陣列
-                depth_image = np.asanyarray(depth_frame.get_data())
-                color_image = np.asanyarray(color_frame.get_data())
-
-                # MTCNN人臉偵測
-                bounding_boxes, points = detect_face.detect_face(color_image, minsize, pnet, rnet, onet, threshold, factor)
-                nrof_faces = bounding_boxes.shape[0]
-
-                if nrof_faces > 0:#如果偵測到人臉
-                    if start_time is None:
-                        start_time = time.time()  #記錄第一次偵測到人臉的時間
-
-                    #取得眼睛位置
-                    points = np.array(points).transpose([1, 0]).astype(np.int16)
-
-                    det = bounding_boxes[:, 0:4]#(左上角 x, 左上角 y, 右下角 x, 右下角 y)
-                    det_arr = []
-                    img_size = np.asarray(color_image.shape)[0:2]#得到圖像的高度和寬度
-                    detect_multiple_faces=False#處理多個檢測到的人臉或僅處理其中的一個
-
-                    det_arr.append(np.squeeze(det))#det_arr 中的每個元素都是一個表示邊界框的一維陣列
-
-                    det_arr = np.array(det_arr)
-                    det_arr = det_arr.astype(np.int16)
-
-                    for i, det in enumerate(det_arr):#遍歷 det_arr 中的每個邊界框
-                        if len(det) > 0  and len(det) == 4:
-                            cv2.rectangle(color_image, (det[0],det[1]), (det[2],det[3]), color, 2)#在原始影像上繪製一個矩形
-
-                        #在人臉上繪製 5 個特徵點
-                        facial_points = points[i]
-                        for j in range(0,5,1):
-                            #cv2.circle(影像, 圓心座標, 半徑, 顏色, 線條寬度)
-                            cv2.circle(color_image, (facial_points[j], facial_points[j + 5]), 2, (0, 0, 255), -1, 1)
-
-                        # 取出左右眼的位置座標
-                        left_eye_x, left_eye_y = facial_points[0], facial_points[1]
-                        right_eye_x, right_eye_y = facial_points[2], facial_points[3]
-                        # print("Left eye coordinates:", (left_eye_x, left_eye_y))
-                        # print("Right eye coordinates:", (right_eye_x, right_eye_y))
-                        # print("eye_center_x",(right_eye_x + left_eye_x)//2)
-                        # print("eye_center_y",(right_eye_y + left_eye_y)//2)
-                        eye_center_x=(right_eye_x + left_eye_x)//2
-                        eye_center_y=(right_eye_y + left_eye_y)//2
-
-                        if 0 <= eye_center_x < depth_image.shape[1] and 0 <= eye_center_y < depth_image.shape[0]:
-                            # 從深度影像中獲取眼睛中心點的深度值
-                            depth_value = depth_frame.get_distance(eye_center_y, eye_center_x)
-                            # 眼睛中心點與相機的距離
-                            print("Distance from camera to eye center (in meters):", depth_value)
-                        else:
-                            print("Eye center point is out of bounds of depth image.")
-
-                    # 計算已經偵測到人臉的時間
-                    elapsed_time = time.time() - start_time
-                    time_remaining = max(0, 5 - int(elapsed_time))  #更新剩餘時間
-                    # emit('data_feed', {'time': time_remaining, 'depth': round(depth_value, 2)})  # 傳送剩餘時間和深度值
-                    # 使用 emit 傳送數據
-                    socketio.emit('data_feed', {
-                        'time': time_remaining,
-                        'depth': round(depth_value, 2)
-                    }) 
-
-                    if elapsed_time >= 5:
-                        break  # 超過5秒停止 要跳轉到下一個葉面
-
-                else:
-                    start_time = None  # 沒有偵測到人臉時，重置計時
-                    # emit('data_feed', {'time': time_remaining, 'depth': round(depth_value, 2)})  # 傳送剩餘時間和深度值
-                    # user_data[socket_id]['start_time'] = None  # 如果中途人臉消失，重置時間
-
-                # 將畫面編碼為jpg格式，傳送到前端
-                ret, buffer = cv2.imencode('.jpg', color_image)
-                frame = buffer.tobytes()
-                yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-            # 結束串流
-            pipeline.stop()
-
-        except Exception as e:
-            print(f"Error: {e}")
-
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-
 # 色盲點圖顯示題目圖片
 @app.route('/next-image')
 def next_image():
@@ -582,6 +442,145 @@ def confirmEyeDistance(data):
 #     width= data['width']
 #     height = data['height']
 #     emit('get_width_height', {'width': width, 'height': height}, broadcast=True)
+#視力檢測 把相機的畫面串流到網頁上
+@app.route('/video_feed')
+def video_feed():
+    def generate_frames():
+        # global time_remaining, depth_value
+        
+        try:
+            # 設置深度與彩色流
+            pipeline = rs.pipeline()
+            rs_config = rs.config()
+
+            # 啟用攝影機的深度與彩色流
+            rs_config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+            rs_config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+
+            # 開始串流
+            pipeline.start(rs_config)
+            align_to = rs.stream.color
+            align = rs.align(align_to)
+
+            # 初始化MTCNN
+            color = (0,255,0)#框框顏色
+            minsize = 20  # 偵測人臉的最小尺寸
+            threshold = [0.6, 0.7, 0.7]  # 三階段門檻
+            factor = 0.709  # 縮放因子
+            depth_value = 0  # 記錄眼睛中心的深度距離
+            start_time = None
+
+            # 建立TensorFlow圖與會話
+            with tf.Graph().as_default():
+                config = tf.compat.v1.ConfigProto(log_device_placement=False, allow_soft_placement=True)
+                config.gpu_options.per_process_gpu_memory_fraction = 0.5
+                sess = tf.compat.v1.Session(config=config)
+                with sess.as_default():
+                    pnet, rnet, onet = detect_face.create_mtcnn(sess, None)
+
+            frame_counter = 0  # 增加跳幀機制
+            while True:
+                frames = pipeline.wait_for_frames()
+                frame_counter += 1
+                if frame_counter % 5 != 0:  # 每五幀處理一次來減少負載
+                    continue
+
+            
+                # 取得RealSense畫面
+                frames = pipeline.wait_for_frames()
+                frames = align.process(frames)
+                depth_frame = frames.get_depth_frame()
+                color_frame = frames.get_color_frame()
+
+                if not depth_frame or not color_frame:
+                    continue
+
+                # 將影像轉換為NumPy陣列
+                depth_image = np.asanyarray(depth_frame.get_data())
+                color_image = np.asanyarray(color_frame.get_data())
+
+                # MTCNN人臉偵測
+                bounding_boxes, points = detect_face.detect_face(color_image, minsize, pnet, rnet, onet, threshold, factor)
+                nrof_faces = bounding_boxes.shape[0]
+
+                if nrof_faces > 0:#如果偵測到人臉
+                    if start_time is None:
+                        start_time = time.time()  #記錄第一次偵測到人臉的時間
+
+                    #取得眼睛位置
+                    points = np.array(points).transpose([1, 0]).astype(np.int16)
+
+                    det = bounding_boxes[:, 0:4]#(左上角 x, 左上角 y, 右下角 x, 右下角 y)
+                    det_arr = []
+                    img_size = np.asarray(color_image.shape)[0:2]#得到圖像的高度和寬度
+                    detect_multiple_faces=False#處理多個檢測到的人臉或僅處理其中的一個
+
+                    det_arr.append(np.squeeze(det))#det_arr 中的每個元素都是一個表示邊界框的一維陣列
+
+                    det_arr = np.array(det_arr)
+                    det_arr = det_arr.astype(np.int16)
+
+                    for i, det in enumerate(det_arr):#遍歷 det_arr 中的每個邊界框
+                        if len(det) > 0  and len(det) == 4:
+                            cv2.rectangle(color_image, (det[0],det[1]), (det[2],det[3]), color, 2)#在原始影像上繪製一個矩形
+
+                        #在人臉上繪製 5 個特徵點
+                        facial_points = points[i]
+                        for j in range(0,5,1):
+                            #cv2.circle(影像, 圓心座標, 半徑, 顏色, 線條寬度)
+                            cv2.circle(color_image, (facial_points[j], facial_points[j + 5]), 2, (0, 0, 255), -1, 1)
+
+                        # 取出左右眼的位置座標
+                        left_eye_x, left_eye_y = facial_points[0], facial_points[1]
+                        right_eye_x, right_eye_y = facial_points[2], facial_points[3]
+                        # print("Left eye coordinates:", (left_eye_x, left_eye_y))
+                        # print("Right eye coordinates:", (right_eye_x, right_eye_y))
+                        # print("eye_center_x",(right_eye_x + left_eye_x)//2)
+                        # print("eye_center_y",(right_eye_y + left_eye_y)//2)
+                        eye_center_x=(right_eye_x + left_eye_x)//2
+                        eye_center_y=(right_eye_y + left_eye_y)//2
+
+                        if 0 <= eye_center_x < depth_image.shape[1] and 0 <= eye_center_y < depth_image.shape[0]:
+                            # 從深度影像中獲取眼睛中心點的深度值
+                            depth_value = depth_frame.get_distance(eye_center_y, eye_center_x)
+                            
+                            # 眼睛中心點與相機的距離
+                            print("Distance from camera to eye center (in meters):", depth_value)
+                        else:
+                            print("Eye center point is out of bounds of depth image.")
+
+                    # 計算已經偵測到人臉的時間
+                    elapsed_time = time.time() - start_time
+                    time_remaining = max(0, 5 - int(elapsed_time))  #更新剩餘時間
+                    # emit('data_feed', {'time': time_remaining, 'depth': round(depth_value, 2)})  # 傳送剩餘時間和深度值
+                    # 使用 emit 傳送數據
+                    socketio.emit('data_feed', {
+                        'time': time_remaining,
+                        'depth': round(depth_value, 2)
+                    }) 
+
+                    if elapsed_time >= 5:
+                        session['depth_value'] = depth_value #將深度值存入session
+                        break  # 超過5秒停止 要跳轉到下一個葉面
+
+                else:
+                    start_time = None  # 沒有偵測到人臉時，重置計時
+                    # emit('data_feed', {'time': time_remaining, 'depth': round(depth_value, 2)})  # 傳送剩餘時間和深度值
+                    # user_data[socket_id]['start_time'] = None  # 如果中途人臉消失，重置時間
+
+                # 將畫面編碼為jpg格式，傳送到前端
+                ret, buffer = cv2.imencode('.jpg', color_image)
+                frame = buffer.tobytes()
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+            # 結束串流
+            pipeline.stop()
+
+        except Exception as e:
+            print(f"Error: {e}")
+
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 #計算視力測驗E字圖片的大小並傳回前端
@@ -594,9 +593,7 @@ def calculate_sizes(data):
         emit('error', {'message': 'Missing PPI or distance data'}, broadcast=True)
         print("Missing PPI or distance dataooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
         return
-
     print(f"Received PPI: {ppi}, Distance: {distance}")
-
     # 确保 PPI 和 distance 是有效的数值
     try:
         ppi = float(ppi)
@@ -604,13 +601,10 @@ def calculate_sizes(data):
     except ValueError:
         emit('error', {'message': 'Invalid PPI or distance value'}, broadcast=True)
         return
-
     #計算縮放比例
     scale_factor = distance / 6  
-
     #計算14種E字圖片的像素寬度
     sizes = [(7.27 / 2.54) * ppi * (ratio / 14) * scale_factor for ratio in range(14, 0, -1)]
-
     # 傳送計算結果給前端
     emit('display_sizes', {'sizes': sizes}, broadcast=True)
 
@@ -623,9 +617,11 @@ def send_width_height():
     session['heightPx'] = data.get('heightPx')#存信用卡在螢幕上佔的像素(高)
     return jsonify({"message": "Width and height saved successfully!"}), 200
 
-@app.route('/get_eye_distance')
-def get_eye_distance():
-    return jsonify(depth=round(depth_value, 2))
+# @app.route('/get_eye_distance')
+# def get_eye_distance():
+#     #從session中獲取深度值
+#     depth=round(session['depth_value'], 2)
+#     return jsonify({'depth_value':depth})
 
 @socketio.on('request_width_height')
 def handle_request_width_height():
@@ -638,31 +634,6 @@ def handle_request_width_height():
     else:
         print("沒有找到數據")
 
-# @app.route('/handwrite')
-# def handwrite():
-#     user_uuid = request.args.get('session')  # 從查詢参數中獲取session ID
-#     if user_uuid:
-#         return render_template('handwrite.html', user_uuid=user_uuid)
-#     else:
-#         return "User UUID not provided", 400
-
-@app.route('/color_blind_spot_map')
-def color_blind_spot_map():
-    user_uuid = request.args.get('session')  # 從查詢参數中獲取session ID
-    if user_uuid:
-        return render_template('/color_blind_spot_map.html', user_uuid=user_uuid)
-    else:
-        return "User UUID not provided", 400
-
-
-# 產生唯一的網址 handwrite?session= 色盲點圖測驗手機端確認button按下後呼叫的API
-@app.route('/generate-url', methods=['GET'])
-def generate_url():
-    user_id = str(uuid.uuid4())  # 生成UUID
-    unique_url = f"{request.host_url}handwrite?session={user_id}"
-    session['user_id']=user_id
-    session['unique_url'] = unique_url  # 存儲到會話中
-    return jsonify({'url': unique_url})
 
 # 產生唯一的網址 eye_echart?session=  從quiz.html 進入
 @app.route('/generate-eye_echart-url', methods=['GET'])
@@ -698,19 +669,42 @@ def confirm_eye_dis(data):
 def confirm_eye_dis(data):
     print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")  # 確認事件觸發
     url_suffix = data.get('urlSuffix')
+    depth = data.get('depth_value')
     if url_suffix:
         print(f'Received urlSuffix: {url_suffix}')
+
         #發去給eye_dis_computer.html 讓他跳轉到測驗的畫面
-        emit('eye_into_test_confirm', {'eye_user_id': url_suffix},broadcast=True) #傳給qrcode.html 告訴她可以跳轉到顯示題目的畫面了
+        print(depth)
+        print("8888888888888888888888888888888888888")
+        emit('eye_into_test_confirm', {'eye_user_id': url_suffix,'depth_value':depth},broadcast=True) #傳給qrcode.html 告訴她可以跳轉到顯示題目的畫面了
     else:
         print('No URL suffix provided.')
-    
+
+# @app.route('/handwrite')
+# def handwrite():
+#     user_uuid = request.args.get('session')  # 從查詢参數中獲取session ID
+#     if user_uuid:
+#         return render_template('handwrite.html', user_uuid=user_uuid)
+#     else:
+#         return "User UUID not provided", 400
+
+@app.route('/color_blind_spot_map')
+def color_blind_spot_map():
+    user_uuid = request.args.get('session')  # 從查詢参數中獲取session ID
+    if user_uuid:
+        return render_template('/color_blind_spot_map.html', user_uuid=user_uuid)
+    else:
+        return "User UUID not provided", 400
 
 
-
-
-
-
+# 產生唯一的網址 handwrite?session= 色盲點圖測驗手機端確認button按下後呼叫的API
+@app.route('/generate-url', methods=['GET'])
+def generate_url():
+    user_id = str(uuid.uuid4())  # 生成UUID
+    unique_url = f"{request.host_url}handwrite?session={user_id}"
+    session['user_id']=user_id
+    session['unique_url'] = unique_url  # 存儲到會話中
+    return jsonify({'url': unique_url})
 
 
 

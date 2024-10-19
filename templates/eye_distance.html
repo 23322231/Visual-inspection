@@ -36,7 +36,7 @@
             if (distance > 0 && time<=0 ) {  //確保獲得有效距離
                 console.log('data.depth:', distance);
                 var urlSuffix = window.location.href.split('=').pop();
-                socket.emit('eye_into_test', {'urlSuffix': urlSuffix});
+                socket.emit('eye_into_test', {'urlSuffix': urlSuffix,'depth_value':distance});
                 window.location.href = window.location.origin + '/eye_user_check?session=' + location.href.split('=').pop();
             }
         }, 1000);  // 每秒更新一次

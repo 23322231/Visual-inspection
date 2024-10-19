@@ -67,13 +67,10 @@
     // 收到更新頁面消息時的處理
     socket.on('eye_into_test_confirm', function(message) {
         console.log('Received message:'+ JSON.stringify (message));
-
+        depth=message.depth_value;
         // 新的URL
-        var newUrl = window.location.origin + '/eye_Etest?session=' + message.eye_user_id;
+        var newUrl = window.location.origin + '/eye_Etest?session=' + message.eye_user_id +'&depth=' + depth;
         window.location.href = newUrl;
-        // setTimeout(function() {
-            // window.location.href = newUrl;
-        // }, 3000);  // 3秒后跳转
     });
     // WebSocket 連接成功時的處理
     socket.on('connect', function() {
