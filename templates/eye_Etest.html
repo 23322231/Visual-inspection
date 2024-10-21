@@ -16,82 +16,97 @@
     </style>
 </head>
 <body>
-    <h1>視力測驗 E 字圖片</h1>
-    <button onclick="getallsizeAndsend()">確認</button>
+    <h1></h1>
 
     <div id="imageContainer">
-        <img id="eImage" src="" style="display:none;" />
-    </div> <!-- 用來顯示 E 字圖片的區域 -->
+        <!-- 這裡將會動態顯示圖片 -->
+        <img id="initialImage" src="static/images/1280.jpg" style="width:300px;"> <!-- 初始圖片 -->
+    </div>
+    <button id="next-btn">確認</button>
 
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
         // 初始化 WebSocket 連接
-        var socket = io.connect('http://192.168.1.179:5000');
+        var socket = io.connect('https://31be-114-34-178-54.ngrok-free.app');
         
         var urlParams = new URLSearchParams(window.location.search);
         var session = urlParams.get('session');
         var depth = urlParams.get('depth');
+        const knownWidthMm = 85.6; //信用卡的寬度 (毫米)
+        const knownHeightMm = 54.0; //信用卡的高度 (毫米)
+        const sizesInMm = [87.3, 43.65, 29.1, 21.83, 17.46, 14.55, 12.47, 10.91, 9.7, 8.73, 7.94, 7.28, 6.72, 6.24, 5.82]; // E 字的不同尺寸 (毫米)
 
-        // WebSocket 連接成功時的處理
-        socket.on('connect', function() {
-            console.log('WebSocket 連接已打開');
-        });
-    
-        var widthPx,heightPx;
-        function getallsizeAndsend() {
+        let currentIndex = 0;  // 目前顯示的 E 字大小索引
+        var widthPx, heightPx, ppi;
+        var isInitialImage = true;  // 用來判斷是否顯示初始圖片
 
-            // // 當頁面加載時請求數據
-            socket.emit('request_width_height');
-            socket.on('get_width_height', function(data) {
-                console.log("????????:)??????????????????");
-                // screenSizeInch = data.screen_size;  // 螢幕尺寸
-                widthPx = data.screen_width;  // 取得參考物件的寬度（像素）
-                heightPx = data.screen_height;// 取得參考物件的高度（像素）
-                
-                console.log(widthPx, heightPx);
-            });
-            if (depth) {
-                        calculateAndSendSizes();
+        function showNextImage() {
+            if (isInitialImage) {
+                // 隱藏初始圖片，顯示 E 字圖片
+                document.getElementById('initialImage').style.display = 'none';  // 隱藏初始圖片
+                isInitialImage = false;  // 將旗標設為 false
+
+                // 開始顯示 E 字測試圖片
+                displayNextEImage();
+            } else {
+                // 如果初始圖片已經顯示過，繼續顯示 E 字圖片
+                displayNextEImage();
             }
         }
-    
-        function calculateAndSendSizes() {
-            const knownWidthCm =8.56;//信用卡的寬度(CM)
-            const knownHeightCm =5.4;//信用卡的高度(CM)
-            const maxWidthCm = 8.73; //最大E字寬度(CM)
-    
-            const widthInch = knownWidthCm / 2.54; //將公分轉換為英吋
-            const heightInch = knownHeightCm / 2.54; //將公分轉換為英吋
-            //卡片對角線尺寸
-            const diagonalInch = Math.sqrt(Math.pow(widthInch, 2) + Math.pow(heightInch, 2));
-            const ppi = Math.sqrt(widthPx ** 2 + heightPx ** 2) / diagonalInch;  // 計算 PPI
-            console.log(ppi);
-            console.log(`PPI: ${ppi}, Depth: ${depth}`);
-    
-            // 傳送 PPI 和距離到後端
-            socket.emit('calculate_sizes', { 'ppi': ppi, 'depth': depth });
-    
-            // 接收後端計算的 E 字圖片尺寸，依序顯示
-            socket.on('display_sizes', (data) => {
-                const imageContainer = document.getElementById('imageContainer');
-                imageContainer.innerHTML = '';  //清空舊內容
-    
-                data.sizes.forEach((size, index) => {
-                    const img = document.createElement('img');
-                    img.src = 'static/e_chart/right.jpg';  
-                    img.style.width = `${size}px`;  //設定圖片的寬度
-                    img.style.display = 'block';
-                    img.style.margin = '10px auto';
-                    imageContainer.appendChild(img);
-                });
-            });
+
+        function displayNextEImage() {
+            if (currentIndex < sizesInMm.length) {
+                const sizeInMm = sizesInMm[currentIndex];
+                const sizeInPixel = mmToPixels(sizeInMm);  // 計算 E 字在螢幕上應有的大小 (像素)
+                depth_calculate = 6*depth;//先換算好深度
+                sizeInPixels=sizeInPixel/depth_calculate; //再根據深度調整大小
+                // 更新圖片
+                var imageContainer = document.getElementById('imageContainer');
+                imageContainer.innerHTML = '';  // 清空舊圖片
+                var img = document.createElement('img');
+                random=Math.floor(Math.random()*4); //回傳0或1或2或3
+                imgset=['static/e_chart/right.jpg','static/e_chart/left.jpg','static/e_chart/down.jpg','static/e_chart/up.jpg']
+                img.src = imgset[random];  // E 字圖片路徑
+                img.style.width = `${sizeInPixels}px`;  // 設定圖片寬度
+                imageContainer.appendChild(img);
+                
+                currentIndex++;  // 更新到下一個尺寸
+            } else {
+                alert('測試結束');
+            }
+        }
+
+        // 將毫米轉換為像素
+        function mmToPixels(mm) {
+            const inches = mm / 25.4;  // 將毫米轉換為英寸
+            return inches * ppi;  // 根據 PPI 計算像素
         }
         
+        // 按下確認按鈕後，顯示下一個 E 字大小
+        document.getElementById('next-btn').addEventListener('click', () => {
+            showNextImage();
+            socket.emit('start_detection');
+        });
+
         window.onload = function() {
-            getallsizeAndsend();
+            // 請求螢幕寬高資料
+            socket.emit('request_width_height');
+            socket.on('get_width_height', function(data) {
+                widthPx = data.screen_width;  // 取得參考物件的寬度（像素）
+                heightPx = data.screen_height; // 取得參考物件的高度（像素）
+
+                // 計算 PPI
+                const widthInch = knownWidthMm / 25.4; // 將毫米轉換為英吋
+                const heightInch = knownHeightMm / 25.4; // 將毫米轉換為英吋
+                const diagonalInch = Math.sqrt(Math.pow(widthInch, 2) + Math.pow(heightInch, 2));
+                const diagonalPx = Math.sqrt(widthPx ** 2 + heightPx ** 2);
+                ppi = diagonalPx / diagonalInch;  // PPI 計算
+            });
+
+            // 初始顯示不同的提示圖片
+            document.getElementById('initialImage').style.display = 'block';
         }
-        
     </script>
     
 </body>

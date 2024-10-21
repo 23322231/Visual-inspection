@@ -262,12 +262,12 @@ def result_cb():
 # 計算色盲點圖分數
 @app.route('/calculate-score', methods=['POST'])
 def calculate_score():
-    # print("進來了 !!!!!!!!!!!!!!!")
+    print("進來了 !!!!!!!!!!!!!!!")
     width = 12  #可容許誤差寬度
     data = request.get_json()
     user_id = data.get('user_id')
     final_score = 0.0
-
+    print(user_id)
     if not user_id:
         return jsonify({'error': 'User ID not provided'}), 400
 
@@ -605,7 +605,7 @@ def calculate_sizes(data):
     #計算縮放比例
     scale_factor = distance / 6  
     #計算14種E字圖片的像素寬度
-    sizes = [(7.27 / 2.54) * ppi * (ratio / 14) * scale_factor for ratio in range(14, 0, -1)]
+    sizes = [(8.73 / 2.54) * ppi * (ratio / 14) * scale_factor for ratio in range(14, 0, -1)]
     # 傳送計算結果給前端
     emit('display_sizes', {'sizes': sizes}, broadcast=True)
 
@@ -616,6 +616,7 @@ def send_width_height():
     # 將數據存入 session
     session['widthPx'] = data.get('widthPx')#存信用卡在螢幕上佔的像素(寬)
     session['heightPx'] = data.get('heightPx')#存信用卡在螢幕上佔的像素(高)
+    print("0000000000000",data.get('widthPx'),data.get('heightPx'))
     return jsonify({"message": "Width and height saved successfully!"}), 200
 
 # @app.route('/get_eye_distance')
@@ -629,6 +630,7 @@ def handle_request_width_height():
     # global data_store
     widthPx = session['widthPx']
     heightPx = session['heightPx']
+    
     if widthPx:
         # emit('get_width_height', {'screen_width': screen_width, 'screen_height': screen_height,'screen_size':screen_size},broadcast=True) 
         emit('get_width_height', {'screen_width': widthPx, 'screen_height': heightPx},broadcast=True) 
@@ -643,6 +645,7 @@ def generate_eye_echart_url():
     unique_url = f"{request.host_url}eye_echart?session={eye_user_id}"
     session['eye_user_id']=eye_user_id
     session['eye_unique_url'] = unique_url  # 存儲到會話中
+
     return jsonify({'url': unique_url})
 
 #產生qrcode #qrcode掃描進去的網址
@@ -739,6 +742,78 @@ def generate_advice():
     except Exception as e:
             app.logger.error(f"Exception: {e}")
             return jsonify({'error': str(e)}), 500
+    
+
+def calculate_direction(finger_tip, finger_root):
+    direction_vector = np.array(finger_tip) - np.array(finger_root)
+    reference_vectors = {
+        "up": np.array([0, -1]),
+        "down": np.array([0, 1]),
+        "right": np.array([-1, 0]),
+        "left": np.array([1, 0])
+    }
+    min_angle = 180
+    detected_direction = None
+
+    for direction, ref_vector in reference_vectors.items():
+        cos_angle = np.dot(direction_vector[:2], ref_vector) / (
+            np.linalg.norm(direction_vector[:2]) * np.linalg.norm(ref_vector)
+        )
+        angle = np.degrees(np.arccos(cos_angle))
+        if angle < min_angle:
+            min_angle = angle
+            detected_direction = direction
+
+    return detected_direction
+
+mp_hands = mp.solutions.hands
+
+@socketio.on('start_detection')  # 事件處理函數
+def detect_hand_direction():
+    cap = cv2.VideoCapture(0)
+    with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.5, min_tracking_confidence=0.5) as hands:
+        while cap.isOpened():
+            ret, img = cap.read()
+            if not ret:
+                break
+            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            results = hands.process(img_rgb)
+
+            if results.multi_hand_landmarks:
+                for hand_landmarks in results.multi_hand_landmarks:
+                    finger_tip = [hand_landmarks.landmark[8].x * img.shape[1], 
+                                  hand_landmarks.landmark[8].y * img.shape[0]]
+                    finger_root = [hand_landmarks.landmark[5].x * img.shape[1], 
+                                   hand_landmarks.landmark[5].y * img.shape[0]]
+
+                    
+                    direction_vector = np.array(finger_tip) - np.array(finger_root)
+                    reference_vectors = {
+                        "up": np.array([0, -1]),
+                        "down": np.array([0, 1]),
+                        "right": np.array([-1, 0]),
+                        "left": np.array([1, 0])
+                    }
+
+                    min_angle = 180
+                    detected_direction = None
+
+                    for direction, ref_vector in reference_vectors.items():
+                        cos_angle = np.dot(direction_vector[:2], ref_vector) / (
+                            np.linalg.norm(direction_vector[:2]) * np.linalg.norm(ref_vector)
+                        )
+                        angle = np.degrees(np.arccos(cos_angle))
+                        if angle < min_angle:
+                            min_angle = angle
+                            detected_direction = direction
+
+                    direction = detected_direction
+
+                    if direction:
+                        socketio.emit('hand_direction', {'direction': direction})  # 傳送方向
+
+    cap.release()
+
 
 @socketio.on('connect')
 def handle_connect():

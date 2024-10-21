@@ -39,7 +39,23 @@
 <body>
     <!-- 訊息區域 -->
     <div class="confirmation-box">
-        <h1>請在此確認辨識是否正確~</h1>
+        <h1 id="direction-text">請在此確認辨識是否正確~</h1>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+        // 初始化 WebSocket 連接
+        var socket = io.connect('https://31be-114-34-178-54.ngrok-free.app');
+
+        // 監聽伺服器傳來的手指方向事件
+        socket.on('hand_direction', function(data) {
+            console.log('hand_direction:', data);
+
+            // 更新網頁上的 h1 標題文字，顯示偵測到的方向
+            var directionText = document.getElementById('direction-text');
+            directionText.textContent = `偵測到的方向: ${data.direction}`;
+        });
+    </script>
 </body>
 </html>
