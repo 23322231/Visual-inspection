@@ -10,10 +10,10 @@ mp_hands = mp.solutions.hands
 cap = cv2.VideoCapture(0)
 
 def calculate_direction(finger_tip, finger_root):
-    # 計算向量 (指尖 - 指根)
+    #計算手指向量
     direction_vector = np.array(finger_tip) - np.array(finger_root)
 
-    # 定義四個基準方向向量
+    #定義上下左右向量
     reference_vectors = {
         "up": np.array([0, -1]),
         "down": np.array([0, 1]),
@@ -21,18 +21,18 @@ def calculate_direction(finger_tip, finger_root):
         "left": np.array([1, 0])
     }
 
-    min_angle = 180  # 初始化最小角度
+    min_angle = 180  #設定初始角度
     detected_direction = None
 
     #計算與四個方向向量的夾角
     for direction, ref_vector in reference_vectors.items():
-        #計算cos角度
+        #cos角度
         cos_angle = np.dot(direction_vector[:2], ref_vector) / (
             np.linalg.norm(direction_vector[:2]) * np.linalg.norm(ref_vector)
         )
-        angle = np.degrees(np.arccos(cos_angle))  # 轉換為角度
+        angle= np.degrees(np.arccos(cos_angle))  #轉換為角度
 
-        if angle < min_angle:  # 找到最小夾角
+        if angle < min_angle:  #找到最小夾角
             min_angle = angle
             detected_direction = direction
 
@@ -54,18 +54,13 @@ with mp_hands.Hands(
             print("Cannot receive frame")
             break
 
-        #BGR 轉 RGB
+        #BGR轉RGB
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         results = hands.process(img_rgb)
 
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
-                # 繪製手部骨架
-                # mp_drawing.draw_landmarks(
-                #     img, hand_landmarks, mp_hands.HAND_CONNECTIONS,
-                #     mp_drawing_styles.get_default_hand_landmarks_style(),
-                #     mp_drawing_styles.get_default_hand_connections_style()
-                # )
+                
 
                 #取得食指(8)和(5)的座標
                 finger_tip = [
@@ -77,7 +72,7 @@ with mp_hands.Hands(
                     hand_landmarks.landmark[5].y * img.shape[0]
                 ]
 
-                # 計算指向方向
+                #計算方向
                 direction = calculate_direction(finger_tip, finger_root)
                 if direction:
                     cv2.putText(
@@ -85,10 +80,10 @@ with mp_hands.Hands(
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA
                     )
 
-        #顯示影像
+        
         cv2.imshow('Hand Direction Detection', img)
         if cv2.waitKey(5) == ord('q'):
-            break  # 按下 q 鍵退出
+            break
 
 cap.release()
 cv2.destroyAllWindows()

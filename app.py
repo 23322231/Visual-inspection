@@ -725,14 +725,14 @@ def generate_advice():
     data = request.json
     symptoms = data.get('symptoms')
     print(symptoms)
-    # 使用 Ollama CLI 調用 Llama 3 來生成醫囑
+    
     try:
         prompt = f"請根據以下症狀生成，一段約300字的中文醫療建議，不需要講太多細節，要中文的{symptoms}"
         result = subprocess.run(
             ['ollama', 'run', 'llama3', ], input=prompt,
             capture_output=True, text=True, #stderr=subprocess.PIPE,
-            encoding='utf-8',  # 指定使用 utf-8 編碼
-            errors='ignore'    # 忽略無法編碼的字符
+            encoding='utf-8',  #指定使用 utf-8 編碼
+            errors='ignore'    #忽略無法編碼的字符
         )
         if result.stderr:
             app.logger.error(f"Subprocess error: {result.stderr}")
@@ -745,6 +745,7 @@ def generate_advice():
     
 
 def calculate_direction(finger_tip, finger_root):
+    
     direction_vector = np.array(finger_tip) - np.array(finger_root)
     reference_vectors = {
         "up": np.array([0, -1]),
@@ -754,7 +755,7 @@ def calculate_direction(finger_tip, finger_root):
     }
     min_angle = 180
     detected_direction = None
-
+    # 計算角度(cos)
     for direction, ref_vector in reference_vectors.items():
         cos_angle = np.dot(direction_vector[:2], ref_vector) / (
             np.linalg.norm(direction_vector[:2]) * np.linalg.norm(ref_vector)
