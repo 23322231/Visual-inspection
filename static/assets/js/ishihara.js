@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
       hide_gui_element(gui, 'clear', true);
       hide_gui_element(gui, 'stop', false);
 
+
       generating = true;
 
       var img_data = img_ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -121,6 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
       hide_gui_element(gui, 'generate', false);
       hide_gui_element(gui, 'clear', false);
       hide_gui_element(gui, 'stop', true);
+
     },
     download_png: function() {
       download('ishihara.png', canvas.toDataURL('image/png'))
@@ -137,10 +139,10 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   function set_colors_folders() {
-    for (var i = 0; i < 6; i++) {
-      hide_gui_element(colors_on_folder, 'color_on' + i, i >= ishihara_input.n_colors_on);
-      hide_gui_element(colors_off_folder, 'color_off' + i, i >= ishihara_input.n_colors_off);
-    }
+    // for (var i = 0; i < 6; i++) {
+    //   hide_gui_element(colors_on_folder, 'color_on' + i, i >= ishihara_input.n_colors_on);
+    //   hide_gui_element(colors_off_folder, 'color_off' + i, i >= ishihara_input.n_colors_off);
+    // }
   }
 
   var gui = new dat.GUI({
@@ -228,42 +230,45 @@ document.addEventListener('DOMContentLoaded', function() {
 
   gui.remember(ishihara_input);
 
-  gui.add(ishihara_input, 'load_image').name("Load image");
-  gui.add(ishihara_input, 'circular').name("Circular");
-  gui.add(ishihara_input, 'resize').name("Resize");
-  gui.add(ishihara_input, 'edge_detection').name("Edge detection");
-  gui.add(ishihara_input, 'invert_colors').name("Invert colors");
-  gui.addColor(ishihara_input, 'background_color').name("Background color");
+// 把功能按鍵加到 UI
+  // gui.add(ishihara_input, 'load_image').name("Load image");
+  // gui.add(ishihara_input, 'circular').name("Circular");
+  // gui.add(ishihara_input, 'resize').name("Resize");
+  // gui.add(ishihara_input, 'edge_detection').name("Edge detection");
+  gui.add(ishihara_input, 'invert_colors').name("Invert colors"); //把主要圖形和背景顏色的顏色互換
+  // gui.addColor(ishihara_input, 'background_color').name("Background color");
+  
+  // 選不同圖形來生成點圖
   gui.add(ishihara_input, 'shape_factory', ['Circle', 'Regular polygon', 'Cross', 'Star']).onChange(function(value) {
     hide_gui_element(gui, 'sides', value !== 'Regular polygon' && value !== 'Star');
     hide_gui_element(gui, 'pointiness', value !== 'Cross' && value !== 'Star');
   }).name("Shape");
-  gui.add(ishihara_input, 'sides', 3, 12, 1).name("Sides");
-  gui.add(ishihara_input, 'pointiness', 0.01, 0.99).name("Pointiness");
-  gui.add(ishihara_input, 'n_colors_on', 1, 6, 1).name("Colors on").onChange(function() {
-    set_colors_folders();
-  });
-  gui.add(ishihara_input, 'n_colors_off', 1, 6, 1).name("Colors off").onChange(function() {
-    set_colors_folders();
-  });
 
-  var colors_on_folder = gui.addFolder('Colors on');
-  var colors_off_folder = gui.addFolder('Colors off');
-  for (var i = 0; i < 6; i++) {
-    colors_on_folder.addColor(ishihara_input, 'color_on' + i).name(i + 1);
-    colors_off_folder.addColor(ishihara_input, 'color_off' + i).name(i + 1);
-  }
+  // gui.add(ishihara_input, 'sides', 3, 12, 1).name("Sides");
+  // gui.add(ishihara_input, 'pointiness', 0.01, 0.99).name("Pointiness");
+  // gui.add(ishihara_input, 'n_colors_on', 1, 6, 1).name("Colors on").onChange(function() {
+  //   set_colors_folders();
+  // });
+  // gui.add(ishihara_input, 'n_colors_off', 1, 6, 1).name("Colors off").onChange(function() {
+  //   set_colors_folders();
+  // });
 
-  gui.add(ishihara_input, 'min_radius', 2, 50).name("Min radius").onChange(function() {
-    ishihara_input.max_radius = Math.max(ishihara_input.min_radius, ishihara_input.max_radius);
-    update_gui(gui);
-  });
-  gui.add(ishihara_input, 'max_radius', 2, 50).name("Max radius").onChange(function() {
-    ishihara_input.min_radius = Math.min(ishihara_input.min_radius, ishihara_input.max_radius);
-    update_gui(gui);
-  });
-  gui.add(ishihara_input, 'draw_ratio', 0, 1, 0.01).name("Draw ratio");
-  gui.add(ishihara_input, 'stop_after', 1000, 100000, 1).name("Stop after");
+// 選項內清單的Colors on跟Colors off的折疊清單
+  // for (var i = 0; i < 6; i++) {
+  //   colors_on_folder.addColor(ishihara_input, 'color_on' + i).name(i + 1);
+  //   colors_off_folder.addColor(ishihara_input, 'color_off' + i).name(i + 1);
+  // }
+
+  // gui.add(ishihara_input, 'min_radius', 2, 50).name("Min radius").onChange(function() {
+  //   ishihara_input.max_radius = Math.max(ishihara_input.min_radius, ishihara_input.max_radius);
+  //   update_gui(gui);
+  // });
+  // gui.add(ishihara_input, 'max_radius', 2, 50).name("Max radius").onChange(function() {
+  //   ishihara_input.min_radius = Math.min(ishihara_input.min_radius, ishihara_input.max_radius);
+  //   update_gui(gui);
+  // });
+  // gui.add(ishihara_input, 'draw_ratio', 0, 1, 0.01).name("Draw ratio");
+  // gui.add(ishihara_input, 'stop_after', 1000, 100000, 1).name("Stop after");
   gui.add(ishihara_input, 'generate').name("Generate");
   gui.add(ishihara_input, 'clear').name("Clear");
   gui.add(ishihara_input, 'stop').name("Stop");
@@ -273,12 +278,14 @@ document.addEventListener('DOMContentLoaded', function() {
   hide_gui_element(gui, 'sides', true);
   hide_gui_element(gui, 'pointiness', true);
   hide_gui_element(gui, 'stop', true);
+  
   set_colors_folders();
 
   var painting = false;
   var generating = false;
   var x, y;
 
+// 手繪部分
   var hand_draw = function(ctx, style, x1, y1, x2, y2) {
     if (x2 && y2) {
       ctx.beginPath();
@@ -295,6 +302,7 @@ document.addEventListener('DOMContentLoaded', function() {
     ctx.closePath();
   };
 
+  // 鼠繪部分
   var mousedown = function(mx, my, style) {
     painting = true;
 
@@ -306,11 +314,13 @@ document.addEventListener('DOMContentLoaded', function() {
     hand_draw(ctx, style, x, y);
     hand_draw(img_ctx, style, x, y);
   };
+  // 對畫布加滑鼠點擊監聽器
   canvas.addEventListener('mousedown', function(e) {
     if (e.button === 0) {
       mousedown(e.offsetX * PIXEL_RATIO, e.offsetY * PIXEL_RATIO, e.ctrlKey ? '#FFF' : '#000');
     }
   });
+  // 對畫布加手指點擊監聽器
   canvas.addEventListener('touchstart', function(e) {
     var rect = canvas.getBoundingClientRect();
     mousedown(
@@ -320,6 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
     );
   });
 
+  // 滑鼠放開點擊部分
   var mouseup = function(mx, my, style) {
     painting = false;
 
@@ -331,11 +342,13 @@ document.addEventListener('DOMContentLoaded', function() {
     hand_draw(ctx, style, x, y);
     hand_draw(img_ctx, style, x, y);
   };
+  // 滑鼠放開點擊
   canvas.addEventListener('mouseup', function(e) {
     if (e.button === 0) {
       mouseup(e.offsetX * PIXEL_RATIO, e.offsetY * PIXEL_RATIO, e.ctrlKey ? '#FFF' : '#000');
     }
   });
+  // 手指
   canvas.addEventListener('touchend', function(e) {
     var rect = canvas.getBoundingClientRect();
     mouseup(
@@ -345,6 +358,7 @@ document.addEventListener('DOMContentLoaded', function() {
     );
   });
 
+  // 畫畫中的部分(手跟滑鼠)
   var mousemove = function(curr_x, curr_y, style) {
     if (!painting || generating) return;
 
@@ -354,9 +368,12 @@ document.addEventListener('DOMContentLoaded', function() {
     x = curr_x;
     y = curr_y;
   };
+
+  // 滑鼠
   canvas.addEventListener('mousemove', function(e) {
     mousemove(e.offsetX * PIXEL_RATIO, e.offsetY * PIXEL_RATIO, e.ctrlKey ? '#FFF' : '#000');
   });
+  // 手
   canvas.addEventListener('touchmove', function(e) {
     var rect = canvas.getBoundingClientRect();
     mousemove(
@@ -395,4 +412,14 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     reader.readAsDataURL(e.target.files[0]);
   }, false);
+  // var guiElement = document.querySelector('.dg.main');
+  // if (guiElement) {
+  //     // Change background color
+  //     guiElement.style.backgroundColor = '#333';
+  //     guiElement.style.color = '#fff';
+  //     // Change position
+  //     guiElement.style.position = 'absolute';
+  //     guiElement.style.top = '20px';
+  //     guiElement.style.right = '200px';
+  // }
 });
