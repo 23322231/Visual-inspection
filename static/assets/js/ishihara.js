@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
     background_color: '#FFFFFF',
     n_colors_on: 3,
     n_colors_off: 6,
+    color: "General 1",
     color_on0: '#F9BB82',
     color_on1: '#EBA170',
     color_on2: '#FCCD84',
@@ -84,6 +85,85 @@ document.addEventListener('DOMContentLoaded', function() {
         'Star': StarFactory
       }[ishihara_input.shape_factory];
       shape_factory = new shape_factory(JSON.parse(JSON.stringify(ishihara_input)));
+
+      var color = {
+        "General 1": [{
+          n_colors_on: 3,
+          n_colors_off: 6,
+          color_on0: '#F9BB82',
+          color_on1: '#EBA170',
+          color_on2: '#FCCD84',
+          color_off0: '#9CA594',
+          color_off1: '#ACB4A5',
+          color_off2: '#BBB964',
+          color_off3: '#D7DAAA',
+          color_off4: '#E5D57D',
+          color_off5: '#D1D6AF'
+        }],
+        "General 2": [{
+          n_colors_on: 5,
+          n_colors_off: 4,
+          color_on0: '#89B270',
+          color_on1: '#7AA45E',
+          color_on2: '#B6C674',
+          color_on3: '#7AA45E',
+          color_on4: '#B6C674',
+          color_off0: '#F49427',
+          color_off1: '#C9785D',
+          color_off2: '#E88C6A',
+          color_off3: '#F1B081'
+        }],
+        "General 3": [{
+          n_colors_on: 6,
+          n_colors_off: 5,
+          color_on0: '#89B270',
+          color_on1: '#7AA45E',
+          color_on2: '#B6C674',
+          color_on3: '#7AA45E',
+          color_on4: '#B6C674',
+          color_on5: '#FECB05',
+          color_off0: '#F49427',
+          color_off1: '#C9785D',
+          color_off2: '#E88C6A',
+          color_off3: '#F1B081',
+          color_off4: '#FFCE00'
+        }],
+        "Protanopia": [{
+          n_colors_on: 2,
+          n_colors_off: 3,
+          color_on0: '#E96B6C',
+          color_on1: '#F7989C',
+          color_off0: '#635A4A',
+          color_off1: '#817865',
+          color_off2: '#9C9C84'
+        }],
+        "Protanomaly": [{
+          n_colors_on: 2,
+          n_colors_off: 3,
+          color_on0: '#AD5277',
+          color_on1: '#F7989C',
+          color_off0: '#635A4A',
+          color_off1: '#817865',
+          color_off2: '#9C9C84'
+        }],
+        "Viewable by all": [{
+          n_colors_on: 1,
+          n_colors_off: 1,
+          color_on0: '#FF934F',
+          color_off1: '#9C9C9C'
+        }],
+        "Colorblind only": [{
+          n_colors_on: 2,
+          n_colors_off: 5,
+          color_on0: '#A8AA00',
+          color_on1: '#83BE28',
+          color_off0: '#828200',
+          color_off1: '#669A1B',
+          color_off2: '#828200',
+          color_off3: '#669A1B',
+          color_off4: '#ED6311'
+        }]
+      }[ishihara_input.color];
 
       svg_elements = [];
 
@@ -151,8 +231,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function set_colors_folders() {
     // for (var i = 0; i < 6; i++) {
-    //   hide_gui_element(colors_on_folder, 'color_on' + i, i >= ishihara_input.n_colors_on);
-    //   hide_gui_element(colors_off_folder, 'color_off' + i, i >= ishihara_input.n_colors_off);
+      // hide_gui_element(colors_on_folder, 'color_on' + i, i >= ishihara_input.n_colors_on);
+      // hide_gui_element(colors_off_folder, 'color_off' + i, i >= ishihara_input.n_colors_off);
     // }
   }
 
@@ -172,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function() {
           color_off4: '#E5D57D',
           color_off5: '#D1D6AF'
         }],
-        'General 2': [{
+        "General 2": [{
           n_colors_on: 5,
           n_colors_off: 4,
           color_on0: '#89B270',
@@ -185,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function() {
           color_off2: '#E88C6A',
           color_off3: '#F1B081'
         }],
-        'General 3': [{
+        "General 3": [{
           n_colors_on: 6,
           n_colors_off: 5,
           color_on0: '#89B270',
@@ -200,7 +280,7 @@ document.addEventListener('DOMContentLoaded', function() {
           color_off3: '#F1B081',
           color_off4: '#FFCE00'
         }],
-        'Protanopia': [{
+        "Protanopia": [{
           n_colors_on: 2,
           n_colors_off: 3,
           color_on0: '#E96B6C',
@@ -209,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
           color_off1: '#817865',
           color_off2: '#9C9C84'
         }],
-        'Protanomaly': [{
+        "Protanomaly": [{
           n_colors_on: 2,
           n_colors_off: 3,
           color_on0: '#AD5277',
@@ -218,13 +298,13 @@ document.addEventListener('DOMContentLoaded', function() {
           color_off1: '#817865',
           color_off2: '#9C9C84'
         }],
-        'Viewable by all': [{
+        "Viewable by all": [{
           n_colors_on: 1,
           n_colors_off: 1,
           color_on0: '#FF934F',
           color_off1: '#9C9C9C'
         }],
-        'Colorblind only': [{
+        "Colorblind only": [{
           n_colors_on: 2,
           n_colors_off: 5,
           color_on0: '#A8AA00',
@@ -242,10 +322,91 @@ document.addEventListener('DOMContentLoaded', function() {
   gui.remember(ishihara_input);
 
 // 把功能按鍵加到 UI
-  // gui.add(ishihara_input, 'load_image').name("Load image");
-  // gui.add(ishihara_input, 'circular').name("Circular");
-  // gui.add(ishihara_input, 'resize').name("Resize");
-  // gui.add(ishihara_input, 'edge_detection').name("Edge detection");
+// gui.add(ishihara_input, 'load_image').name("Load image");
+// gui.add(ishihara_input, 'circular').name("Circular");
+// gui.add(ishihara_input, 'resize').name("Resize");
+// gui.add(ishihara_input, 'edge_detection').name("Edge detection");
+  gui.add(ishihara_input, 'color', ['General 1', 'General 2', 'General 3', 'Protanopia', 'Protanomaly','Viewable by all','Colorblind only']).onChange(function(value) {
+      switch (value) {
+        case "General 1":
+          ishihara_input.n_colors_on= 3;
+          ishihara_input.n_colors_off= 6;
+          ishihara_input.color_on0= '#F9BB82';
+          ishihara_input.color_on1= '#EBA170';
+          ishihara_input.color_on2= '#FCCD84';
+          ishihara_input.color_off0= '#9CA594';
+          ishihara_input.color_off1= '#ACB4A5';
+          ishihara_input.color_off2= '#BBB964';
+          ishihara_input.color_off3= '#D7DAAA';
+          ishihara_input.color_off4= '#E5D57D';
+          ishihara_input.color_off5= '#D1D6AF';
+          break;
+        case "General 2":
+          ishihara_input.n_colors_on= 5;
+          ishihara_input.n_colors_off= 4;
+          ishihara_input.color_on0= '#89B270';
+          ishihara_input.color_on1= '#7AA45E';
+          ishihara_input.color_on2= '#B6C674';
+          ishihara_input.color_on3= '#7AA45E';
+          ishihara_input.color_on4= '#B6C674';
+          ishihara_input.color_off0= '#F49427';
+          ishihara_input.color_off1= '#C9785D';
+          ishihara_input.color_off2= '#E88C6A';
+          ishihara_input.color_off3= '#F1B081';
+          break;
+        case "General 3":
+          ishihara_input.n_colors_on= 6;
+          ishihara_input.n_colors_off= 5;
+          ishihara_input.color_on0= '#89B270';
+          ishihara_input.color_on1= '#7AA45E';
+          ishihara_input.color_on2= '#B6C674';
+          ishihara_input.color_on3= '#7AA45E';
+          ishihara_input.color_on4= '#B6C674';
+          ishihara_input.color_on5= '#FECB05';
+          ishihara_input.color_off0= '#F49427';
+          ishihara_input.color_off1= '#C9785D';
+          ishihara_input.color_off2= '#E88C6A';
+          ishihara_input.color_off3= '#F1B081';
+          ishihara_input.color_off4= '#FFCE00';
+          break;
+        case "Protanopia":
+          ishihara_input.n_colors_on= 2;
+          ishihara_input.n_colors_off= 3;
+          ishihara_input.color_on0= '#E96B6C';
+          ishihara_input.color_on1= '#F7989C';
+          ishihara_input.color_off0= '#635A4A';
+          ishihara_input.color_off1= '#817865';
+          ishihara_input.color_off2= '#9C9C84';
+          break;
+        case "Protanomaly":
+          ishihara_input.n_colors_on= 2;
+          ishihara_input.n_colors_off= 3;
+          ishihara_input.color_on0= '#AD5277';
+          ishihara_input.color_on1= '#F7989C';
+          ishihara_input.color_off0= '#635A4A';
+          ishihara_input.color_off1= '#817865';
+          ishihara_input.color_off2= '#9C9C84';
+          break;
+        case "Viewable by all":
+          ishihara_input.n_colors_on= 1;
+          ishihara_input.n_colors_off= 1;
+          ishihara_input.color_on0= '#FF934F';
+          ishihara_input.color_off1= '#9C9C9C';
+          break;
+        case "Colorblind only":
+          ishihara_input.n_colors_on= 2;
+          ishihara_input.n_colors_off= 5;
+          ishihara_input.color_on0= '#A8AA00';
+          ishihara_input.color_on1= '#83BE28';
+          ishihara_input.color_off0= '#828200';
+          ishihara_input.color_off1= '#669A1B';
+          ishihara_input.color_off2= '#828200';
+          ishihara_input.color_off3= '#669A1B';
+          ishihara_input.color_off4= '#ED6311';
+          break;
+
+      }
+   }).name("點圖主題");
   gui.add(ishihara_input, 'invert_colors').name("Invert colors"); //把主要圖形和背景顏色的顏色互換
   // gui.addColor(ishihara_input, 'background_color').name("Background color");
   

@@ -23,7 +23,7 @@ html, body {
     right: 20px;
     /* background-color: #fff; Dark background */
     color: #fff; /* White text */
-    height:230 !important;
+    height:300 !important;
 }
 .dg.main::-webkit-scrollbar{
     display: none;
@@ -82,6 +82,9 @@ html, body {
     /* visibility:hidden; */
     background-color: #ceb195 !important; /* 新的背景顏色 */
 
+}
+.dg.a .save-row {
+    visibility:hidden;
 }
 .dg .button.gears{
     visibility:hidden;
