@@ -17,7 +17,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
   ctx.fillStyle = "white";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+  ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.arc(max_width/2, max_height/2, (Math.min(max_height,max_width)-20)/2, 0, 2 * Math.PI);
+  ctx.stroke();
+  
   var img_canvas = document.createElement('canvas');
   var img_ctx = img_canvas.getContext('2d');
 
@@ -108,10 +112,17 @@ document.addEventListener('DOMContentLoaded', function() {
       })
     },
     clear: function() {
+      var max_width  = window.innerWidth  * PIXEL_RATIO;
+      var max_height = window.innerHeight * PIXEL_RATIO;
       ctx.fillStyle = "white";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       img_ctx.fillStyle = "white";
       img_ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.lineWidth=1;
+      ctx.strokeStyle="black";
+      ctx.beginPath();
+      ctx.arc(max_width/2, max_height/2, (Math.min(max_height,max_width)-20)/2, 0, 2 * Math.PI);
+      ctx.stroke();
     },
     stop: function() {
       if (worker) {
@@ -240,9 +251,9 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // 選不同圖形來生成點圖
   gui.add(ishihara_input, 'shape_factory', ['Circle', 'Regular polygon', 'Cross', 'Star']).onChange(function(value) {
-    hide_gui_element(gui, 'sides', value !== 'Regular polygon' && value !== 'Star');
-    hide_gui_element(gui, 'pointiness', value !== 'Cross' && value !== 'Star');
-  }).name("Shape");
+    // hide_gui_element(gui, 'sides', value !== 'Regular polygon' && value !== 'Star');
+    // hide_gui_element(gui, 'pointiness', value !== 'Cross' && value !== 'Star');
+  }).name("點圖樣式");
 
   // gui.add(ishihara_input, 'sides', 3, 12, 1).name("Sides");
   // gui.add(ishihara_input, 'pointiness', 0.01, 0.99).name("Pointiness");
@@ -269,11 +280,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // });
   // gui.add(ishihara_input, 'draw_ratio', 0, 1, 0.01).name("Draw ratio");
   // gui.add(ishihara_input, 'stop_after', 1000, 100000, 1).name("Stop after");
-  gui.add(ishihara_input, 'generate').name("Generate");
-  gui.add(ishihara_input, 'clear').name("Clear");
-  gui.add(ishihara_input, 'stop').name("Stop");
-  gui.add(ishihara_input, 'download_png').name("Download PNG");
-  gui.add(ishihara_input, 'download_svg').name("Download SVG");
+  gui.add(ishihara_input, 'generate').name("生成點圖");
+  gui.add(ishihara_input, 'clear').name("清除");
+  gui.add(ishihara_input, 'stop').name("停止生成");
+  gui.add(ishihara_input, 'download_png').name("下載點圖(PNG)");
+  gui.add(ishihara_input, 'download_svg').name("下載點圖(SVG)");
 
   hide_gui_element(gui, 'sides', true);
   hide_gui_element(gui, 'pointiness', true);
@@ -412,14 +423,4 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     reader.readAsDataURL(e.target.files[0]);
   }, false);
-  // var guiElement = document.querySelector('.dg.main');
-  // if (guiElement) {
-  //     // Change background color
-  //     guiElement.style.backgroundColor = '#333';
-  //     guiElement.style.color = '#fff';
-  //     // Change position
-  //     guiElement.style.position = 'absolute';
-  //     guiElement.style.top = '20px';
-  //     guiElement.style.right = '200px';
-  // }
 });
