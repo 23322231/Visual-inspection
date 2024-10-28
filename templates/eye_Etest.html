@@ -22,13 +22,13 @@
         <!-- 這裡將會動態顯示圖片 -->
         <img id="initialImage" src="static/images/1280.jpg" style="width:300px;"> <!-- 初始圖片 -->
     </div>
-    <button id="next-btn">確認</button>
+    <!-- <button id="next-btn">確認</button> -->
 
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
         // 初始化 WebSocket 連接
-        var socket = io.connect('https://31be-114-34-178-54.ngrok-free.app');
+        var socket = io.connect('http://192.168.1.179:5000');
         
         var urlParams = new URLSearchParams(window.location.search);
         var session = urlParams.get('session');
@@ -36,45 +36,110 @@
         const knownWidthMm = 85.6; //信用卡的寬度 (毫米)
         const knownHeightMm = 54.0; //信用卡的高度 (毫米)
         const sizesInMm = [87.3, 43.65, 29.1, 21.83, 17.46, 14.55, 12.47, 10.91, 9.7, 8.73, 7.94, 7.28, 6.72, 6.24, 5.82]; // E 字的不同尺寸 (毫米)
-
+        user_answer = 0;//使用者的答案
         let currentIndex = 0;  // 目前顯示的 E 字大小索引
+        let errorCount = 0;//g使用者答錯次數
+        let answer = []; //存題目的答案 之後要顯示在結果頁面
+        let correct = []; //存答對的題數 0表示錯 1表示對
         var widthPx, heightPx, ppi;
         var isInitialImage = true;  // 用來判斷是否顯示初始圖片
+        var numberOftest = 0 , randomIndx = 0; //題目數 題目的index
+        const setIndex = Math.floor(Math.random()*4);//設定是哪一個題目陣列
+        // 設陣列 直接把題目的答案存進去
+        const currentRandom={
+            0:[1,2,2,1,0,3,2,0,1,2,3,0,2,1,2,3,0,2,1,2,0,2,3,2,0,1,2,3,0,2,1,2,2,3,0,2,1,3,2,1,3,2],
+            1:[3,1,0,2,3,2,0,1,2,1,0,2,3,2,1,0,3,2,0,3,1,2,1,3,0,2,3,0,1,2,3,0,2,1,3,0,2,1,3,0,2,1],
+            2:[2,1,3,0,2,3,0,1,2,3,0,2,1,3,0,2,1,3,0,2,1,1,2,3,2,1,0,3,2,0,1,3,2,0,2,1,3,0.,3,2,1,0],
+            3:[1,2,3,2,1,0,3,2,0,1,3,2,0,2,1,3,0.,3,2,1,0,2,1,3,0,2,3,0,1,2,3,0,2,1,3,0,2,1,3,0,2,1],
+        }
 
+        socket.on('next-eye', function() {
+            showNextImage()
+        });
+            
         function showNextImage() {
             if (isInitialImage) {
+                console.log('進來的')
                 // 隱藏初始圖片，顯示 E 字圖片
                 document.getElementById('initialImage').style.display = 'none';  // 隱藏初始圖片
                 isInitialImage = false;  // 將旗標設為 false
-
+                console.log('進來!!!!!!!!!!!!!!!')
                 // 開始顯示 E 字測試圖片
                 displayNextEImage();
+                socket.emit('start_detection'); //開始手指方向偵測
             } else {
                 // 如果初始圖片已經顯示過，繼續顯示 E 字圖片
                 displayNextEImage();
+                // socket.emit('start_detection'); //開始手指方向偵測
             }
         }
+        
 
         function displayNextEImage() {
-            if (currentIndex < sizesInMm.length) {
+            if (currentIndex < sizesInMm.length) {//同樣的題目大小連續答錯兩次直接結束測驗
+                socket.off('eye_user_ans'); 
+                // console.log('errorCount:', errorCount);
                 const sizeInMm = sizesInMm[currentIndex];
                 const sizeInPixel = mmToPixels(sizeInMm);  // 計算 E 字在螢幕上應有的大小 (像素)
-                depth_calculate = 6*depth;//先換算好深度
+                depth_calculate = 6 * depth;//先換算好深度
                 sizeInPixels=sizeInPixel/depth_calculate; //再根據深度調整大小
                 // 更新圖片
                 var imageContainer = document.getElementById('imageContainer');
                 imageContainer.innerHTML = '';  // 清空舊圖片
                 var img = document.createElement('img');
-                random=Math.floor(Math.random()*4); //回傳0或1或2或3
-                imgset=['static/e_chart/right.jpg','static/e_chart/left.jpg','static/e_chart/down.jpg','static/e_chart/up.jpg']
-                img.src = imgset[random];  // E 字圖片路徑
+                
+                // console.log('剛出來的currentRandom:', currentRandom);
+                //answer.push(random); //存答案
+
+                // socket.emit('eye-answer', {'eye_answer': random}); //傳送答案
+
+                imgset=['static/e_chart/up.jpg','static/e_chart/down.jpg','static/e_chart/left.jpg','static/e_chart/right.jpg']
+                img.src = imgset[currentRandom[setIndex][randomIndx]];  // E 字圖片路徑
+                answer.push(currentRandom[setIndex][randomIndx] ); //存答案
                 img.style.width = `${sizeInPixels}px`;  // 設定圖片寬度
                 imageContainer.appendChild(img);
                 
-                currentIndex++;  // 更新到下一個尺寸
-            } else {
-                alert('測試結束');
+                // 使用立即執行函數表達式 (IIFE) 鎖定 currentRandom 值
+                
+                    socket.once('eye_user_ans', function(data) {
+                        user_answer = data.eye_user_answer;
+                        console.log('接收到的使用者答案 (user_answer):', user_answer);
+                        console.log('現在的correctAnswer:', currentRandom[setIndex][randomIndx]);
+                        console.log('errorCount', errorCount);
+
+                        if (Number(user_answer) === currentRandom[setIndex][randomIndx] ){//答對 直接下一題
+                            currentIndex++;  // 更新到下一個尺寸
+                            errorCount = 0;
+                            correct.push(1);
+                            numberOftest++;
+                            randomIndx++;                           
+                        }
+                        else{//答錯的話
+                            errorCount++;
+                            correct.push(0);
+                            numberOftest++;
+                            randomIndx++;
+                        }
+                        // 檢查是否應該結束測試
+                        if (errorCount < 2) {
+                            displayNextEImage();  // 繼續下一題
+                        } else {
+                            endTest();  // 結束測試
+                        }
+                    });
+            } 
+            else {
+                endTest();  // 測驗已達到最大題數或錯誤次數，結束測試
             }
+        }
+
+        function endTest() {
+            socket.off('eye_user_ans'); 
+            socket.off('next-eye');
+            // socket.emit('eye-test-end');
+            socket.emit('Etest-end', {'answer': answer, 'correct': correct,'numberOftest':numberOftest});
+            const newUrl = `${window.location.origin}/eye_result?session=${session}`;
+            window.location.href = newUrl;
         }
 
         // 將毫米轉換為像素
@@ -82,12 +147,6 @@
             const inches = mm / 25.4;  // 將毫米轉換為英寸
             return inches * ppi;  // 根據 PPI 計算像素
         }
-        
-        // 按下確認按鈕後，顯示下一個 E 字大小
-        document.getElementById('next-btn').addEventListener('click', () => {
-            showNextImage();
-            socket.emit('start_detection');
-        });
 
         window.onload = function() {
             // 請求螢幕寬高資料

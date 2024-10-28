@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>確認辨識頁面</title>
     <style>
-        /* 設定頁面的基礎樣式 */
         body {
             display: flex;
             justify-content: center;
@@ -16,7 +15,6 @@
             background-color: #f0f0f0;
         }
 
-        /* 設定訊息區域的樣式 */
         .confirmation-box {
             text-align: center;
             padding: 20px;
@@ -27,34 +25,158 @@
             margin: 0 auto;
         }
 
-        /* 設定標題文字的樣式 */
         h1 {
             color: #fff;
             font-size: 24px;
-            margin: 0;
-            padding: 10px 0;
+            margin: 10px 0;
+        }
+
+        p {
+            font-size: 20px;
+            color: #fff;
+        }
+
+        .button-group {
+            margin-top: 20px;
+        }
+
+        .start-btn, .confirm-btn, .retry-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            color: white;
+        }
+
+        .start-btn {
+            background-color: #007bff;
+        }
+
+        .confirm-btn {
+            background-color: #4caf50;
+            display: none;
+        }
+
+        .retry-btn {
+            background-color: #f44336;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <!-- 訊息區域 -->
     <div class="confirmation-box">
-        <h1 id="direction-text">請在此確認辨識是否正確~</h1>
+        <h1 id="direction-text">請在這確認您的作答方向</h1>
+        <p id="countdown-text"></p>
+
+        <div class="button-group">
+            <button class="start-btn" id="start-btn">確定</button>
+            <button class="confirm-btn" id="confirm-btn">確認</button>
+            <button class="retry-btn" id="retry-btn">重新作答</button>
+        </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
-        // 初始化 WebSocket 連接
-        var socket = io.connect('https://31be-114-34-178-54.ngrok-free.app');
+        const socket = io.connect('http://192.168.1.179:5000');
+        let countdown, currentDirection, sureDirection = '';  // 儲存目前方向
+        let answer ;//存使用者的答案
+        // 隱藏 direction-text（只出現第一次）
+        function hideDirectionText() {
+            document.getElementById('direction-text').style.display = 'none';
+            document.getElementById('start-btn').style.display = 'none';
+        }
 
-        // 監聽伺服器傳來的手指方向事件
+        // 初始「確定」按鈕事件，啟動偵測流程
+        document.getElementById('start-btn').addEventListener('click', function() {
+            socket.emit('next_Etest');
+            startDetection();
+        });
+
+        // 啟動偵測流程
+        function startDetection() {
+            document.getElementById('confirm-btn').style.display = 'none';
+            document.getElementById('start-btn').style.display = 'none';  // 隱藏「確定」按鈕
+            startCountdown();  // 開始倒數計時
+        }
+
+        // 倒數3秒計時器，持續更新方向
+        function startCountdown() {
+            document.getElementById('retry-btn').style.display = 'none';
+            let seconds = 5;
+            const countdownText = document.getElementById('countdown-text');
+
+            countdownText.textContent = `倒數：${seconds} 秒 | 偵測方向: ${currentDirection}`;
+
+            countdown = setInterval(() => {
+                seconds--;
+                countdownText.textContent = `倒數：${seconds} 秒 | 偵測方向: ${currentDirection}`;
+
+                if (seconds <= 0) {
+                    clearInterval(countdown);  // 停止倒數
+                    showFinalDirection();  // 顯示最終方向
+                }
+            }, 1000);
+
+            // 第一次之後隱藏 h1 標題
+            hideDirectionText();
+        }
+
+        // 顯示最終方向並啟用「確認」與「重新作答」按鈕
+        function showFinalDirection() {
+            const directionText = document.getElementById('direction-text');
+            directionText.textContent = `最終方向: ${currentDirection}`;
+            sureDirection = currentDirection;  // 紀錄最終方向
+            
+            
+            directionText.style.display = 'block';  // 顯示最終方向文字
+
+            // 顯示按鈕
+            document.getElementById('confirm-btn').style.display = 'inline-block';
+            document.getElementById('retry-btn').style.display = 'inline-block';
+        }
+
+        // 接收手指方向更新事件
         socket.on('hand_direction', function(data) {
             console.log('hand_direction:', data);
+            currentDirection = data.direction;  // 更新方向
+        });
 
-            // 更新網頁上的 h1 標題文字，顯示偵測到的方向
-            var directionText = document.getElementById('direction-text');
-            directionText.textContent = `偵測到的方向: ${data.direction}`;
+        // 確認按鈕事件，記錄答案
+        document.getElementById('confirm-btn').addEventListener('click', function() {
+            
+            if (sureDirection == 'up') {
+                answer=0;
+            } else if (sureDirection == 'down') {
+                answer=1;
+            } else if (sureDirection == 'left') {
+                answer=2;
+            } else if (sureDirection == 'right') {
+                answer=3;
+            }
+
+            socket.emit('next_Etest');//告訴電腦端可以下一題
+            socket.emit('eye-user-answer', {'eye_user_answer': answer}); // 發送使用者的答案
+            startDetection();
+        });
+
+        // 重新作答按鈕事件，重置狀態
+        document.getElementById('retry-btn').addEventListener('click', function() {
+            startDetection();
+        });
+
+        // 重置狀態以等待新一輪偵測
+        function resetState() {
+            currentDirection = '';
+            document.getElementById('countdown-text').textContent = '';
+            document.getElementById('confirm-btn').style.display = 'none';
+            document.getElementById('retry-btn').style.display = 'none';
+        }
+
+        // 接收測驗結束事件
+        socket.on('Etest_finish', function() {
+            var newUrl = window.location.origin + '/finish?session=' + location.href.split('=').pop();
+            window.location.href = newUrl;
         });
     </script>
 </body>

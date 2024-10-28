@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>測驗結果</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #f8f8f8;
+        }
+        .question {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 10px 0;
+            background-color: #fff;
+        }
+        .question img {
+            max-width: 100%;
+            border-radius: 4px;
+        }
+        .user-answer, .correct-answer {
+            padding: 8px;
+            margin-top: 10px;
+        }
+        .user-answer.correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .user-answer.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <h2>測驗結果</h2>
+    <div id="results"></div>
+
+    
+
+    <script>
+        // 初始化 WebSocket 連接
+        var socket = io.connect('http://192.168.1.179:5000');
+        let Etest_ans=[];
+        let correct=[];
+        let numberOftest=0;
+        
+        
+        // 測驗題目和使用者答案的假資料
+        const quizResults = [
+            {
+                questionText: "這是什麼動物？",
+                imageUrl: "static/e_chart/up.jpg",
+                correctAnswer: "老虎",
+                userAnswer: "老虎"
+            },
+            {
+                questionText: "哪個星球是太陽系中最大的？",
+                imageUrl: "static/e_chart/up.jpg",
+                correctAnswer: "木星",
+                userAnswer: "火星"
+            },
+            {
+                questionText: "最長的河流是什麼？",
+                imageUrl: "static/e_chart/up.jpg",
+                correctAnswer: "尼羅河",
+                userAnswer: "亞馬遜河"
+            }
+        ];
+
+        function renderResults(results) {
+            const resultsContainer = document.getElementById('results');
+            results.forEach((result, index) => {
+                // 建立題目容器
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('question');
+
+                // 題目圖片
+                const img = document.createElement('img');
+                img.src = result.imageUrl;
+                img.alt = `Question ${index + 1}`;
+                questionDiv.appendChild(img);
+
+                // 題目文字
+                const questionText = document.createElement('p');
+                questionText.textContent = `${index + 1}. ${result.questionText}`;
+                questionDiv.appendChild(questionText);
+
+                // 使用者的回答
+                const userAnswerDiv = document.createElement('div');
+                userAnswerDiv.classList.add('user-answer');
+                userAnswerDiv.textContent = `你的答案：${result.userAnswer}`;
+                if (result.userAnswer === result.correctAnswer) {
+                    userAnswerDiv.classList.add('correct');
+                } else {
+                    userAnswerDiv.classList.add('incorrect');
+                }
+                questionDiv.appendChild(userAnswerDiv);
+
+                // 正確答案
+                const correctAnswerDiv = document.createElement('div');
+                correctAnswerDiv.classList.add('correct-answer');
+                correctAnswerDiv.textContent = `正確答案：${result.correctAnswer}`;
+                questionDiv.appendChild(correctAnswerDiv);
+
+                resultsContainer.appendChild(questionDiv);
+            });
+        }
+
+
+        socket.on('connect', () => {
+            console.log('WebSocket connected!');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('WebSocket disconnected!');
+        });
+
+        socket.on('Etest_finish', function(data) {
+            alert('Received data!');  // 確保資料接收到了
+            Etest_ans = data.Etest_ans;
+            correct = data.correct;
+            numberOftest = data.numberOftest;
+            console.log('E',Etest_ans);
+            console.log('C',correct);
+            console.log('N',numberOftest);
+        });
+        console.log('E',Etest_ans);
+        console.log('C',correct);
+        console.log('N',numberOftest);
+
+        // 渲染測驗結果
+        renderResults(quizResults);
+    </script>
+
+</body>
+</html>

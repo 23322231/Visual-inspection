@@ -15,17 +15,17 @@
     <p id="distance">Calculating...</p>
 
     <h2>Time Remaining:</h2>
-    <p id="timer">5</p>
+    <p id="timer">3</p>
 
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
         
         // 初始化 WebSocket 連接
-        var socket = io.connect('https://31be-114-34-178-54.ngrok-free.app');
+        var socket = io.connect('http://192.168.1.179:5000');
 
         // Fetch data from the API endpoint every second
         var distance = 0;
-        var time = 5;
+        var time = 3;
         setInterval(() => {
             socket.on('data_feed', function(data) {
                 document.getElementById('timer').innerText = data.time;

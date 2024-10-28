@@ -105,30 +105,11 @@ def index():
 def start():
     return render_template('quiz.html')
 
+#色盲點圖
+#掃QRcode的頁面
 @app.route('/qrcode')
 def qrcode():
     return render_template('qrcode.html')
-
-@app.route('/eye_test')
-def eye_test():
-    return render_template('eye_test.html')
-
-@app.route('/open_pic')
-def open_pic():
-    return render_template('open_pic.html')
-
-@app.route('/camera')
-def choose():
-    return render_template('camera_try.html')
-
-@app.route('/myopia')
-def myopia():
-    return render_template('myopia.html')
-    
-#點圖製作功能頁面
-@app.route('/ishihara-test')
-def elements():
-    return render_template('ishihara-test.html')
 
 @app.route('/comfirm_colordot')
 def comfirm_colordot():
@@ -141,6 +122,11 @@ def finish():
 @app.route('/result')
 def result():
     return render_template('result.html')
+
+#視力檢測
+@app.route('/eye_test')
+def eye_test():
+    return render_template('eye_test.html')
 
 @app.route('/eye_distance')
 def eye_distance():
@@ -165,6 +151,36 @@ def eye_dis_computer():
 @app.route('/eye_user_check')
 def eye_user_check():
     return render_template('eye_user_check.html')
+
+@app.route('/eye_result')
+def eye_result():
+    return render_template('eye_result.html')
+
+
+#點圖製作功能頁面
+@app.route('/ishihara-test')
+def elements():
+    return render_template('ishihara-test.html')
+
+
+
+@app.route('/open_pic')
+def open_pic():
+    return render_template('open_pic.html')
+
+@app.route('/camera')
+def choose():
+    return render_template('camera_try.html')
+
+@app.route('/myopia')
+def myopia():
+    return render_template('myopia.html')
+    
+
+
+
+
+
 
 # 色盲點圖顯示題目圖片
 @app.route('/next-image')
@@ -228,8 +244,6 @@ def result_cb():
     # 將answer_image 交叠在 question_image 上，黏貼時使用answer_image的透明度作為mask
     question_image.paste(answer_image, (0, 0), answer_image)
 
-    # 显示合成后的图片
-    # question_image.show()
 
     if question_image:
 
@@ -364,7 +378,7 @@ def upload_image():
     image_data = fix_base64_padding(image_data)
 
     # image_data = image_data.replace('data:image/jpeg;base64,', '')
-    # 解碼 base64 字符串
+    # 解碼base64字符串
 
     try:
         binary_image_data = base64.b64decode(image_data)
@@ -435,14 +449,6 @@ def confirmEyeDistance(data):
         print('No URL suffix provided.')
 
 
-
-#將eye_echart.html量到的卡片長寬傳給eye_Etest.html
-# @app.route('/store_dimensions', methods=['POST'])
-# def store_dimensions():
-#     data = request.get_json()
-#     width= data['width']
-#     height = data['height']
-#     emit('get_width_height', {'width': width, 'height': height}, broadcast=True)
 #視力檢測 把相機的畫面串流到網頁上
 @app.route('/video_feed')
 def video_feed():
@@ -552,7 +558,7 @@ def video_feed():
 
                     # 計算已經偵測到人臉的時間
                     elapsed_time = time.time() - start_time
-                    time_remaining = max(0, 5 - int(elapsed_time))  #更新剩餘時間
+                    time_remaining = max(0, 3 - int(elapsed_time))  #更新剩餘時間
                     # emit('data_feed', {'time': time_remaining, 'depth': round(depth_value, 2)})  # 傳送剩餘時間和深度值
                     # 使用 emit 傳送數據
                     socketio.emit('data_feed', {
@@ -560,7 +566,7 @@ def video_feed():
                         'depth': round(depth_value, 2)
                     }) 
 
-                    if elapsed_time >= 5:
+                    if elapsed_time >= 3:
                         session['depth_value'] = depth_value #將深度值存入session
                         break  # 超過5秒停止 要跳轉到下一個葉面
 
@@ -584,6 +590,7 @@ def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
+#視力檢測
 #計算視力測驗E字圖片的大小並傳回前端
 @socketio.on('calculate_sizes')
 def calculate_sizes(data):
@@ -684,6 +691,30 @@ def confirm_eye_dis(data):
     else:
         print('No URL suffix provided.')
 
+# 告訴電腦端切換到下一張圖片 (視力檢測))
+@socketio.on('next_Etest')
+def next_Etest():
+    print("收到 next_Etest 事件")
+    emit('next-eye',broadcast=True)
+
+# 把使用者作答的答案先傳到電腦頁面
+@socketio.on('eye-user-answer')
+def eye_user_answer(data):
+    user_ans=data.get('eye_user_answer')
+    print(user_ans)
+    emit('eye_user_ans', {'eye_user_answer': user_ans},broadcast=True)
+
+
+# 將題目圖片 和使用者作答傳到eye_result.html  順便電腦端告訴手機單測驗結束
+@socketio.on('Etest-end')
+def Etest_end(data):
+    Etest_ans = data.get('answer')
+    Etest_user_correct = data.get('correct')
+    numberOftest = data.get('numberOftest')
+    print("快點給我成功!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    emit('Etest_finish', {'Etest_ans': Etest_ans, 'correct': Etest_user_correct,'numberOftest':numberOftest},broadcast=True)
+        
+
 @app.route('/handwrite')
 def handwrite():
     user_uuid = request.args.get('session')  # 從查詢参數中獲取session ID
@@ -744,34 +775,11 @@ def generate_advice():
             return jsonify({'error': str(e)}), 500
     
 
-def calculate_direction(finger_tip, finger_root):
-    
-    direction_vector = np.array(finger_tip) - np.array(finger_root)
-    reference_vectors = {
-        "up": np.array([0, -1]),
-        "down": np.array([0, 1]),
-        "right": np.array([-1, 0]),
-        "left": np.array([1, 0])
-    }
-    min_angle = 180
-    detected_direction = None
-    # 計算角度(cos)
-    for direction, ref_vector in reference_vectors.items():
-        cos_angle = np.dot(direction_vector[:2], ref_vector) / (
-            np.linalg.norm(direction_vector[:2]) * np.linalg.norm(ref_vector)
-        )
-        angle = np.degrees(np.arccos(cos_angle))
-        if angle < min_angle:
-            min_angle = angle
-            detected_direction = direction
-
-    return detected_direction
-
-mp_hands = mp.solutions.hands
-
-@socketio.on('start_detection')  # 事件處理函數
-def detect_hand_direction():
+# 開始手指方向辨識
+@socketio.on('start_detection') 
+def start_detection():
     cap = cv2.VideoCapture(0)
+    mp_hands = mp.solutions.hands
     with mp_hands.Hands(model_complexity=0, min_detection_confidence=0.5, min_tracking_confidence=0.5) as hands:
         while cap.isOpened():
             ret, img = cap.read()
