@@ -1,0 +1,337 @@
+<!-- 正式版: 圖片測驗 -->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圖片測驗</title>
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <style>
+        .image-test-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .main-image {
+            width: 450px;
+            height: 300px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin-bottom: 20px;
+        }
+        .small-images {
+            display: flex;
+            justify-content: center;  /* 水平置中 */
+            width: 80%;
+        }
+        .small-image-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .small-image {
+            width: 300px;
+            height: 200px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin: 5px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .small-image.selected { /* 選擇圖片的方框 */
+            border-color: #e67e5f;  
+        }
+        button {
+            padding: 15px 30px; /* 增加按鈕內邊距 */
+            font-size: 18px; /* 增加按鈕字體大小 */
+            color: #fff;
+            background-color: #e89980;
+            border: none;
+            border-radius: 6px; /* 較方的按鈕 */
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 按鈕陰影加強 */
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .question-status {  /* 目前題數 */
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #e89980;
+        }
+    </style>
+</head>
+<body class="is-preload">
+    <div id="page-wrapper">
+
+        <!-- Header -->
+        <header id="header">
+            <h1><a href="index.html">Alpha</a> by HTML5 UP</h1>
+            <nav id="nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li>
+                        <a href="#" class="icon solid fa-angle-down">Layouts</a>
+                        <ul>
+                            <li><a href="generic.html">Generic</a></li>
+                            <li><a href="contact.html">Contact</a></li>
+                            <li><a href="elements.html">Elements</a></li>
+                            <li>
+                                <a href="#">Submenu</a>
+                                <ul>
+                                    <li><a href="#">Option One</a></li>
+                                    <li><a href="#">Option Two</a></li>
+                                    <li><a href="#">Option Three</a></li>
+                                    <li><a href="#">Option Four</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><a href="#" class="button">Sign Up</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <!-- Main -->
+        <section id="main" class="container">
+
+            <!-- 圖片測驗 -->
+            <div class="image-test-container">
+                <div class="question-status" id="questionStatus"></div> <!-- 顯示目前題數 -->
+                <div class="main-image" id="mainImage"></div>
+                <div class="small-images" id="smallImagesContainer">
+                    <div class="small-image-container">
+                        <div class="small-image" id="smallImage1" onclick="toggleSelection(0)"></div>
+                        <div style="text-align:center;"><h4>選項 A</h4></div>
+                    </div>
+                    <div class="small-image-container">
+                        <div class="small-image" id="smallImage2" onclick="toggleSelection(1)"></div>
+                        <div style="text-align:center;"><h4>選項 B</h4></div>
+                    </div>
+                    <div class="small-image-container">
+                        <div class="small-image" id="smallImage3" onclick="toggleSelection(2)"></div>
+                        <div style="text-align:center;"><h4>選項 C</h4></div>
+                    </div>
+                    <div class="small-image-container">
+                        <div class="small-image" id="smallImage4" onclick="toggleSelection(3)"></div>
+                        <div style="text-align:center;"><h4>選項 D</h4></div>
+                    </div>
+                </div>
+                <button onclick="nextQuestion()">下一題</button>
+
+                <script>
+                    // 定義圖片資料夾變數，可以隨時更改資料夾路徑
+                    const imageFolder = '../static/cb_test_image/';
+                    const mainImage = document.getElementById('mainImage');
+                    const smallImages = [
+                        document.getElementById('smallImage1'),
+                        document.getElementById('smallImage2'),
+                        document.getElementById('smallImage3'),
+                        document.getElementById('smallImage4')
+                    ];
+        
+                    const questionStatus = document.getElementById('questionStatus'); // 顯示題數的元素
+
+                    // 定義所有 15 張 main 圖片名稱
+                    const allImages = [
+                        'colored_pencil.jpg',
+                        'apple.jpg',
+                        'rainbow.jpg',
+                        'orange.jpg',
+                        'kiwi.jpg',
+                        'hot_air_balloon.jpg',
+                        'beef.jpg',
+                        'watermelon.jpg',
+                        'book.jpg',
+                        'christmas.jpg',                        
+                        'car.jpg',
+                        'house.jpg',
+                        'clothes.jpg',
+                        'sky.jpg',
+                        'traffic_light2.jpg',
+                    ];
+
+                    // 根據每個 main 圖片生成對應的_pro、_deu、_tri
+                    function generateQuestions(images) {
+                        return images.map(main => ({
+                            main: main,
+                            small: [
+                                main.replace('.jpg', '_pro.jpg'),
+                                main.replace('.jpg', '_deu.jpg'),
+                                main.replace('.jpg', '_tri.jpg'),
+                                main
+                            ]
+                        }));
+                    }
+
+                    // 隨機選擇 10 張圖片
+                    function getRandomQuestions() {
+                        const shuffledImages = allImages.sort(() => 0.5 - Math.random()); // 隨機打亂所有圖片
+                        const selectedImages = shuffledImages.slice(0, 10); // 取前 10 張
+                        return generateQuestions(selectedImages); // 生成對應的 question 物件
+                    }
+
+                    // 生成 10 道題目的 questions 陣列
+                    const questions = getRandomQuestions();
+        
+                    let currentQuestionIndex = 0;
+                    let selectedOptions = [];
+                    let correctCount = 0;
+                    let redGreenColorBlindCount = 0;
+                    let blueColorBlindCount = 0;
+                    let otherCount = 0;
+                    
+                    // 設定主圖片
+                    function setMainImage(imageFileName) {
+                        const imageUrl = `${imageFolder}${imageFileName}`;
+                        mainImage.style.backgroundImage = `url("${imageUrl}")`;
+                    }
+
+                    // 隨機排序小圖片
+                    function shuffleImages(smallImageFiles) {
+                        const shuffledFiles = smallImageFiles.sort(() => Math.random() - 0.5);
+                        smallImages.forEach((image, index) => {
+                            const imageUrl = `${imageFolder}${shuffledFiles[index]}`;
+                            image.style.backgroundImage = `url("${imageUrl}")`;
+                            image.dataset.image = imageUrl;
+                        });
+                    }
+                    
+                    // 目前測驗題數
+                    function updateQuestionStatus() {
+                        const completedQuestions = currentQuestionIndex + 1;
+                        const remainingQuestions = questions.length - completedQuestions;
+                        questionStatus.textContent = `第 ${completedQuestions} 題`;
+                    }
+                    
+                    // 判斷使用者選擇的圖片和記錄每種類型(正常、紅綠色盲、藍色色盲、無法判斷)的數量
+                    function evaluateAnswer() {
+                        let hasRedGreen = false;
+                        let hasBlue = false;
+                        let hasCorrect = false;
+        
+                        selectedOptions.forEach(option => {
+                            if (!option.includes('_pro') && !option.includes('_deu') && !option.includes('_tri')) {
+                                hasCorrect = true;
+                            }
+                            else if ((option.includes('_pro') || option.includes('_deu')) && !option.includes('_tri')) {
+                                hasRedGreen = true;
+                            }
+                            else if (option.includes('_tri') && !option.includes('_pro') && !option.includes('_deu')) {
+                                hasBlue = true;
+                            }
+                        });
+        
+                        if (hasCorrect && !hasRedGreen && !hasBlue) {
+                            correctCount++;
+                        } else if (hasRedGreen) {
+                            redGreenColorBlindCount++;
+                        } else if (hasBlue) {
+                            blueColorBlindCount++;
+                        } else {
+                            otherCount++;
+                        }
+                        // console.log('正常:',correctCount)
+                        // console.log('紅綠:',redGreenColorBlindCount)
+                        // console.log('藍:',blueColorBlindCount)
+                        // console.log('其他:',otherCount)
+                    }
+                    
+                    // 進入下一題
+                    function nextQuestion() {
+                        // console.log('選擇的圖片:', selectedOptions);
+                        evaluateAnswer();
+                        selectedOptions = [];
+                        if (currentQuestionIndex < questions.length - 1) {
+                            currentQuestionIndex++;
+                            smallImages.forEach(image => image.classList.remove('selected'));
+                            const nextQuestion = questions[currentQuestionIndex];
+                            setMainImage(nextQuestion.main);
+                            shuffleImages(nextQuestion.small);
+                            updateQuestionStatus(); // 更新題數顯示
+                        } else {
+                            alert('最後一題 確定結束測驗');
+                            showResult();
+                        }
+                    }
+
+                    // 顯示測驗結果內容
+                    function showResult() {
+                        let resultMessage = `答對題數: ${correctCount} / 10 題\n`;
+        
+                        if (correctCount > redGreenColorBlindCount && correctCount > blueColorBlindCount && correctCount > otherCount && correctCount >= 6) {
+                            resultMessage += "色盲測驗結果為正常";
+                        }else if (otherCount > redGreenColorBlindCount && otherCount > blueColorBlindCount) {
+                            resultMessage += "無法判斷具體色盲類型";
+                        }else if (redGreenColorBlindCount > blueColorBlindCount) {
+                            resultMessage += "有可能為紅色或綠色色盲";
+                        } else if (blueColorBlindCount > redGreenColorBlindCount) {
+                            resultMessage += "有可能為藍色色盲";
+                        }
+
+                        // 儲存結果到localStorage
+                        localStorage.setItem('resultMessage', resultMessage);
+                        // 開啟結果頁面
+                        window.open("image_test_result.html", "_self");
+                    }
+                    
+                    // 選擇圖片
+                    function toggleSelection(index) {
+                        const image = smallImages[index];
+                        const imageUrl = image.dataset.image;
+                        if (selectedOptions.includes(imageUrl)) {
+                            selectedOptions = selectedOptions.filter(option => option !== imageUrl);
+                            image.classList.remove('selected');
+                        } else {
+                            selectedOptions.push(imageUrl);
+                            image.classList.add('selected');
+                        }
+                    }
+                    
+                    // 初始化測驗
+                    function initialize() {
+                        const firstQuestion = questions[0];
+                        setMainImage(firstQuestion.main);
+                        shuffleImages(firstQuestion.small);
+                        updateQuestionStatus(); // 初始化時顯示題數
+                    }
+        
+                    initialize();
+                </script>
+
+            </div>
+        </section>
+        
+        <!-- Footer -->
+        <footer id="footer">
+            <ul class="icons">
+                <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+                <li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+                <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+                <li><a href="#" class="icon brands fa-github"><span class="label">Github</span></a></li>
+                <li><a href="#" class="icon brands fa-dribbble"><span class="label">Dribbble</span></a></li>
+                <li><a href="#" class="icon brands fa-google-plus"><span class="label">Google+</span></a></li>
+            </ul>
+            <ul class="copyright">
+                <li>&copy; Untitled. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+            </ul>
+            <ul>
+                <li>*免責聲明：有關近視的建議和進一步資訊，請諮詢您的視力保健專業人員。本系統之視覺模擬器僅供參考，不代表建議。</li>
+            </ul>
+        </footer>
+
+
+    </div>
+
+    <!-- Scripts -->
+        <script src="assets/js/jquery.min.js"></script>
+        <script src="assets/js/jquery.dropotron.min.js"></script>
+        <script src="assets/js/jquery.scrollex.min.js"></script>
+        <script src="assets/js/browser.min.js"></script>
+        <script src="assets/js/breakpoints.min.js"></script>
+        <script src="assets/js/util.js"></script>
+        <script src="assets/js/main.js"></script>
+
+</body>
+</html>
