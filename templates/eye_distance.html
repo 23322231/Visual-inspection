@@ -3,25 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L515 Camera Stream</title>
+    <title>測量距離</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 1rem;
+            color: #555;
+            margin-top: 20px;
+        }
+        #distance, #timer {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            margin: 8px 0;
+        }
+        .stream-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .stream-wrapper img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1rem;
+            }
+            h2 {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>L515 Camera Live Feed</h1>
+    <div class="container">
+        <h1>臉上有出現綠色框框才是有偵測到喔</h1>
 
-    <!-- 用於顯示影像流 -->
-    <img src="{{ url_for('video_feed') }}" alt="Camera Stream" width="320" height="240">
+        <div class="stream-wrapper">
+            <!-- 用於顯示影像流 -->
+            <img src="{{ url_for('video_feed') }}" alt="Camera Stream">
+        </div>
 
-    <h2>Eye Center Distance:</h2>
-    <p id="distance">Calculating...</p>
+        <h2>眼中和鏡頭相距:</h2>
+        <p id="distance">計算中...</p>
 
-    <h2>Time Remaining:</h2>
-    <p id="timer">3</p>
+        <h2>剩餘時間:</h2>
+        <p id="timer">3</p>
+    </div>
 
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
-        
         // 初始化 WebSocket 連接
-        var socket = io.connect('http://192.168.1.179:5000');
+        var socket = io.connect('https://28c7-114-34-178-54.ngrok-free.app');
 
         // Fetch data from the API endpoint every second
         var distance = 0;
@@ -29,7 +95,7 @@
         setInterval(() => {
             socket.on('data_feed', function(data) {
                 document.getElementById('timer').innerText = data.time;
-                document.getElementById('distance').innerText = `${data.depth} meters`;
+                document.getElementById('distance').innerText = `${data.depth} 公尺`;
                 distance = data.depth;
                 time = data.time;
             });
@@ -41,10 +107,10 @@
             }
         }, 1000);  // 每秒更新一次
 
-        window.onload = function() {
+        document.addEventListener("DOMContentLoaded", function() {
             var urlSuffix = window.location.href.split('=').pop();
             socket.emit('confirm_eye_dis', {'urlSuffix': urlSuffix});
-        };
+        });
     </script>
 </body>
 </html>

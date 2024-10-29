@@ -5,46 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>調整視力測驗圖片大小</title>
     <style>
+        /* 基本樣式設置 */
         body {
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f8e6e6;
             font-family: Arial, sans-serif;
+            color: #4d4d4d;
         }
-        #referenceObject {
-            border: 2px solid #000;
-            width: 100px;
-            height: calc(100px / 1.618); /* 根據黃金比例計算高度 */
-            margin: 20px auto;
+        .container {
+            text-align: center;
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            font-size: 1.5em;
+            color: #df9898;
         }
         .instruction {
-            margin-top: 20px;
-            font-size: 16px;
+            margin: 10px 0;
+            font-size: 1em;
+            color: #666;
+        }
+        #referenceObject {
+            border: 2px solid #df9898;
+            width: 100px;
+            height: calc(100px / 1.618);
+            margin: 15px auto;
         }
         #sliderContainer {
-            margin-top: 20px;
-            width: 300px;
-            margin: 0 auto;
+            margin: 20px auto;
+            width: 100%;
         }
-        /* 美化滑桿 */
         input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
             width: 100%;
-            height: 10px;
-            background: linear-gradient(90deg, #e1afaf, #cd9797);
+            height: 8px;
+            background: linear-gradient(90deg, #df9898, #f8c1c1);
             outline: none;
-            border-radius: 5px;
-            opacity: 0.9;
-            transition: opacity 0.3s;
-        }
-        input[type="range"]:hover {
-            opacity: 1;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
         }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            appearance: none;
             width: 20px;
             height: 20px;
-            background: #eff5ef;
+            background: #ffffff;
+            border: 2px solid #df9898;
             border-radius: 50%;
             cursor: pointer;
             box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
@@ -52,35 +68,51 @@
         input[type="range"]::-moz-range-thumb {
             width: 20px;
             height: 20px;
-            background: #eff5ef;
+            background: #ffffff;
+            border: 2px solid #df9898;
             border-radius: 50%;
             cursor: pointer;
             box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
         }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+            color: #fff;
+            background-color: #df9898;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #d47a7a;
+        }
     </style>
 </head>
 <body>
-    <h1>調整視力測驗圖片大小</h1>
-    <p class="instruction">
-        將信用卡（或已知尺寸的物品）放在螢幕上，並調整黑框使其尺寸與物品相符。
-    </p>
+    <div class="container">
+        <h1>調整視力測驗圖片大小</h1>
+        <p class="instruction">
+            請將信用卡（或已知尺寸的物品）放在螢幕上，並調整黑框尺寸，使其與物品大小一致。
+        </p>
 
-    <div id="referenceObject"></div>
-    <p class="instruction">調整後的寬度：<span id="widthDisplay">100</span> 像素</p>
-    <p class="instruction">調整後的高度：<span id="heightDisplay">62</span> 像素</p>
+        <div id="referenceObject"></div>
+        <p class="instruction">寬度：<span id="widthDisplay">100</span> 像素 | 高度：<span id="heightDisplay">62</span> 像素</p>
 
-    <div id="sliderContainer">
-        <label for="sizeSlider">調整大小:</label>
-        <input type="range" id="sizeSlider" min="50" max="500" value="100">
+        <div id="sliderContainer">
+            <label for="sizeSlider">調整大小:</label>
+            <input type="range" id="sizeSlider" min="50" max="500" value="100">
+        </div>
+
+        <button onclick="confirmAndRedirect()">確認</button>
     </div>
-
-    <button onclick="confirmAndRedirect()">確認</button>
 
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
         // 初始化 WebSocket 連接
-        var socket = io.connect('http://192.168.1.179:5000');
+        var socket = io.connect('https://28c7-114-34-178-54.ngrok-free.app');
     
         // WebSocket 連接成功時的處理
         socket.on('connect', function() {
@@ -91,10 +123,9 @@
         const widthDisplay = document.getElementById('widthDisplay');
         const heightDisplay = document.getElementById('heightDisplay');
         const sizeSlider = document.getElementById('sizeSlider');
+        const goldenRatio = 1.618;
 
-        const goldenRatio = 1.618; // 固定長寬比
-
-        // 根據滑桿更新方框大小
+        // 更新方框大小
         sizeSlider.addEventListener('input', updateSize);
 
         function updateSize() {
@@ -108,11 +139,11 @@
             heightDisplay.textContent = Math.round(heightPx);
         }
 
-        // 按下確認鍵跳轉到顯示 E 字圖片的頁面，並傳遞寬度作為參數
+        // 確認並跳轉到顯示 E 字圖片的頁面，發送寬度數據
         function confirmAndRedirect() {
             const widthPx = referenceObject.offsetWidth;
             const heightPx = referenceObject.offsetHeight;
-            // 發送數據到後端
+
             fetch('/send_width_height', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -120,7 +151,8 @@
             }).then(response => {
                 console.log('Data saved to session');
             });
-            var newUrl = window.location.origin +'/eye_qrcode?session='+ location.href.split('=').pop(); 
+
+            const newUrl = `${window.location.origin}/eye_qrcode?session=${location.href.split('=').pop()}`; 
             window.location.href = newUrl;
         }
     </script>

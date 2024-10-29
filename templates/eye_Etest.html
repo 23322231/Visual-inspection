@@ -28,7 +28,7 @@
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
         // 初始化 WebSocket 連接
-        var socket = io.connect('http://192.168.1.179:5000');
+        var socket = io.connect('https://28c7-114-34-178-54.ngrok-free.app');
         
         var urlParams = new URLSearchParams(window.location.search);
         var session = urlParams.get('session');
@@ -47,10 +47,10 @@
         const setIndex = Math.floor(Math.random()*4);//設定是哪一個題目陣列
         // 設陣列 直接把題目的答案存進去
         const currentRandom={
-            0:[1,2,2,1,0,3,2,0,1,2,3,0,2,1,2,3,0,2,1,2,0,2,3,2,0,1,2,3,0,2,1,2,2,3,0,2,1,3,2,1,3,2],
+            0:[1,2,3,1,0,3,2,0,1,2,3,0,2,1,2,3,0,2,1,2,0,2,3,2,0,1,2,3,0,2,1,0,2,3,0,2,1,3,2,1,3,2],
             1:[3,1,0,2,3,2,0,1,2,1,0,2,3,2,1,0,3,2,0,3,1,2,1,3,0,2,3,0,1,2,3,0,2,1,3,0,2,1,3,0,2,1],
-            2:[2,1,3,0,2,3,0,1,2,3,0,2,1,3,0,2,1,3,0,2,1,1,2,3,2,1,0,3,2,0,1,3,2,0,2,1,3,0.,3,2,1,0],
-            3:[1,2,3,2,1,0,3,2,0,1,3,2,0,2,1,3,0.,3,2,1,0,2,1,3,0,2,3,0,1,2,3,0,2,1,3,0,2,1,3,0,2,1],
+            2:[2,1,3,0,2,3,0,1,2,3,0,2,1,3,0,2,1,3,0,2,1,3,2,3,2,1,0,3,2,0,1,3,2,0,2,1,3,0,3,2,1,0],
+            3:[1,2,3,2,1,0,3,2,0,1,3,2,0,2,1,3,0,3,2,1,0,2,1,3,0,2,3,0,1,2,3,0,2,1,3,0,2,1,3,0,2,1],
         }
 
         socket.on('next-eye', function() {
@@ -76,7 +76,7 @@
         
 
         function displayNextEImage() {
-            if (currentIndex < sizesInMm.length) {//同樣的題目大小連續答錯兩次直接結束測驗
+            if (currentIndex < sizesInMm.length && currentIndex < 20) {//同樣的題目大小連續答錯兩次直接結束測驗
                 socket.off('eye_user_ans'); 
                 // console.log('errorCount:', errorCount);
                 const sizeInMm = sizesInMm[currentIndex];
@@ -95,7 +95,7 @@
 
                 imgset=['static/e_chart/up.jpg','static/e_chart/down.jpg','static/e_chart/left.jpg','static/e_chart/right.jpg']
                 img.src = imgset[currentRandom[setIndex][randomIndx]];  // E 字圖片路徑
-                answer.push(currentRandom[setIndex][randomIndx] ); //存答案
+                
                 img.style.width = `${sizeInPixels}px`;  // 設定圖片寬度
                 imageContainer.appendChild(img);
                 
@@ -103,20 +103,24 @@
                 
                     socket.once('eye_user_ans', function(data) {
                         user_answer = data.eye_user_answer;
-                        console.log('接收到的使用者答案 (user_answer):', user_answer);
-                        console.log('現在的correctAnswer:', currentRandom[setIndex][randomIndx]);
-                        console.log('errorCount', errorCount);
+                        // console.log('接收到的使用者答案 (user_answer):', user_answer);
+                        // console.log('現在的correctAnswer:', currentRandom[setIndex][randomIndx]);
+                        // console.log('errorCount', errorCount);
 
                         if (Number(user_answer) === currentRandom[setIndex][randomIndx] ){//答對 直接下一題
                             currentIndex++;  // 更新到下一個尺寸
+                            answer.push(currentRandom[setIndex][randomIndx] ); //存答案
+                            console.log('answer',answer);
                             errorCount = 0;
-                            correct.push(1);
+                            correct.push(Number(user_answer));
                             numberOftest++;
                             randomIndx++;                           
                         }
                         else{//答錯的話
                             errorCount++;
-                            correct.push(0);
+                            answer.push(currentRandom[setIndex][randomIndx] ); //存答案
+                            console.log('answer',answer);
+                            correct.push(Number(user_answer));
                             numberOftest++;
                             randomIndx++;
                         }
@@ -137,9 +141,20 @@
             socket.off('eye_user_ans'); 
             socket.off('next-eye');
             // socket.emit('eye-test-end');
-            socket.emit('Etest-end', {'answer': answer, 'correct': correct,'numberOftest':numberOftest});
+            socket.emit('Etest-end');
+            const combinedArrays = {
+                answer: answer,
+                correct: correct,
+                numberOftest:numberOftest
+            };
+            localStorage.setItem('combinedArrays', JSON.stringify(combinedArrays));
+            // 發送數據到後端
+            //socket.emit('Etest_result', {'answer': answer, 'correct': correct,'numberOftest':numberOftest});
+            
             const newUrl = `${window.location.origin}/eye_result?session=${session}`;
             window.location.href = newUrl;
+
+            //history.replaceState(null, '', newUrl);
         }
 
         // 將毫米轉換為像素

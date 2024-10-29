@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, session
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO , emit , join_room , leave_room , close_room , rooms , disconnect
 from flask_sqlalchemy import SQLAlchemy
 import base64
 from PIL import Image
@@ -707,13 +707,11 @@ def eye_user_answer(data):
 
 # 將題目圖片 和使用者作答傳到eye_result.html  順便電腦端告訴手機單測驗結束
 @socketio.on('Etest-end')
-def Etest_end(data):
-    Etest_ans = data.get('answer')
-    Etest_user_correct = data.get('correct')
-    numberOftest = data.get('numberOftest')
+def Etest_end():
     print("快點給我成功!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    emit('Etest_finish', {'Etest_ans': Etest_ans, 'correct': Etest_user_correct,'numberOftest':numberOftest},broadcast=True)
-        
+    emit('Etest_finish',broadcast=True)
+
+            
 
 @app.route('/handwrite')
 def handwrite():
