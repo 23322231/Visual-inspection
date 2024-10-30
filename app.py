@@ -1,25 +1,24 @@
 from flask import Flask, render_template, request, jsonify, session
 from flask_socketio import SocketIO , emit , join_room , leave_room , close_room , rooms , disconnect
 from flask_sqlalchemy import SQLAlchemy
-import base64
+from color_blind_simulation import simulate_color_blindness
+from score_edit import Score_calculation
 from PIL import Image
 from io import BytesIO
-import random
-import uuid
 from sqlalchemy.dialects.postgresql import UUID
-import os
 from sqlalchemy.exc import IntegrityError
 from psycopg2 import Binary
-import string
 from flask import Response,send_from_directory
+from hashlib import md5
+import base64
+import random
+import uuid
+import os
 import psycopg2
 import re
-from hashlib import md5
 import subprocess
-import json
 import numpy as np
 import cv2
-from score_edit import Score_calculation
 import pyrealsense2 as rs
 import numpy as np
 import cv2
@@ -27,6 +26,7 @@ import time
 import mediapipe as mp
 import tensorflow as tf
 import detect_face
+
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 
@@ -166,6 +166,15 @@ def ishihara_test():
 @app.route('/color_blind_simulation')
 def color_blind_simulation():
     return render_template('color_blind_simulation.html')
+
+# 色覺障礙圖片測驗
+@app.route('/image_test')
+def image_test():
+    return render_template('image_test.html')
+
+@app.route('/image_test_result')
+def image_test_result():
+    return render_template('image_test_result.html')
 
 
 
@@ -826,6 +835,69 @@ def start_detection():
                         socketio.emit('hand_direction', {'direction': direction})  # 傳送方向
 
     cap.release()
+
+# 設定上傳資料夾
+UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# 支援的圖片格式
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+# 確保上傳資料夾存在
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+# 檢查檔案副檔名是否允許
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.route('/simulate', methods=['POST'])
+def simulate():
+    if 'file' not in request.files:
+        return 'No file part', 400
+    file = request.files['file']
+    
+    if file.filename == '':
+        return 'No selected file', 400
+    
+    if file and allowed_file(file.filename):
+        # 取得檔案副檔名
+        file_ext = file.filename.rsplit('.', 1)[1].lower()
+        
+        # 儲存檔案到伺服器的臨時目錄
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(filepath)
+
+        # 使用 OpenCV 讀取圖片
+        image = cv2.imread(filepath)
+
+        # 根據前端選擇的色盲類型和嚴重程度進行模擬
+        cb_type = int(request.form['cb_type'])
+        severity = int(request.form['severity'])
+
+        # 模擬色盲效果（這裡調用 simulate_color_blindness 函數）
+        simulated_image = simulate_color_blindness(image, cb_type, severity)
+
+        # OpenCV 的圖像處理後返回的是 NumPy 陣列，需轉換為 PIL Image 才能保存
+        simulated_image_pil = Image.fromarray(simulated_image)
+
+        # 將模擬後的圖片儲存到 BytesIO 中
+        img_io = BytesIO()
+        # simulated_image_pil.save(img_io, format=file_ext.upper())
+        file_ext = file_ext.upper()
+        if file_ext == 'JPG':
+            file_ext = 'JPEG'
+        simulated_image_pil.save(img_io, format=file_ext)
+        img_io.seek(0)
+
+        # 將圖片轉換為 base64 字串
+        img_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
+
+        # 返回 JSON 給前端
+        return jsonify({'image_data': f"data:image/{file_ext.lower()};base64,{img_base64}"})
+
+    return 'Invalid file format', 400
 
 
 @socketio.on('connect')
