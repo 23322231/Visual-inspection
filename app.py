@@ -159,8 +159,14 @@ def eye_result():
 
 #點圖製作功能頁面
 @app.route('/ishihara-test')
-def elements():
+def ishihara_test():
     return render_template('ishihara-test.html')
+
+# 色覺障礙模擬
+@app.route('/color_blind_simulation')
+def color_blind_simulation():
+    return render_template('color_blind_simulation.html')
+
 
 
 
