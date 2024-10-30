@@ -92,12 +92,13 @@
 
     <h2>測驗結果</h2>
     <div id="results" class="grid-container"></div>
-
+    <div id="advice" class="result">醫囑將顯示在這裡...</div>
     <script>
-        var socket = io.connect('https://e214-114-34-178-54.ngrok-free.app');
+        var socket = io.connect('https://e34e-114-34-178-54.ngrok-free.app');
         let answer = [];
         let correct = [];
         let numberOftest = 0;
+        let degree = 0.1;
 
         var uuid = location.href.split('=').pop();
 
@@ -108,6 +109,8 @@
             answer = storedData['answer'];
             correct = storedData['correct'];
             numberOftest = storedData['numberOftest'];
+            degree = storedData['degree'];
+
             renderResults();
         }
 
@@ -179,10 +182,45 @@
             });
         }
 
+        let symptoms ="這是一個E字視力檢查的結果，我在圖片為視力"+degree+"時連續答錯2題後結束測驗"; // 取得使用者輸入的症狀描述
+        // 清空之前的結果並顯示 "生成中..."
+        const adviceDiv = document.getElementById('advice');
+        adviceDiv.innerText = "生成中...";
+        async function fetchAdvice() {
+            try {
+                // 發送 POST 請求到後端以生成醫囑
+                const response = await fetch('/generate-doctor-advice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ symptoms }) // 將症狀描述傳遞到後端
+                });
+
+                if (!response.ok) {
+                    throw new Error("發生錯誤，請重試。");
+                }
+
+                const data = await response.json();
+                if (data.advice) {
+                    adviceDiv.innerText = data.advice; // 顯示生成的醫囑
+                } else {
+                    adviceDiv.innerText = "未能生成醫囑。";
+                }
+            } catch (error) {
+                adviceDiv.innerText = `錯誤：${error.message}`;
+            }
+        }
+
         socket.on('connect', () => console.log('WebSocket 已連接！'));
         socket.on('disconnect', () => console.log('WebSocket 已斷開連接！'));
 
-        window.onload = fetchTestResults;
+        window.onload = ()=>{
+            fetchTestResults();
+            fetchAdvice();
+        }
+
     </script>
+    
 </body>
 </html>

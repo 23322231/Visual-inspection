@@ -6,7 +6,7 @@ app = Flask(__name__)
 #點圖製作功能頁面
 @app.route('/')
 def elements():
-    return render_template('ishihara-test.html')
+    return render_template('visual_simulation.html')
 
 #提供靜態檔案的路由，將內容類型指定為 JavaScript
 @app.route('/static/assets/js/<path:filename>')

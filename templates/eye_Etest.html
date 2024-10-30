@@ -28,7 +28,7 @@
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
         // 初始化 WebSocket 連接
-        var socket = io.connect('https://e214-114-34-178-54.ngrok-free.app');
+        var socket = io.connect('https://e34e-114-34-178-54.ngrok-free.app');
         
         var urlParams = new URLSearchParams(window.location.search);
         var session = urlParams.get('session');
@@ -44,6 +44,7 @@
         var widthPx, heightPx, ppi;
         var isInitialImage = true;  // 用來判斷是否顯示初始圖片
         var numberOftest = 0 , randomIndx = 0; //題目數 題目的index
+        var degree=0.1;//存使用者最後做的圖片大小的度數 0.1~1.5
         const setIndex = Math.floor(Math.random()*4);//設定是哪一個題目陣列
         // 設陣列 直接把題目的答案存進去
         const currentRandom={
@@ -106,12 +107,13 @@
                         // console.log('接收到的使用者答案 (user_answer):', user_answer);
                         // console.log('現在的correctAnswer:', currentRandom[setIndex][randomIndx]);
                         // console.log('errorCount', errorCount);
-
+                        // 答對的話
                         if (Number(user_answer) === currentRandom[setIndex][randomIndx] ){//答對 直接下一題
                             currentIndex++;  // 更新到下一個尺寸
                             answer.push(currentRandom[setIndex][randomIndx] ); //存答案
                             console.log('answer',answer);
                             errorCount = 0;
+                            degree+=0.1;
                             correct.push(Number(user_answer));
                             numberOftest++;
                             randomIndx++;                           
@@ -145,7 +147,8 @@
             const combinedArrays = {
                 answer: answer,
                 correct: correct,
-                numberOftest:numberOftest
+                numberOftest:numberOftest,
+                degree:degree
             };
             localStorage.setItem('combinedArrays', JSON.stringify(combinedArrays));
             // 發送數據到後端
