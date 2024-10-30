@@ -135,7 +135,7 @@
 								if (myopia == 0 && astigmatism == 0) {
 									rightImage.src = "static/images/letter_e.png";  // 如果滑桿皆為0，顯示原圖
 								} 
-								else if (degree == 0){//只有近視或遠視
+								else if (astigmatism == 0){//只有近視或遠視
 									// 模擬不同度數時的圖片(替代圖片)
 									s="static/vision_blur\\"+String(myopia)+'.0_img.jpg'
 									rightImage.src = s;  
