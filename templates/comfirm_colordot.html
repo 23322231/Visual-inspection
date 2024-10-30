@@ -43,7 +43,7 @@
     </style>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
-        var socket = io.connect('https://28c7-114-34-178-54.ngrok-free.app');
+        var socket = io.connect('https://e214-114-34-178-54.ngrok-free.app');
         // var socket = io();
 
         socket.on('connect', function() {
@@ -71,6 +71,9 @@
                         // alert('Sent1 urlSuffix: ' + urlSuffix);  //debug
                         // console.log('Emitting confirmDrawing with urlSuffix:', urlSuffix);
                         // 發送 WebSocket 消息通知 QRcode頁面更新
+                        // document.addEventListener("DOMContentLoaded", function() {
+                        //     socket.emit('confirmDrawing', {'urlSuffix': urlSuffix});
+                        // });
                         socket.emit('confirmDrawing', {'urlSuffix': urlSuffix});
                         // alert('Sent2 urlSuffix:'+ urlSuffix); 
 
