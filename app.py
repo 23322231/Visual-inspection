@@ -176,6 +176,11 @@ def image_test():
 def image_test_result():
     return render_template('image_test_result.html')
 
+# 視覺模擬
+@app.route('/visual_simulation')
+def visual_simulation():
+    return render_template('visual_simulation.html')
+
 
 
 

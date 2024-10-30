@@ -1,0 +1,183 @@
+<!DOCTYPE HTML>
+<!--
+	Alpha by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Generic - Alpha by HTML5 UP</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="static/css/main.css" />
+		<link rel="stylesheet" href="static/css/vision.css" />
+	</head>
+	<body class="is-preload">
+		<div id="page-wrapper">
+
+			<!-- Header -->
+				<header id="header">
+					<h1><a href="index.html">Alpha</a> by HTML5 UP</h1>
+					<nav id="nav">
+						<ul>
+							<li><a href="index.html">Home</a></li>
+							<li>
+								<a href="#" class="icon solid fa-angle-down">Layouts</a>
+								<ul>
+									<li><a href="generic.html">Generic</a></li>
+									<li><a href="contact.html">Contact</a></li>
+									<li><a href="elements.html">Elements</a></li>
+									<li>
+										<a href="#">Submenu</a>
+										<ul>
+											<li><a href="#">Option One</a></li>
+											<li><a href="#">Option Two</a></li>
+											<li><a href="#">Option Three</a></li>
+											<li><a href="#">Option Four</a></li>
+										</ul>
+									</li>
+								</ul>
+							</li>
+							<li><a href="#" class="button">Sign Up</a></li>
+						</ul>
+					</nav>
+				</header>
+
+			<!-- Main -->
+				<section id="main" class="container">
+				
+					<!-- 圖片部分 -->
+					<div class="box">
+						<div class="row gtr-50 gtr-uniform">
+							<div class="col-6"><span class="image fit">
+								<img id="beforeImage" src="static/images/letter_e.png"  style="border:2px black solid;" alt="" />
+								<div  style="text-align:center;">
+									<h4>Original</h4>
+								</div>
+							</span></div>
+							<div class="col-6"><span class="image fit">
+								<img id="afterImage" src="static/images/letter_e.png" style="border:2px black solid;" alt="" />
+								<div  style="text-align:center;">
+									<h4>Blurred</h4>
+								</div>
+							</span></div>
+						</div>
+						<!-- 顯示目前的度數文字 -->
+						<h4 id="myopiaLabel" style="text-align: center;margin-top:10px ;width:100%;height: 100%;">近視度數：0，遠視度數：0，散光度數：0，散光角度：0</h4>
+						<!-- 調整度數部分 -->
+						<div class="ranges" >
+							<div class="row gtr-50 gtr-uniform">
+								<div  style="text-align:left;width:50%;">
+									<h4>近視度數</h4>
+								</div>
+								<div  style="text-align:right;width:50%;">
+									<h4>遠視度數</h4>
+								</div>
+							</div>
+							<!-- 拉條部分 -->
+							<div>
+								<input type="range" id="myopia" min="-200" max="200" step="25" value="0" onchange="adjustImage(); updateLabel()" />
+						
+							</div>
+
+							<div class="control-item">
+								<h4 for="degree">散光角度</h4>
+								<input type="range" id="degree" min="0" max="180" step="15" value="0" onchange="adjustImage(); updateLabel()">
+							</div>
+							<div class="control-item">
+								<h4 for="astigmatism">散光度數</h4>
+								<input type="range" id="astigmatism" min="0" max="200" step="25" value="0" onchange="adjustImage(); updateLabel()">
+							</div>
+						</div>	
+
+						<!-- 依據度數調整圖片部分 -->
+						<script>
+							function updateLabel() {
+								// 近視遠視度數
+								const myopia = document.getElementById('myopia').value;
+								// 散光角度
+								const degree = document.getElementById('degree').value;
+								// 散光度數
+								const astigmatism = document.getElementById('astigmatism').value;
+								//要改字的 label id
+								const label = document.getElementById('myopiaLabel');
+
+								if(myopia>0){
+									s="近視度數：0，遠視度數："+String(myopia)+"，散光度數："+String(astigmatism)+"，散光角度："+String(degree)
+								}
+								else{
+									s="近視度數："+String((-myopia))+"，遠視度數：0，散光度數："+String(astigmatism)+"，散光角度："+String(degree)
+								}
+								
+								label.textContent = s;
+							}
+							function downloadImage() {
+								const image = document.getElementById('afterImage');
+								const link = document.createElement('a');
+								link.href = image.src;
+								link.download = 'downloaded_image.png';
+								link.click();
+							}
+					
+							function adjustImage() {
+								// 近視遠視度數
+								const myopia = document.getElementById('myopia').value;
+								// 散光角度
+								const degree = document.getElementById('degree').value;
+								// 散光度數
+								const astigmatism = document.getElementById('astigmatism').value;
+								// 要更新的圖片
+								const rightImage = document.getElementById('afterImage');
+								if(myopia){
+									document.elementFromPoint
+								}
+								// 根據滑桿值來模擬不同的視覺變化
+								if (myopia == 0 && astigmatism == 0) {
+									rightImage.src = "static/images/letter_e.png";  // 如果滑桿皆為0，顯示原圖
+								} 
+								else if (degree == 0 && astigmatism == 0){//只有近視或遠視
+									// 模擬不同度數時的圖片(替代圖片)
+									s="static/vision_blur\\"+String(myopia)+'.0_img.jpg'
+									rightImage.src = s;  
+								}
+								else{//近視遠視與散光
+									s="static/vision_blur\\"+String(astigmatism)+".0_"+String(degree)+"_"+String(myopia)+'.0_img.jpg'
+									rightImage.src = s;  
+								}
+							}
+						</script>
+						<!-- 下面的免責文章部分 -->
+					</div>
+				</section>
+
+			<!-- Footer -->
+				<footer id="footer">
+					<ul class="icons">
+						<li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+						<li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+						<li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+						<li><a href="#" class="icon brands fa-github"><span class="label">Github</span></a></li>
+						<li><a href="#" class="icon brands fa-dribbble"><span class="label">Dribbble</span></a></li>
+						<li><a href="#" class="icon brands fa-google-plus"><span class="label">Google+</span></a></li>
+					</ul>
+					<ul class="copyright">
+						<li>&copy; Untitled. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+					</ul>
+					<ul>
+						<li>*免責聲明：有關近視的建議和進一步資訊，請諮詢您的視力保健專業人員。本系統之視覺模擬器僅供參考，不代表建議。</li>
+					</ul>
+				</footer>
+
+		</div>
+
+		<!-- Scripts -->
+			<script src="static/assets/js/jquery.min.js"></script>
+			<script src="static/assets/js/jquery.dropotron.min.js"></script>
+			<script src="static/assets/js/jquery.scrollex.min.js"></script>
+			<script src="static/assets/js/browser.min.js"></script>
+			<script src="static/assets/js/breakpoints.min.js"></script>
+			<script src="static/assets/js/util.js"></script>
+			<script src="static/assets/js/main.js"></script>
+
+	</body>
+</html>
