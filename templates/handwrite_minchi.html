@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>觸控畫圖工具</title>
+    <link rel="stylesheet" href="assets/css/minchi.css" />
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.8); /* 背景透明度 */
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* 增強陰影效果 */
+            width: 90%;
+            max-width: 500px; /* 調整容器寬度 */
+        }
+        canvas {
+            background-size: cover; /* 背景圖片覆蓋整個 canvas */
+            background-position: center; /* 圖片居中 */
+            border: 4px solid #ef734d; /* 更粗的綠框 */
+            border-radius: 15px; /* 圓角變大 */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* 更強的陰影效果 */
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1; /* 保持正方形 */
+            margin-bottom: 30px; /* 調整間距 */
+        }
+        button {
+            padding: 15px 30px; /* 增加按鈕內邊距 */
+            font-size: 18px; /* 增加按鈕字體大小 */
+            color: #fff;
+            background-color: #e89980;
+            border: none;
+            border-radius: 6px; /* 更圓的按鈕 */
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 按鈕陰影加強 */
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        button:hover {
+            background-color: #f67f5b; /* 按鈕懸停顏色 */
+            transform: scale(1.05); /* 懸停時微放大 */
+        }
+        .status {
+            font-size: 22px; /* 更大字體 */
+            font-weight: bold;
+            color: #e89980; /* 狀態文字顏色 */
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* 增加狀態文字陰影 */
+        }
+        .btn {
+            border: 2px solid #e89980;
+            color: white;
+            background-color: #e89980;
+            padding: 8px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center; /* 將按鈕置中 */
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 40px;
+        }
+        /* 當 clearButton 隱藏時，置中 submitButton */
+        .button-container .btn {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        /* 需要時顯示 clearButton */
+        .clearButton-hidden {
+            display: none;
+        }
+    </style>
+
+</head>
+<body class="is-preload">
+    <div id="page-wrapper">
+        <!-- Header -->
+        <header id="header">
+            <h1><a href="index.html">Alpha</a> by HTML5 UP</h1>
+            <nav id="nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li>
+                        <a href="#" class="icon solid fa-angle-down">Layouts</a>
+                        <ul>
+                            <li><a href="generic.html">Generic</a></li>
+                            <li><a href="contact.html">Contact</a></li>
+                            <li><a href="elements.html">Elements</a></li>
+                            <li>
+                                <a href="#">Submenu</a>
+                                <ul>
+                                    <li><a href="#">Option One</a></li>
+                                    <li><a href="#">Option Two</a></li>
+                                    <li><a href="#">Option Three</a></li>
+                                    <li><a href="#">Option Four</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><a href="#" class="button">Sign Up</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <!-- Main -->
+        <br>
+        <div class="container">
+            <div class="status" id="status">完成題數: 0/10</div>
+            <canvas id="drawingCanvas"></canvas>
+            <div class="button-container">
+                <div>
+                    <button class="btn clearButton-hidden" id="clearButton" onclick="clearCanvas()">清除重畫</button> <!-- 預設隱藏 clearButton -->
+                </div>
+                <div>
+                    <button class="btn" id="submitButton" onclick="handleButtonClick()">確認送出</button>
+                </div>
+                
+            </div>
+            
+        </div><br>
+        
+        <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+        <script>
+            var socket = io.connect('http://192.168.1.179:5000', {
+                pingInterval: 25000, // 25 seconds
+                pingTimeout: 60000,  // 60 seconds
+            });
+        
+            var totalQuestions = 11;
+            var completedQuestions = 0;
+        
+            function resizeCanvas() {
+                var canvas = document.getElementById('drawingCanvas');
+                var computedStyle = window.getComputedStyle(canvas);
+        
+                var width = Math.min(canvas.clientWidth, canvas.clientHeight) - parseInt(computedStyle.borderWidth) * 2;
+                canvas.width = width;  
+                canvas.height = width;  
+            }
+        
+            function updateStatus() {
+                document.getElementById('status').innerText = '第' + completedQuestions + '題，還有' + (10 - completedQuestions) + '題';
+            }
+        
+            function handleIntroduction() {
+                document.getElementById('status').innerText = '請在手機上用手指描出您看到的圖案';
+                var canvas = document.getElementById('drawingCanvas');
+                var clearButton = document.getElementById('clearButton');   //新增
+                canvas.removeEventListener('touchstart', startDrawing);
+                canvas.removeEventListener('touchmove', draw);
+                canvas.removeEventListener('touchend', stopDrawing);
+                canvas.style.border = 'none';
+                document.getElementById('submitButton').innerText = '知道啦';
+                clearButton.style.display = 'none';  // 隱藏 clearButton
+                document.getElementById('submitButton').onclick = function() {
+                    completedQuestions++;
+                    resetToDrawingMode();
+                    loadNextImage();
+                };
+            }
+        
+            function resetToDrawingMode() {
+                updateStatus();
+                var canvas = document.getElementById('drawingCanvas');
+                canvas.style.border = '4px solid #e89980'; 
+                canvas.addEventListener('touchstart', startDrawing);
+                canvas.addEventListener('touchmove', draw);
+                canvas.addEventListener('touchend', stopDrawing);
+                var submitButton = document.getElementById('submitButton');
+                // var clearButton = document.getElementById('clearButton');
+                // clearButton.innerText = '清除重畫';    //新增
+                submitButton.innerText = '確認送出';
+                clearButton.style.display = 'inline-block';  // 顯示 clearButton
+                // clearButton.onclick = function() {  //新增
+                //     clearCanvas();
+                // };
+                submitButton.onclick = function() {
+                    saveImage();
+                };
+            }
+        
+            var canvas = document.getElementById('drawingCanvas');
+            var context = canvas.getContext('2d');
+            
+            canvas.addEventListener('touchstart', startDrawing);
+            canvas.addEventListener('touchmove', draw);
+            canvas.addEventListener('touchend', stopDrawing);
+        
+            var isDrawing = false;
+            var lineCoordinates = [];
+        
+            function getTouchPosition(canvas, touchEvent) {
+                var rect = canvas.getBoundingClientRect();
+                return {
+                    x: (touchEvent.touches[0].clientX - rect.left) * (canvas.width / rect.width),
+                    y: (touchEvent.touches[0].clientY - rect.top) * (canvas.height / rect.height)
+                };
+            }
+        
+            function startDrawing(e) {
+                isDrawing = true;
+                var pos = getTouchPosition(canvas, e);
+                lineCoordinates.push(pos);
+                draw(e);
+            }
+        
+            function draw(e) {
+                e.preventDefault();
+                if (!isDrawing) return;
+        
+                context.lineWidth = 12;  
+                context.lineCap = 'round';
+                context.lineJoin = 'round';
+                context.strokeStyle = 'black';
+        
+                var pos = getTouchPosition(canvas, e);
+                lineCoordinates.push(pos);
+        
+                context.beginPath();
+                context.moveTo(lineCoordinates[0].x, lineCoordinates[0].y);
+        
+                for (var i = 1; i < lineCoordinates.length; i++) {
+                    context.lineTo(lineCoordinates[i].x, lineCoordinates[i].y);
+                    context.stroke();
+                }
+            }
+        
+            function stopDrawing() {
+                isDrawing = false;
+                lineCoordinates = [];
+            }
+        
+            function saveImage() {
+                if (confirm("您確定要送出嗎？")) {
+                    var dataURL = canvas.toDataURL();
+                    fetch('/upload', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ image: dataURL, completedQuestions: completedQuestions })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        completedQuestions++;
+                        updateStatus();
+                        if (completedQuestions < totalQuestions) {
+                            loadNextImage();
+                        } else {
+                            alert("已完成所有題目！");
+                            var newUrl = window.location.origin + '/finish?session=' + location.href.split('=').pop();
+                            window.location.href = newUrl;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                }
+            }
+        
+            function loadNextImage() {
+                fetch('/next-image')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.nextImageUrl) {
+                        context.clearRect(0, 0, canvas.width, canvas.height); // 清空 canvas
+                        canvas.style.backgroundImage = 'url(' + data.nextImageUrl + ')';
+                        canvas.style.backgroundSize = 'cover'; // 確保圖片覆蓋整個 canvas
+                        canvas.style.backgroundPosition = 'center'; // 圖片居中
+                        socket.emit('img-connect', {'background-image': data.nextImageUrl});
+                        console.log("Next image URL received:", data.nextImageUrl);
+                    } else {
+                        console.error('Error: no image URL returned');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading next image:', error);
+                });
+            }
+        
+            function handleButtonClick() {
+                if (completedQuestions === 0) {
+                    handleIntroduction();
+                } else {
+                    saveImage();
+                }
+            }
+        
+            window.onload = function() {
+                if (completedQuestions === 0) {
+                    var canvas = document.getElementById('drawingCanvas');
+                    canvas.style.backgroundImage = 'url("/static/images/chart_demonstration.gif")'; // 設定 GIF 圖片
+                    console.log("Loading GIF image for question 0");
+                    handleIntroduction(); 
+                } else {
+                    loadNextImage();
+                }
+                resizeCanvas();
+            };
+        
+            window.onresize = function() {
+                resizeCanvas(); // 確保 canvas 在窗口大小變更時保持正方形
+            };
+        
+            // 清除畫布的函數
+            function clearCanvas() {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        </script>
+
+        <!-- Footer -->
+        <footer id="footer">
+            <ul class="icons">
+                <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+                <li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+                <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+                <li><a href="#" class="icon brands fa-github"><span class="label">Github</span></a></li>
+                <li><a href="#" class="icon brands fa-dribbble"><span class="label">Dribbble</span></a></li>
+                <li><a href="#" class="icon brands fa-google-plus"><span class="label">Google+</span></a></li>
+            </ul>
+            <ul class="copyright">
+                <li>&copy; Untitled. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+            </ul>
+            <ul>
+                <li>*免責聲明：有關近視的建議和進一步資訊，請諮詢您的視力保健專業人員。本系統之視覺模擬器僅供參考，不代表建議。</li>
+            </ul>
+        </footer>
+
+    </div>
+
+</body>
+</html>

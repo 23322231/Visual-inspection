@@ -1,0 +1,128 @@
+<!-- 正式版 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Blindness Simulator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #e9c4b9;  /*#e0f7fa*/
+        }
+        .container {
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .image-box {
+            border: 1px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .image-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 40px;
+        }
+        img {
+            max-width: 100%; /* 讓圖片根據網頁的排版自動調整大小 */
+            height: auto;   /* 保持圖片的比例 */
+        }
+        label {
+            font-size: 18px;
+        }
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        .btn {
+            border: 2px solid #008CBA;
+            color: white;
+            background-color: #008CBA;
+            padding: 8px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+        }
+        .options {
+            display: flex;
+            justify-content: space-around;
+        }
+        .radio-group {
+            margin: 0 20px;
+        }
+        .buttons {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>色盲模擬</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+        <div class="image-container">
+            <div>
+                <label>上傳前圖片</label>
+                <div class="image-box">
+                    <img src="../static/original.png" id="before-img" alt="Original Image">
+                </div><br>
+                <!-- 自定義上傳按鈕 -->
+                <div class="upload-btn-wrapper">
+                    <button class="btn">上傳圖片</button>
+                    <input type="file" name="file" id="upload-img" accept="image/*">
+                </div>
+            </div>
+            <div>
+                <label>模擬後圖片</label>
+                <div class="image-box">
+                    <img src="../static/original.png" id="after-img" alt="Simulated Image">
+                </div><br>
+                <button class="btn" id="download-btn">下載圖片</button>
+            </div>
+        </div>
+
+        <div class="options">
+            <div class="radio-group">
+                <label>選擇色盲類型：</label><br>
+                <input type="radio" id="red_blindness" name="cb_type" value="0" required>
+                <label for="red_blindness">紅色色盲</label><br>
+                <input type="radio" id="green_blindness" name="cb_type" value="1">
+                <label for="green_blindness">綠色色盲</label><br>
+                <input type="radio" id="blue_blindness" name="cb_type" value="2">
+                <label for="blue_blindness">藍色色盲</label>
+            </div>
+
+            <div class="radio-group">
+                <label>選擇嚴重程度：</label><br>
+                <input type="radio" id="mild" name="severity" value="0" required>
+                <label for="mild">輕微</label><br>
+                <input type="radio" id="moderate" name="severity" value="1">
+                <label for="moderate">中度</label><br>
+                <input type="radio" id="severe" name="severity" value="2">
+                <label for="severe">嚴重</label>
+            </div>
+        </div><br>
+
+        <button class="btn" type="submit">模擬</button>
+    </form>
+</div>
+
+<script src="static/simulation_script.js"></script>
+</body>
+</html>
