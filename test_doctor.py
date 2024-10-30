@@ -8,8 +8,8 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-@app.route('/generate-advice', methods=['POST'])
-def generate_advice():
+@app.route('/generate-doctor-advice', methods=['POST'])
+def generate_doctor_advice():
     data = request.json
     symptoms = data.get('symptoms')
     print(symptoms)
