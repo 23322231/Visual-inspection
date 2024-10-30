@@ -205,7 +205,7 @@
                         questionStatus.textContent = `第 ${completedQuestions} 題`;
                     }
                     
-                    // 判斷使用者選擇的圖片和記錄每種類型(正常、紅綠色盲、藍色色盲、無法判斷)的數量
+                    // 判斷使用者選擇的圖片和記錄每種類型(正常、紅綠色色覺障礙、藍色色覺障礙、無法判斷)的數量
                     function evaluateAnswer() {
                         let hasRedGreen = false;
                         let hasBlue = false;
@@ -261,13 +261,13 @@
                         let resultMessage = `答對題數: ${correctCount} / 10 題\n`;
         
                         if (correctCount > redGreenColorBlindCount && correctCount > blueColorBlindCount && correctCount > otherCount && correctCount >= 6) {
-                            resultMessage += "色盲測驗結果為正常";
+                            resultMessage += "色覺障礙測驗結果為正常";
                         }else if (otherCount > redGreenColorBlindCount && otherCount > blueColorBlindCount) {
-                            resultMessage += "無法判斷具體色盲類型";
+                            resultMessage += "無法判斷具體色覺障礙類型";
                         }else if (redGreenColorBlindCount > blueColorBlindCount) {
-                            resultMessage += "有可能為紅色或綠色色盲";
+                            resultMessage += "有可能為紅色或綠色色覺障礙";
                         } else if (blueColorBlindCount > redGreenColorBlindCount) {
-                            resultMessage += "有可能為藍色色盲";
+                            resultMessage += "有可能為藍色色覺障礙";
                         }
 
                         // 儲存結果到localStorage
