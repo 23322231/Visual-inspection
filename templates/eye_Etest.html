@@ -28,7 +28,7 @@
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
         // 初始化 WebSocket 連接
-        var socket = io.connect('https://e34e-114-34-178-54.ngrok-free.app');
+        var socket = io.connect('https://3915-114-34-178-54.ngrok-free.app');
         
         var urlParams = new URLSearchParams(window.location.search);
         var session = urlParams.get('session');
@@ -113,7 +113,7 @@
                             answer.push(currentRandom[setIndex][randomIndx] ); //存答案
                             console.log('answer',answer);
                             errorCount = 0;
-                            degree+=0.1;
+                            degree=degree+0.1;
                             correct.push(Number(user_answer));
                             numberOftest++;
                             randomIndx++;                           

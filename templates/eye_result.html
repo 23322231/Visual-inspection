@@ -15,15 +15,18 @@
             max-width: 1000px;
             margin: auto;
             padding: 20px;
-            background-color: #f5f5f5;
+            background: linear-gradient(135deg, #d3eaff, #e6e6fa);
             color: #333;
             line-height: 1.6;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
         }
         h2 {
             text-align: center;
             color: #333;
             margin-bottom: 20px;
-            font-size: 1.5rem;
+            font-size: 2rem;
+            font-weight: bold;
         }
         /* Grid container for question cards */
         .grid-container {
@@ -34,15 +37,16 @@
         /* Question card styling */
         .question {
             border: 1px solid #ddd;
-            border-radius: 6px;
+            border-radius: 8px;
             padding: 12px;
             background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease-in-out;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
             text-align: center;
         }
         .question:hover {
-            transform: translateY(-3px);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
         .question img {
             max-width: 100%;
@@ -52,28 +56,40 @@
             margin-bottom: 10px;
         }
         .question-text {
-            font-size: 0.9rem;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #555;
             margin-bottom: 8px;
         }
         .user-answer, .correct-answer {
-            font-size: 0.85rem;
-            padding: 6px;
-            border-radius: 4px;
-            margin: 4px 0;
+            font-size: 0.9rem;
+            padding: 8px;
+            border-radius: 5px;
+            margin: 6px 0;
+            font-weight: 500;
         }
         .user-answer.correct {
             background-color: #d4edda;
             color: #155724;
-            font-weight: bold;
         }
         .user-answer.incorrect {
             background-color: #f8d7da;
             color: #721c24;
-            font-weight: bold;
         }
         .correct-answer {
             background-color: #e2e3e5;
             color: #555;
+        }
+        #advice {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #fff9e6;
+            color: #8a6d3b;
+            font-size: 1.1rem;
+            border: 1px solid #faebcc;
+            border-radius: 6px;
+            text-align: center;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         }
         /* Responsive adjustments */
         @media (max-width: 768px) {
@@ -94,11 +110,11 @@
     <div id="results" class="grid-container"></div>
     <div id="advice" class="result">醫囑將顯示在這裡...</div>
     <script>
-        var socket = io.connect('https://e34e-114-34-178-54.ngrok-free.app');
+        var socket = io.connect('https://3915-114-34-178-54.ngrok-free.app');
         let answer = [];
         let correct = [];
         let numberOftest = 0;
-        let degree = 0.1;
+        let degree = 0;
 
         var uuid = location.href.split('=').pop();
 
@@ -111,6 +127,7 @@
             numberOftest = storedData['numberOftest'];
             degree = storedData['degree'];
 
+            console.log(degree)
             renderResults();
         }
 
@@ -182,7 +199,7 @@
             });
         }
 
-        let symptoms ="這是一個E字視力檢查的結果，我在圖片為視力"+degree+"時連續答錯2題後結束測驗"; // 取得使用者輸入的症狀描述
+        let symptoms ="這是一個E字視力檢查的結果，我在視力相當於視力"+degree+"時連續答錯2題後結束測驗"; // 取得使用者輸入的症狀描述
         // 清空之前的結果並顯示 "生成中..."
         const adviceDiv = document.getElementById('advice');
         adviceDiv.innerText = "生成中...";
@@ -215,11 +232,10 @@
         socket.on('connect', () => console.log('WebSocket 已連接！'));
         socket.on('disconnect', () => console.log('WebSocket 已斷開連接！'));
 
-        window.onload = ()=>{
+        window.onload = ()=> {
             fetchTestResults();
             fetchAdvice();
         }
-
     </script>
     
 </body>

@@ -10,6 +10,9 @@ from sqlalchemy.exc import IntegrityError
 from psycopg2 import Binary
 from flask import Response,send_from_directory
 from hashlib import md5
+from langdetect import detect
+from translate import Translator
+from deep_translator import GoogleTranslator
 import base64
 import random
 import uuid
@@ -26,6 +29,7 @@ import time
 import mediapipe as mp
 import tensorflow as tf
 import detect_face
+import opencc  #簡體轉繁體
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
@@ -320,7 +324,7 @@ def calculate_score():
                 continue
 
             if not answer_image:
-                # 如果答案不存在，记录错误并继续
+                #如果答案不存在，紀錄錯誤然後繼續
                 print(f"Answer image not found for question {question_id}")
                 continue
             
@@ -904,6 +908,7 @@ def simulate():
 
     return 'Invalid file format', 400
 
+converter = opencc.OpenCC('s2t')  #簡體轉繁體
 @app.route('/generate-doctor-advice', methods=['POST'])
 def generate_doctor_advice():
     data = request.json
@@ -911,7 +916,8 @@ def generate_doctor_advice():
     print(symptoms)
     # 使用 Ollama CLI調用 Llama3.2來生成醫囑
     try:
-        prompt = f"你是一位只會繁體中文的臺灣醫生，請根據以下症狀生成一段約150字的全繁體中文醫療建議，不需要講太多細節，要繁體中文，臺灣用語，禁止使用英文任何單字，如果有英文單字，請翻譯官翻譯成中文{symptoms}"
+        # 你是一位眼科醫師，請根據以下視力檢測狀況生成一段約150字的全英文建議，建議可以如何保護照顧眼睛，不需要講太多細節。
+        prompt = f"You are an ophthalmologist. Please generate a full English suggestion of about 150 words based on the following vision test conditions, suggesting how to protect and care for your eyes. You don’t need to go into too many details.{symptoms}"
         result = subprocess.run(
             ['ollama', 'run', 'llama3.2', ], input=prompt,
             capture_output=True, text=True, #stderr=subprocess.PIPE,
@@ -921,7 +927,32 @@ def generate_doctor_advice():
         if result.stderr:
             app.logger.error(f"Subprocess error: {result.stderr}")
         advice = result.stdout.strip()
+        print("advice")
+        print(advice)
+        
+        
+
+        # 使用 translate 將英文內容翻譯為繁體中文
+        # advice_back = Translator(from_lang="English",to_lang="Chinese").translate(advice)
+        # print("advice_back")
+        # print(advice_back)
+
+        try:
+            advice_back = GoogleTranslator(source='en', target='zh-TW').translate(advice)
+        except Exception as e:
+            print(f"翻譯時發生錯誤: {e}")
+
+        # 檢測生成的醫囑是否為繁體中文，若非繁體則轉換
+        if detect(advice_back) != 'zh-tw':
+            advice = converter.convert(advice_back)
+        
+        print("advice")
+        print(advice)
+        
+
         return jsonify({'advice': advice})
+    
+
 
     except Exception as e:
             app.logger.error(f"Exception: {e}")

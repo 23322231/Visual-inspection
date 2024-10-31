@@ -1,3 +1,4 @@
+<!-- 色覺障礙測驗的結果頁面 -->
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -49,6 +50,18 @@
             transform: scale(1.05); /* 滑過時略微放大圖片 */
         }
 
+        #advice {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #fff9e6;
+            color: #8a6d3b;
+            font-size: 1.1rem;
+            border: 1px solid #faebcc;
+            border-radius: 6px;
+            text-align: center;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
         button {
             padding: 12px 24px;
             font-size: 18px;
@@ -73,15 +86,17 @@
         <p id="scoreDisplay">分數: 計算中...</p> <!-- 用來顯示分數 -->
         <div id="imagesContainer"></div>
     </div>
+    <div id="advice" class="result">醫囑將顯示在這裡...</div>
 
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
-        var socket = io.connect('https://e34e-114-34-178-54.ngrok-free.app', {
+        var socket = io.connect('https://3915-114-34-178-54.ngrok-free.app', {
             pingInterval: 25000, // 25 seconds
             pingTimeout: 60000,  // 60 seconds
         });
     </script>
     <script>
+        let score;
         // 頁面載入完成後初始化
         window.onload = function() {
 
@@ -143,7 +158,39 @@
                     console.error('Error fetching images:', error);
                 });
             }
+            fetchAdvice();
         };
+
+
+        let symptoms ="這是一個石原氏色盲測驗的結果，我獲得"+score+"分"; // 取得使用者輸入的症狀描述
+        // 清空之前的結果並顯示 "生成中..."
+        const adviceDiv = document.getElementById('advice');
+        adviceDiv.innerText = "生成中...";
+        async function fetchAdvice() {
+            try {
+                // 發送 POST 請求到後端以生成醫囑
+                const response = await fetch('/generate-doctor-advice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ symptoms }) // 將症狀描述傳遞到後端
+                });
+
+                if (!response.ok) {
+                    throw new Error("發生錯誤，請重試。");
+                }
+
+                const data = await response.json();
+                if (data.advice) {
+                    adviceDiv.innerText = data.advice; // 顯示生成的醫囑
+                } else {
+                    adviceDiv.innerText = "未能生成醫囑。";
+                }
+            } catch (error) {
+                adviceDiv.innerText = `錯誤：${error.message}`;
+            }
+        }
     </script>
 </body>
 </html>
