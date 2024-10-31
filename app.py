@@ -914,7 +914,7 @@ def generate_doctor_advice():
     data = request.json
     symptoms = data.get('symptoms')
     print(symptoms)
-    # 使用 Ollama CLI調用 Llama3.2來生成醫囑
+    
     try:
         # 你是一位眼科醫師，請根據以下視力檢測狀況生成一段約150字的全英文建議，建議可以如何保護照顧眼睛，不需要講太多細節。
         prompt = f"You are an ophthalmologist. Please generate a full English suggestion of about 150 words based on the following vision test conditions, suggesting how to protect and care for your eyes. You don’t need to go into too many details.{symptoms}"
