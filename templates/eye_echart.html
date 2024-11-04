@@ -90,9 +90,28 @@
         button:hover {
             background-color: #d47a7a;
         }
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 15px;
+            font-size: 1em;
+            color: #fff;
+            /* background-color: #e89980; */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        /* .back-button:hover { */
+            /* background-color: #d47a7a; */
+        /* } */
     </style>
 </head>
 <body>
+
+    <button class="back-button" onclick="history.back()">回前頁</button>
+
     <div class="container">
         <h1>調整E字測驗圖片大小</h1>
         <p class="instruction">
