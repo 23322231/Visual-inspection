@@ -764,8 +764,6 @@ def generate_url():
     return jsonify({'url': unique_url})
 
 
-
-
 @app.route('/generate-url-qrcode')
 def generate_url_qrcode():
     session_id = str(uuid.uuid4())  # 生成唯一的sessionID
@@ -773,28 +771,28 @@ def generate_url_qrcode():
     return jsonify(url=unique_url)
 
 #生成醫囑
-@app.route('/generate-advice', methods=['POST'])
-def generate_advice():
-    data = request.json
-    symptoms = data.get('symptoms')
-    print(symptoms)
+# @app.route('/generate-advice', methods=['POST'])
+# def generate_advice():
+#     data = request.json
+#     symptoms = data.get('symptoms')
+#     print(symptoms)
     
-    try:
-        prompt = f"請根據以下症狀生成，一段約300字的中文醫療建議，不需要講太多細節，要中文的{symptoms}"
-        result = subprocess.run(
-            ['ollama', 'run', 'llama3', ], input=prompt,
-            capture_output=True, text=True, #stderr=subprocess.PIPE,
-            encoding='utf-8',  #指定使用 utf-8 編碼
-            errors='ignore'    #忽略無法編碼的字符
-        )
-        if result.stderr:
-            app.logger.error(f"Subprocess error: {result.stderr}")
-        advice = result.stdout.strip()
-        return jsonify({'advice': advice})
+#     try:
+#         prompt = f"請根據以下症狀生成，一段約300字的中文醫療建議，不需要講太多細節，要中文的{symptoms}"
+#         result = subprocess.run(
+#             ['ollama', 'run', 'llama3', ], input=prompt,
+#             capture_output=True, text=True, #stderr=subprocess.PIPE,
+#             encoding='utf-8',  #指定使用 utf-8 編碼
+#             errors='ignore'    #忽略無法編碼的字符
+#         )
+#         if result.stderr:
+#             app.logger.error(f"Subprocess error: {result.stderr}")
+#         advice = result.stdout.strip()
+#         return jsonify({'advice': advice})
 
-    except Exception as e:
-            app.logger.error(f"Exception: {e}")
-            return jsonify({'error': str(e)}), 500
+#     except Exception as e:
+#             app.logger.error(f"Exception: {e}")
+#             return jsonify({'error': str(e)}), 500
     
 
 # 開始手指方向辨識
@@ -908,14 +906,16 @@ def simulate():
 
     return 'Invalid file format', 400
 
+
 converter = opencc.OpenCC('s2t')  #簡體轉繁體
+# 產生醫囑
 @app.route('/generate-doctor-advice', methods=['POST'])
 def generate_doctor_advice():
     data = request.json
     symptoms = data.get('symptoms')
     print(symptoms)
     
-    try:
+    try:#寫在實驗裡面，他沒辦法輸出全繁體... 如何解決...
         # 你是一位眼科醫師，請根據以下視力檢測狀況生成一段約150字的全英文建議，建議可以如何保護照顧眼睛，不需要講太多細節。
         prompt = f"You are an ophthalmologist. Please generate a full English suggestion of about 150 words based on the following vision test conditions, suggesting how to protect and care for your eyes. You don’t need to go into too many details.{symptoms}"
         result = subprocess.run(
