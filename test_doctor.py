@@ -6,10 +6,11 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('doctor_orders.html')
 
 @app.route('/generate-doctor-advice', methods=['POST'])
 def generate_doctor_advice():
+    get_model_info()
     data = request.json
     symptoms = data.get('symptoms')
     print(symptoms)
@@ -30,6 +31,17 @@ def generate_doctor_advice():
     except Exception as e:
             app.logger.error(f"Exception: {e}")
             return jsonify({'error': str(e)}), 500
+    
+def get_model_info():
+    try:
+        # 使用 Ollama CLI 獲取已安裝模型的列表
+        result = subprocess.run(['ollama', 'list'], capture_output=True, text=True)
+        if result.stderr:
+            print(f"Error fetching models: {result.stderr}")
+        else:
+            print(f"Installed models:\n{result.stdout.strip()}")
+    except Exception as e:
+        print(f"Exception occurred: {e}")
 
 
 if __name__ == '__main__':
