@@ -30,6 +30,10 @@ def index():
 def quiz():
     return render_template('quiz.html')
 
+@app.route('/image_test')
+def image_test():
+    return render_template('image_test.html')
+
 
 
 
