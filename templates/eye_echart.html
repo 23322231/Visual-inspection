@@ -5,14 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>調整視力測驗圖片大小</title>
     <style>
-        /* 基本樣式設置 */
+        
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f8e6e6;
+            /* background-color: #f8e6e6; */
+            background-image:url("static/images/pic04.jpg");
+            background-size: cover;
             font-family: Arial, sans-serif;
             color: #4d4d4d;
         }
@@ -21,7 +23,7 @@
             background-color: #ffffff;
             border-radius: 10px;
             padding: 20px;
-            max-width: 400px;
+            max-width: 500px;
             width: 90%;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
@@ -49,7 +51,7 @@
             appearance: none;
             width: 100%;
             height: 8px;
-            background: linear-gradient(90deg, #df9898, #f8c1c1);
+            background: linear-gradient(80deg, #df9898, #f8c1c1);
             outline: none;
             border-radius: 4px;
             cursor: pointer;
@@ -60,7 +62,7 @@
             width: 20px;
             height: 20px;
             background: #ffffff;
-            border: 2px solid #df9898;
+            border: 2px solid #e89980;
             border-radius: 50%;
             cursor: pointer;
             box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
@@ -69,7 +71,7 @@
             width: 20px;
             height: 20px;
             background: #ffffff;
-            border: 2px solid #df9898;
+            border: 2px solid #e89980;
             border-radius: 50%;
             cursor: pointer;
             box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
@@ -79,7 +81,7 @@
             padding: 10px 20px;
             font-size: 1em;
             color: #fff;
-            background-color: #df9898;
+            background-color: #e89980;
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -92,9 +94,9 @@
 </head>
 <body>
     <div class="container">
-        <h1>調整視力測驗圖片大小</h1>
+        <h1>調整E字測驗圖片大小</h1>
         <p class="instruction">
-            請將信用卡（或已知尺寸的物品）放在螢幕上，並調整黑框尺寸，使其與物品大小一致。
+            請將信用卡或其他長寬為85.60毫米、53.98毫米的卡片放在螢幕上框框中，並調整下方滑桿，使其與物品大小一致。
         </p>
 
         <div id="referenceObject"></div>
@@ -112,7 +114,7 @@
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
         // 初始化 WebSocket 連接
-        var socket = io.connect('https://3915-114-34-178-54.ngrok-free.app');
+        var socket = io.connect('http://127.0.0.1:5000');
     
         // WebSocket 連接成功時的處理
         socket.on('connect', function() {
@@ -129,13 +131,20 @@
         sizeSlider.addEventListener('input', updateSize);
 
         function updateSize() {
-            const widthPx = sizeSlider.value;
+            const containerWidth = document.querySelector('.container').offsetWidth * 0.9; // 容器的 90% 寬度
+            let widthPx = sizeSlider.value;
+
+            // 限制框框寬度
+            if (widthPx > containerWidth) {
+                widthPx = containerWidth;
+            }
+
             const heightPx = widthPx / goldenRatio;
 
             referenceObject.style.width = widthPx + 'px';
             referenceObject.style.height = heightPx + 'px';
 
-            widthDisplay.textContent = widthPx;
+            widthDisplay.textContent = Math.round(widthPx);
             heightDisplay.textContent = Math.round(heightPx);
         }
 
