@@ -5,8 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Color Blindness Simulator</title>
-    <link rel="stylesheet" href="assets/css/minchi.css" />
+    <link rel="stylesheet" href="static/assets/css/minchi.css" />
     <style>
+        body, html {    /* 新增 防止網頁內容超出視窗寬度 */
+            overflow-x: hidden;
+        }
         .container {
             margin: 0 auto;
             padding: 20px;
@@ -83,6 +86,12 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 按鈕陰影加強 */
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
+        .smulation-result {
+            margin-top: 20px; 
+            font-size: 18px; 
+            color: #333; 
+            text-align: left;
+        }
     </style>
 </head>
 <body class="is-preload">
@@ -124,7 +133,7 @@
                         <div>
                             <label>原始圖片</label>
                             <div class="image-box">
-                                <img src="../static/original.png" id="before-img" alt="Original Image">
+                                <img src="static/original.png" id="before-img" alt="Original Image">
                             </div><br>
                             <!-- 自定義上傳按鈕 -->
                             <div class="upload-btn-wrapper">
@@ -135,7 +144,7 @@
                         <div>
                             <label>模擬圖片</label>
                             <div class="image-box">
-                                <img src="../static/original.png" id="after-img" alt="Simulated Image">
+                                <img src="static/original.png" id="after-img" alt="Simulated Image">
                             </div><br>
                             <button class="buttons" id="download-btn">下載圖片</button>
                         </div>
@@ -143,13 +152,13 @@
         
                     <div class="options">
                         <div class="radio-group">
-                            <label>選擇色覺模擬類型：</label>
+                            <label>選擇色覺障礙模擬類型：</label>
                             <input type="radio" id="red_blindness" name="cb_type" value="0" required>
-                            <label for="red_blindness">紅色色覺</label>
+                            <label for="red_blindness">紅色</label>
                             <input type="radio" id="green_blindness" name="cb_type" value="1">
-                            <label for="green_blindness">綠色色覺</label>
+                            <label for="green_blindness">綠色</label>
                             <input type="radio" id="blue_blindness" name="cb_type" value="2">
-                            <label for="blue_blindness">藍色色覺</label>
+                            <label for="blue_blindness">藍色</label>
                         </div>
         
                         <div class="radio-group">
@@ -162,14 +171,15 @@
                             <label for="severe">嚴重</label>
                         </div>
                     </div>
-                                        
+                    
                     <div class="container">
-                        <button class="buttons" type="submit">模擬</button>
+                        <button class="buttons" type="submit" onclick="simulate()">模擬</button>
                     </div>
+                    <div id="simulation-result" class="smulation-result"></div>
                     
                 </form>          
             </div>
-            <script src="../static/simulation_script.js"></script>
+            <script src="static/simulation_script.js"></script>
             
         </section>
 
@@ -194,14 +204,13 @@
 
 
     <!-- Scripts -->
-        <script src="assets/js/jquery.min.js"></script>
-        <script src="assets/js/jquery.dropotron.min.js"></script>
-        <script src="assets/js/jquery.scrollex.min.js"></script>
-        <script src="assets/js/browser.min.js"></script>
-        <script src="assets/js/breakpoints.min.js"></script>
-        <script src="assets/js/util.js"></script>
-        <script src="assets/js/main.js"></script>
+        <script src="static/assets/js/jquery.min.js"></script>
+        <script src="static/assets/js/jquery.dropotron.min.js"></script>
+        <script src="static/assets/js/jquery.scrollex.min.js"></script>
+        <script src="static/assets/js/browser.min.js"></script>
+        <script src="static/assets/js/breakpoints.min.js"></script>
+        <script src="static/assets/js/util.js"></script>
+        <script src="static/assets/js/main.js"></script>
 
-    
 </body>
 </html>
