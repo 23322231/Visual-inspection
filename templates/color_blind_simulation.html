@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>Color Blindness Simulator</title>
     <style>
         @import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700");
@@ -16,7 +17,7 @@
 
         body {
             font-family: 'Open Sans', sans-serif;
-            background-color: #e9c4b9;
+            background-color: #ffffff;
             color: #333;
             margin: 0;
             padding: 0;
@@ -35,17 +36,31 @@
         }
 
         /* Header */
-        #header {
-            position: relative;
-            padding: 20px;
+        #header-bar {
+            background-color: #444; /* 深灰色橫條 */
+            width: 100%;
+            padding: 20px 10px;
+        }
+
+        /* #header {
+            
+            max-width: 800px;
+            margin: 0 auto;
             text-align: right;
+        } */
+        #header {
+            max-width: 100%;
+            margin: 0 auto;
+            text-align: right;
+            padding-right: 10px; /* 增加右側內邊距 */
         }
 
         #header a {
             text-decoration: none;
-            color: #999;
-            font-size: 20px;
-            font-weight: 600;
+            color: #ffffff; /* 白色的Home文字 */
+            font-size: 18px;
+            font-weight: 400;
+            /* padding: 0px 17.333px; */
         }
 
         /* Image Container */
@@ -95,9 +110,9 @@
         }
 
         .btn {
-            border: 2px solid #d15b4d;
+            border: 2px solid #e89980;
             color: #fff;
-            background-color: #d15b4d;
+            background-color: #e89980;
             padding: 8px 20px;
             font-size: 16px;
             cursor: pointer;
@@ -194,9 +209,11 @@
 </head>
 
 <body>
-    <header id="header">
-        <a href="http://192.168.1.121:5000/quiz">Home</a>
-    </header>
+    <div id="header-bar">
+        <header id="header">
+            <a href="http://192.168.1.121:5000/quiz">Home</a>
+        </header>
+    </div>
 
     <div class="container">
         <h1>色盲模擬</h1>
