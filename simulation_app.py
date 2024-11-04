@@ -5,7 +5,8 @@ from io import BytesIO
 import cv2
 import numpy as np
 import base64
-from color_blind_simulation import simulate_color_blindness
+from color_blind_simulation import simulate_color_blindness     # 引用 color_blind_simulation.py 色覺辨識障礙功能
+from gradient import calculate_edge_loss    # 引用 gradient.py 計算梯度差異並算邊緣消失比例功能
 
 app = Flask(__name__)
 
@@ -27,6 +28,29 @@ def allowed_file(filename):
 @app.route('/')
 def index():
     return render_template('color_blind_simulation.html')
+
+
+@app.route('/simulation-result', methods=['GET','POST'])
+def simulation_result():
+    # 這些是您從 Python 計算出來的結果
+    # 接收上傳的圖片文件
+    file1 = request.files['original_image']
+    file2 = request.files['simulated_image']
+    image1 = Image.open(file1).convert('RGB')
+    image2 = Image.open(file2).convert('RGB')
+
+    # 轉為 OpenCV 格式
+    img_rgb = np.array(image1)
+    img_sim_rgb = np.array(image2)
+
+    # Example usage
+    edge_loss_ratio_ori, max_value = calculate_edge_loss(img_rgb, img_sim_rgb)
+
+    return jsonify({
+        'edge_loss_ratio_ori': edge_loss_ratio_ori,
+        'max_value': max_value
+    })
+
 
 @app.route('/simulate', methods=['POST'])
 def simulate():
