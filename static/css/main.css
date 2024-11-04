@@ -3525,7 +3525,7 @@
 				z-index: 10001;
 			}
 
-				#navButton .toggle {
+				/* #navButton .toggle {
 					text-decoration: none;
 					height: 100%;
 					left: 0;
@@ -3563,7 +3563,7 @@
 						text-align: center;
 						top: 0.5em;
 						width: 3.5em;
-					}
+					} */
 
 			#navPanel {
 				-moz-backface-visibility: hidden;

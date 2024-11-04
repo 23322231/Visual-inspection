@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Color Blindness Simulator</title>
     <style>
+        @import url("fontawesome-all.min.css");
+        @import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700");
         body {
             font-family: Arial, sans-serif;
             text-align: center;
@@ -68,9 +70,206 @@
         .buttons {
             margin-top: 20px;
         }
+        /* Header */
+        
+        #header .icons {
+            text-align: right;
+            margin-right: 50px;    
+        }
+
+        #header ul > a:not(.button) {
+            color: #999; /* 首頁上面 Home Layouts...那些字 */
+            display: inline-block;
+            text-decoration: none;
+            border: 0;
+        }
+
+        #header ul > a:not(.button):before, a:not(.button):after{
+        color: #999;
+        margin-right: 5em;
+        }
+
+        #cta {
+		background: #e89980;
+		color: #f9e6df;
+		padding: 3.5em 0 4em 0;
+		text-align: center;
+	}
+
+		#cta h2, #cta h3, #cta h4, #cta h5, #cta h6 {
+			color: inherit;
+		}
+
+		#cta form {
+			margin: 0 auto;
+			max-width: 100%;
+			width: 25em;
+		}
+
+		#cta input[type="submit"],
+		#cta input[type="reset"],
+		#cta input[type="button"],
+		#cta .button {
+			box-shadow: none;
+			background: #fff;
+			color: #e89980;
+		}
+
+		#cta input[type="text"],
+		#cta input[type="password"],
+		#cta input[type="email"],
+		#cta select,
+		#cta textarea {
+			color: #ffffff;
+			background: rgba(255, 255, 255, 0.15);
+			border: 0;
+		}
+
+			#cta input[type="text"]:focus,
+			#cta input[type="password"]:focus,
+			#cta input[type="email"]:focus,
+			#cta select:focus,
+			#cta textarea:focus {
+				box-shadow: inset 0 0 0 2px #fff;
+			}
+
+		#cta ::-webkit-input-placeholder {
+			color: rgba(255, 255, 255, 0.75) !important;
+		}
+
+		#cta :-moz-placeholder {
+			color: rgba(255, 255, 255, 0.75) !important;
+		}
+
+		#cta ::-moz-placeholder {
+			color: rgba(255, 255, 255, 0.75) !important;
+		}
+
+		#cta :-ms-input-placeholder {
+			color: rgba(255, 255, 255, 0.75) !important;
+		}
+
+		#cta .formerize-placeholder {
+			color: rgba(255, 255, 255, 0.75) !important;
+		}
+    
+    
+        /* Mobile (Portrait) */
+
+	@media screen and (max-width: 480px) {
+
+    /* Basic */
+
+        html, body {
+            min-width: 320px;
+        }
+
+        body, input, select, textarea {
+            font-size: 11pt;
+        }
+
+    /* Section/Article */
+
+        header.major {
+            padding: 0;
+        }
+
+    /* List */
+
+        ul.actions {
+            margin: 0 0 2em 0;
+        }
+
+            ul.actions li {
+                display: block;
+                padding: 1em 0 0 0;
+                text-align: center;
+                width: 100%;
+            }
+
+                ul.actions li:first-child {
+                    padding-top: 0;
+                }
+
+                ul.actions li > * {
+                    width: 100%;
+                    margin: 0 !important;
+                }
+
+                    ul.actions li > *.icon:before {
+                        margin-left: -2em;
+                    }
+
+            ul.actions.small li {
+                padding: 0.5em 0 0 0;
+            }
+
+                ul.actions.small li:first-child {
+                    padding-top: 0;
+                }
+
+    /* Box */
+
+        .box {
+            border-radius: 0;
+            box-shadow: none;
+            margin: 1em 0 0 0;
+            padding: 3em 1em !important;
+        }
+
+            .box.features .features-row section {
+                margin: 3em 0 0 0 !important;
+                padding: 3em 0 0 0 !important;
+            }
+
+            .box .image.featured {
+                border-radius: 0;
+                margin-left: -1em;
+                width: calc(100% + 2em);
+            }
+
+                .box .image.featured img {
+                    border-radius: 0 !important;
+                }
+
+                .box .image.featured:first-child {
+                    margin-bottom: 3em;
+                    margin-top: -3em;
+                }
+
+                .box .image.featured:last-child {
+                    margin-bottom: -3em;
+                    margin-top: 3em;
+                }
+
+    /* Banner */
+
+        #banner {
+            padding: 5em 3em 4em 3em;
+        }
+
+    /* Main */
+
+        #main > .box:first-child {
+            margin-top: 0;
+        }
+
+    /* CTA */
+
+        #cta {
+            padding: 2.5em 1em 3em 1em;
+        }
+
+    }
     </style>
 </head>
+    
 <body>
+    <header id="header">
+        <ul class="icons">
+            <a href="http://192.168.1.121:5000/quiz">Home</a>
+        </ul>
+    </header>
 
 <div class="container">
     <h1>色盲模擬</h1>
@@ -121,6 +320,12 @@
 
         <button class="btn" type="submit">模擬</button>
     </form>
+
+    <section id="cta">
+        <ul>
+            <li>*免責聲明：有關近視的建議和進一步資訊，請諮詢您的視力保健專業人員。本系統之視覺模擬器僅供參考，不代表建議。</li>
+        </ul>
+    </section>
 </div>
 
 <script src="static/assets/js/simulation_script.js"></script>
