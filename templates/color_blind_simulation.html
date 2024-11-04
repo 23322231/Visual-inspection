@@ -1,4 +1,3 @@
-<!-- 正式版 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,53 +5,110 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Color Blindness Simulator</title>
     <style>
-        @import url("fontawesome-all.min.css");
         @import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700");
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
+
+        /* Reset */
+        * {
             margin: 0;
             padding: 0;
-            background-color: #e9c4b9;  /*#e0f7fa*/
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #e9c4b9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
         .container {
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            text-align: center;
         }
+
+        h1 {
+            color: #d15b4d;
+            margin-bottom: 20px;
+        }
+
+        /* Header */
+        #header {
+            position: relative;
+            padding: 20px;
+            text-align: right;
+        }
+
+        #header a {
+            text-decoration: none;
+            color: #999;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        /* Image Container */
+        .image-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .image-box-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         .image-box {
-            border: 1px solid black;
+            border: 2px solid #d15b4d;
+            padding: 10px;
+            width: 300px;
+            height: 300px;
             display: flex;
             align-items: center;
             justify-content: center;
+            background-color: #fff;
+            margin-bottom: 10px;
         }
-        .image-container {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            margin-bottom: 20px;
-            gap: 40px;
+
+        .image-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* 保持圖片比例，確保框架高度一致 */
         }
-        img {
-            max-width: 100%; /* 讓圖片根據網頁的排版自動調整大小 */
-            height: auto;   /* 保持圖片的比例 */
-        }
+
         label {
             font-size: 18px;
+            font-weight: 600;
+            color: #555;
         }
+
+        /* Upload and Download Button */
         .upload-btn-wrapper {
             position: relative;
             overflow: hidden;
             display: inline-block;
         }
+
         .btn {
-            border: 2px solid #008CBA;
-            color: white;
-            background-color: #008CBA;
+            border: 2px solid #d15b4d;
+            color: #fff;
+            background-color: #d15b4d;
             padding: 8px 20px;
             font-size: 16px;
             cursor: pointer;
             border-radius: 5px;
+            transition: background 0.3s;
         }
+
+        .btn:hover {
+            background-color: #b94c42;
+        }
+
         .upload-btn-wrapper input[type=file] {
             font-size: 100px;
             position: absolute;
@@ -60,274 +116,142 @@
             top: 0;
             opacity: 0;
         }
+
+        /* Radio Group Options */
         .options {
             display: flex;
-            justify-content: space-around;
-        }
-        .radio-group {
-            margin: 0 20px;
-        }
-        .buttons {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
             margin-top: 20px;
-        }
-        /* Header */
-        
-        #header .icons {
-            text-align: right;
-            margin-right: 50px;    
+            color: #666;
         }
 
-        #header ul > a:not(.button) {
-            color: #999; /* 首頁上面 Home Layouts...那些字 */
-            display: inline-block;
-            text-decoration: none;
-            border: 0;
+        .radio-group {
+            margin: 15px 80px;
         }
 
-        #header ul > a:not(.button):before, a:not(.button):after{
-        color: #999;
-        margin-right: 5em;
-        }
-
+        /* CTA Section */
         #cta {
-		background: #e89980;
-		color: #f9e6df;
-		padding: 3.5em 0 4em 0;
-		text-align: center;
-	}
-
-		#cta h2, #cta h3, #cta h4, #cta h5, #cta h6 {
-			color: inherit;
-		}
-
-		#cta form {
-			margin: 0 auto;
-			max-width: 100%;
-			width: 25em;
-		}
-
-		#cta input[type="submit"],
-		#cta input[type="reset"],
-		#cta input[type="button"],
-		#cta .button {
-			box-shadow: none;
-			background: #fff;
-			color: #e89980;
-		}
-
-		#cta input[type="text"],
-		#cta input[type="password"],
-		#cta input[type="email"],
-		#cta select,
-		#cta textarea {
-			color: #ffffff;
-			background: rgba(255, 255, 255, 0.15);
-			border: 0;
-		}
-
-			#cta input[type="text"]:focus,
-			#cta input[type="password"]:focus,
-			#cta input[type="email"]:focus,
-			#cta select:focus,
-			#cta textarea:focus {
-				box-shadow: inset 0 0 0 2px #fff;
-			}
-
-		#cta ::-webkit-input-placeholder {
-			color: rgba(255, 255, 255, 0.75) !important;
-		}
-
-		#cta :-moz-placeholder {
-			color: rgba(255, 255, 255, 0.75) !important;
-		}
-
-		#cta ::-moz-placeholder {
-			color: rgba(255, 255, 255, 0.75) !important;
-		}
-
-		#cta :-ms-input-placeholder {
-			color: rgba(255, 255, 255, 0.75) !important;
-		}
-
-		#cta .formerize-placeholder {
-			color: rgba(255, 255, 255, 0.75) !important;
-		}
-    
-    
-        /* Mobile (Portrait) */
-
-	@media screen and (max-width: 480px) {
-
-    /* Basic */
-
-        html, body {
-            min-width: 320px;
+            background: #e89980;
+            color: #f9e6df;
+            padding: 2em 0;
+            text-align: center;
+            margin-top: 30px;
+            width: 100%;
         }
 
-        body, input, select, textarea {
-            font-size: 11pt;
-        }
-
-    /* Section/Article */
-
-        header.major {
+        #cta ul {
+            list-style: none;
+            max-width: 800px;
+            margin: 0 auto;
             padding: 0;
+            font-size: 14px;
+            line-height: 1.6;
         }
 
-    /* List */
+        /* Mobile Responsiveness */
+        @media screen and (max-width: 768px) {
+            .image-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
 
-        ul.actions {
-            margin: 0 0 2em 0;
-        }
-
-            ul.actions li {
-                display: block;
-                padding: 1em 0 0 0;
-                text-align: center;
+            .image-box {
                 width: 100%;
+                max-width: 300px;
             }
 
-                ul.actions li:first-child {
-                    padding-top: 0;
-                }
-
-                ul.actions li > * {
-                    width: 100%;
-                    margin: 0 !important;
-                }
-
-                    ul.actions li > *.icon:before {
-                        margin-left: -2em;
-                    }
-
-            ul.actions.small li {
-                padding: 0.5em 0 0 0;
+            .options {
+                flex-direction: column;
+                align-items: center;
             }
 
-                ul.actions.small li:first-child {
-                    padding-top: 0;
-                }
-
-    /* Box */
-
-        .box {
-            border-radius: 0;
-            box-shadow: none;
-            margin: 1em 0 0 0;
-            padding: 3em 1em !important;
+            .radio-group {
+                margin: 0;
+            }
         }
 
-            .box.features .features-row section {
-                margin: 3em 0 0 0 !important;
-                padding: 3em 0 0 0 !important;
+        @media screen and (max-width: 480px) {
+            h1 {
+                font-size: 24px;
             }
 
-            .box .image.featured {
-                border-radius: 0;
-                margin-left: -1em;
-                width: calc(100% + 2em);
+            #header a {
+                font-size: 16px;
             }
 
-                .box .image.featured img {
-                    border-radius: 0 !important;
-                }
+            .btn {
+                font-size: 14px;
+            }
 
-                .box .image.featured:first-child {
-                    margin-bottom: 3em;
-                    margin-top: -3em;
-                }
-
-                .box .image.featured:last-child {
-                    margin-bottom: -3em;
-                    margin-top: 3em;
-                }
-
-    /* Banner */
-
-        #banner {
-            padding: 5em 3em 4em 3em;
+            #cta {
+                padding: 1em 0;
+            }
         }
-
-    /* Main */
-
-        #main > .box:first-child {
-            margin-top: 0;
-        }
-
-    /* CTA */
-
-        #cta {
-            padding: 2.5em 1em 3em 1em;
-        }
-
-    }
     </style>
 </head>
-    
+
 <body>
     <header id="header">
-        <ul class="icons">
-            <a href="http://192.168.1.121:5000/quiz">Home</a>
-        </ul>
+        <a href="http://192.168.1.121:5000/quiz">Home</a>
     </header>
 
-<div class="container">
-    <h1>色盲模擬</h1>
+    <div class="container">
+        <h1>色盲模擬</h1>
 
-    <form method="POST" enctype="multipart/form-data">
-        <div class="image-container">
-            <div>
-                <label>上傳前圖片</label>
-                <div class="image-box">
-                    <img src="../static/original.png" id="before-img" alt="Original Image">
-                </div><br>
-                <!-- 自定義上傳按鈕 -->
-                <div class="upload-btn-wrapper">
-                    <button class="btn">上傳圖片</button>
-                    <input type="file" name="file" id="upload-img" accept="image/*">
+        <form method="POST" enctype="multipart/form-data">
+            <div class="image-container">
+                <div class="image-box-wrapper">
+                    <label>上傳前圖片</label>
+                    <div class="image-box">
+                        <img src="../static/original.png" id="before-img" alt="Original Image">
+                    </div>
+                    <div class="upload-btn-wrapper">
+                        <button class="btn">上傳圖片</button>
+                        <input type="file" name="file" id="upload-img" accept="image/*">
+                    </div>
+                </div>
+                <div class="image-box-wrapper">
+                    <label>模擬後圖片</label>
+                    <div class="image-box">
+                        <img src="../static/original.png" id="after-img" alt="Simulated Image">
+                    </div>
+                    <button class="btn" id="download-btn">下載圖片</button>
                 </div>
             </div>
-            <div>
-                <label>模擬後圖片</label>
-                <div class="image-box">
-                    <img src="../static/original.png" id="after-img" alt="Simulated Image">
-                </div><br>
-                <button class="btn" id="download-btn">下載圖片</button>
-            </div>
-        </div>
 
-        <div class="options">
-            <div class="radio-group">
-                <label>選擇色盲類型：</label><br>
-                <input type="radio" id="red_blindness" name="cb_type" value="0" required>
-                <label for="red_blindness">紅色色盲</label><br>
-                <input type="radio" id="green_blindness" name="cb_type" value="1">
-                <label for="green_blindness">綠色色盲</label><br>
-                <input type="radio" id="blue_blindness" name="cb_type" value="2">
-                <label for="blue_blindness">藍色色盲</label>
-            </div>
+            <div class="options">
+                <div class="radio-group">
+                    <label>選擇色盲類型：</label><br>
+                    <input type="radio" id="red_blindness" name="cb_type" value="0" required>
+                    <label for="red_blindness">紅色色盲</label><br>
+                    <input type="radio" id="green_blindness" name="cb_type" value="1">
+                    <label for="green_blindness">綠色色盲</label><br>
+                    <input type="radio" id="blue_blindness" name="cb_type" value="2">
+                    <label for="blue_blindness">藍色色盲</label>
+                </div>
 
-            <div class="radio-group">
-                <label>選擇嚴重程度：</label><br>
-                <input type="radio" id="mild" name="severity" value="0" required>
-                <label for="mild">輕微</label><br>
-                <input type="radio" id="moderate" name="severity" value="1">
-                <label for="moderate">中度</label><br>
-                <input type="radio" id="severe" name="severity" value="2">
-                <label for="severe">嚴重</label>
-            </div>
-        </div><br>
+                <div class="radio-group">
+                    <label>選擇嚴重程度：</label><br>
+                    <input type="radio" id="mild" name="severity" value="0" required>
+                    <label for="mild">輕微</label><br>
+                    <input type="radio" id="moderate" name="severity" value="1">
+                    <label for="moderate">中度</label><br>
+                    <input type="radio" id="severe" name="severity" value="2">
+                    <label for="severe">嚴重</label>
+                </div>
+            </div><br>
 
-        <button class="btn" type="submit">模擬</button>
-    </form>
+            <button class="btn" type="submit">模擬</button>
+        </form>
+    </div>
 
     <section id="cta">
         <ul>
             <li>*免責聲明：有關近視的建議和進一步資訊，請諮詢您的視力保健專業人員。本系統之視覺模擬器僅供參考，不代表建議。</li>
         </ul>
     </section>
-</div>
-
-<script src="static/assets/js/simulation_script.js"></script>
 </body>
 </html>
