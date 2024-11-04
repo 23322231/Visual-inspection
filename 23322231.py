@@ -13,6 +13,16 @@ def elements():
 def serve_js(filename):
     return send_from_directory('static/assets/js', filename, mimetype='text/javascript')
 
+@app.route('/eye_echart')
+def eye_echart():
+    return render_template('eye_echart.html')
+
+
+@app.route('/eye_distance')
+def eye_distance():
+    return render_template('eye_distance.html')
+
+
 
 if __name__ == '__main__':
     # with app.app_context():
