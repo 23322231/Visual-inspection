@@ -34,6 +34,10 @@ def quiz():
 def image_test():
     return render_template('image_test.html')
 
+@app.route('/image_test_result')
+def image_test_result():
+    return render_template('image_test_result.html')
+
 
 
 

@@ -1,94 +1,150 @@
-<!-- 正式版: 圖片測驗結果 -->
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>色盲圖片測驗結果</title>
-    <link rel="stylesheet" href="static/css/minchi.css" />
+    <style>
+        @import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700");
+
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Basic Styling */
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background-color: #ffffff;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+            flex-grow: 1; /* 讓內容區域撐滿可用空間 */
+        }
+
+        h1 {
+            color: #d15b4d;
+            margin-bottom: 20px;
+        }
+
+        /* Header */
+        #header-bar {
+            background-color: #444; /* 深灰色橫條 */
+            width: 100%;
+            padding: 20px 10px;
+        }
+
+        #header {
+            max-width: 100%;
+            margin: 0 auto;
+            text-align: right;
+            padding-right: 10px;
+        }
+
+        #header a {
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 17.333px;
+            font-weight: 200;
+        }
+
+        /* Title Styling */
+        h2 {
+            color: #444;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            
+        }
+
+        /* Result Styling */
+        #result {
+            background-color: #f5f5f5;
+            color: #4f4e4e;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: 600;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 50px auto 0; /* 往下移動 */
+            max-width: 400px;
+            text-align: center;
+        }
+
+        /* CTA Section */
+        #cta {
+            background: #e89980;
+            color: #f9e6df;
+            padding: 2em 0;
+            text-align: center;
+            width: 100%;
+            margin-top: auto; /* 將 CTA 區塊推到底部 */
+        }
+
+        #cta ul {
+            list-style: none;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Mobile Responsiveness */
+        @media screen and (max-width: 768px) {
+            #result {
+                font-size: 20px;
+                padding: 15px;
+            }
+        }
+    </style>
 </head>
-<body class="is-preload">
-    <div id="page-wrapper">
-
-        <!-- Header -->
+<body>
+    <div id="header-bar">
         <header id="header">
-            <h1><a href="index.html">Alpha</a> by HTML5 UP</h1>
-            <nav id="nav">
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li>
-                        <a href="#" class="icon solid fa-angle-down">Layouts</a>
-                        <ul>
-                            <li><a href="generic.html">Generic</a></li>
-                            <li><a href="contact.html">Contact</a></li>
-                            <li><a href="elements.html">Elements</a></li>
-                            <li>
-                                <a href="#">Submenu</a>
-                                <ul>
-                                    <li><a href="#">Option One</a></li>
-                                    <li><a href="#">Option Two</a></li>
-                                    <li><a href="#">Option Three</a></li>
-                                    <li><a href="#">Option Four</a></li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                    <li><a href="#" class="button">Sign Up</a></li>
-                </ul>
-            </nav>
+            <a href="http://192.168.1.121:5000/quiz">Home</a>
         </header>
-
-        <!-- Main -->
-        <section id="main" class="container">
-            <header>
-                <h2>色盲圖片測驗結果</h2>                
-            </header>
-            <div class="box">
-                <h3 id="result"></h3>                
-            </div>
-
-            <script>
-                // 從localStorage讀取結果
-                const resultMessage = localStorage.getItem('resultMessage');
-
-                // 顯示結果
-                if (resultMessage) {
-                    document.getElementById('result').innerText = resultMessage;
-                } else {
-                    document.getElementById('result').innerText = "無法獲取測驗結果。";
-                }
-            </script>
-
-        </section>
-        
-        <!-- Footer -->
-        <footer id="footer">
-            <ul class="icons">
-                <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
-                <li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
-                <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
-                <li><a href="#" class="icon brands fa-github"><span class="label">Github</span></a></li>
-                <li><a href="#" class="icon brands fa-dribbble"><span class="label">Dribbble</span></a></li>
-                <li><a href="#" class="icon brands fa-google-plus"><span class="label">Google+</span></a></li>
-            </ul>
-            <ul class="copyright">
-                <li>&copy; Untitled. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-            </ul>
-            <ul>
-                <li>*免責聲明：有關近視的建議和進一步資訊，請諮詢您的視力保健專業人員。本系統之視覺模擬器僅供參考，不代表建議。</li>
-            </ul>
-        </footer>    
-
     </div>
 
-    <!-- Scripts -->
-    <script src="static/assets/js/jquery.min.js"></script>
-    <script src="static/assets/js/jquery.dropotron.min.js"></script>
-    <script src="static/assets/js/jquery.scrollex.min.js"></script>
-    <script src="static/assets/js/browser.min.js"></script>
-    <script src="static/assets/js/breakpoints.min.js"></script>
-    <script src="static/assets/js/util.js"></script>
-    <script src="static/assets/js/main.js"></script>
+    <!-- Main Content -->
+    <div class="container">
+        <header>
+            <h2>色盲圖片測驗結果</h2>                
+        </header>
+        <div id="result">
+            <!-- 顯示測驗結果 -->
+        </div>
 
+        <script>
+            // 從 localStorage 讀取結果
+            const resultMessage = localStorage.getItem('resultMessage');
+
+            // 顯示結果
+            if (resultMessage) {
+                document.getElementById('result').innerText = resultMessage;
+            } else {
+                document.getElementById('result').innerText = "無法獲取測驗結果。";
+            }
+        </script>
+    </div>
+
+    <!-- Footer with CTA and Disclaimer -->
+    <section id="cta">
+        <ul>
+            <li>*免責聲明：有關近視的建議和進一步資訊，請諮詢您的視力保健專業人員。本系統之視覺模擬器僅供參考，不代表建議。</li>
+        </ul>
+    </section>
 </body>
 </html>
