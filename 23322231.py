@@ -38,6 +38,10 @@ def image_test():
 def image_test_result():
     return render_template('image_test_result.html')
 
+@app.route('/finish')
+def finish():
+    return render_template('finish.html')
+
 
 
 

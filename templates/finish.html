@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -12,35 +12,56 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f0f8ff; /* 淡藍色背景 */
+            background-image: url("static/images/pic04.jpg");
+            background-size: cover;
+            background-position: center;
             font-family: 'Arial', sans-serif;
+            color: #fff;
         }
 
-        /* .container {
+        .container {
             text-align: center;
-            background-color: white;
-            padding: 30px;
+            background-color: rgba(214, 177, 177, 0.7); /* 半透明背景 */
+            padding: 40px;
             border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        } */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+        }
 
         h1 {
-            color: #4CAF50; /* 綠色字體 */
+            color: #4b2323; 
             font-size: 2.5em;
             margin-bottom: 20px;
         }
 
         img {
-            width: 300px;
+            width: 250px;
             height: auto;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(232, 191, 191, 0.695);
+            margin-bottom: 20px;
         }
 
         p {
             font-size: 1.2em;
-            color: #555;
+            color: #4b2323;
             margin-top: 20px;
+        }
+
+        .exit-button {
+            margin-top: 30px;
+            padding: 10px 20px;
+            font-size: 1em;
+            color: #fff;
+            background-color: #d9534f;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .exit-button:hover {
+            background-color: #df9898;
         }
     </style>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
@@ -58,15 +79,23 @@
                 window.location.href = window.location.origin + '/';
             };
         };
+
+        // 關閉頁面或返回主頁
+        function closePage() {
+            if (window.confirm("確定要離開此頁面嗎？")) {
+                // window.close(); // 嘗試關閉當前頁面
+                window.location.href = window.location.origin + '/';
+            }
+        }
     </script>
 </head>
 
 <body>
     <div class="container">
         <h1>恭喜您完成測驗!</h1>
-        <img src="static/images/welldone.gif" alt="完成測驗" />
+        <!-- <img src="static/images/welldone.gif" alt="完成測驗" /> -->
         <p>請至電腦查看您的測驗結果~</p>
-        
+        <button class="exit-button" onclick="closePage()">離開</button>
     </div>
 </body>
 </html>
