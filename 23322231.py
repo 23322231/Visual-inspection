@@ -42,6 +42,13 @@ def image_test_result():
 def finish():
     return render_template('finish.html')
 
+@app.route('/eye_result') #晚點調整
+def eye_result():
+    return render_template('eye_result.html')
+
+@app.route('/comfirm_colordot')
+def comfirm_colordot():
+    return render_template('comfirm_colordot.html')
 
 
 
