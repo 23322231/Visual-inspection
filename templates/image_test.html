@@ -5,8 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>圖片測驗</title>
-    <link rel="stylesheet" href="static/css/minchi.css" />
     <style>
+        /* Header */
+        #header-bar {
+            background-color: #444;
+            width: 100%;
+            padding: 15px 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 15;
+            text-align: left; /* 左對齊 */
+            /* margin-bottom: 80px; */
+        }
+        #header-bar a {
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 200;
+            margin-right: 20px;
+            margin-left: 10px; /* 左邊微調間距 */
+        }
         .image-test-container {
             display: flex;
             flex-direction: column;
@@ -18,7 +37,9 @@
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
+            margin-top: 100px; /* 調整圖片位置，避免與題數重疊 */
             margin-bottom: 20px;
+            /* margin-top: 80px; 增加margin-top讓出空間給question-status */
         }
         .small-images {
             display: flex;
@@ -39,6 +60,7 @@
             margin: 5px;
             cursor: pointer;
             border: 2px solid transparent;
+            margin-bottom: 20px;
         }
         .small-image.selected { /* 選擇圖片的方框 */
             border-color: #e67e5f;  
@@ -54,44 +76,111 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 按鈕陰影加強 */
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
-        .question-status {  /* 目前題數 */
+        .question-status {
+            margin-top: 25px;
             font-size: 24px;
-            margin-bottom: 20px;
             font-weight: bold;
-            color: #e89980;
+            color: #e89980; /* 文字顏色清晰 */
+            text-align: center;
+            position: absolute;
+            top: 30px; /* 調整至更靠近頁面頂部的位置 */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 15; /* 確保在圖片上層 */
+            
+            padding: 5px 15px;
+            
+        }
+        /* CTA Section */
+        #cta {
+            background: #e89980;
+            color: #f9e6df;
+            position: fixed;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            text-align: left; /* 左對齊 */
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 5;
+        }
+        #cta ul {
+            list-style: none;
+            margin: 0 auto;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1.6;
+            max-width: 800px;
+        }
+        /* 調整在小螢幕下的顯示方式 */
+        @media screen and (max-width: 768px) {
+            .main-image {
+                width: 80%;
+                height: auto;
+                aspect-ratio: 3 / 2; /* 保持圖片比例 */
+                margin-bottom: 10px;
+            }
+            .small-images {
+                flex-direction: column; /* 改成垂直排列 */
+                width: 100%; /* 滿版寬度 */
+            }
+            .small-image-container {
+                width: 100%; /* 保持滿版寬度 */
+                margin: 5px 0; /* 增加間距 */
+                text-align: center; /* 中心對齊 */
+            }
+            .small-image {
+                width: 80%; /* 增加寬度，讓圖片在窄螢幕上更清晰 */
+                height: auto;
+                flex-direction: column;
+                align-items: center; /* 確保按鈕在中間 */
+                aspect-ratio: 3 / 2; /* 保持圖片比例 */
+            }
+            button {
+                width: 80%;
+                padding: 10px;
+                font-size: 16px;
+                margin-top: 20px;
+            }
+            .question-status {
+                font-size: 20px;
+            }
+        }
+
+        /* 超小螢幕的調整 */
+        @media screen and (max-width: 480px) {
+            .main-image {
+                width: 100%;
+                height: auto;
+            }
+            .small-image {
+                width: 90%;
+                height: auto;
+                align-items: center; /* 確保按鈕在中間 */
+            }
+            .question-status {
+                font-size: 18px;
+            }
+            button {
+                font-size: 14px;
+                padding: 10px;
+            }
+            #cta ul {
+                font-size: 10px;
+            }
+            #cta {
+                padding: 15px 10px;
+            }
         }
     </style>
 </head>
-<body class="is-preload">
-    <div id="page-wrapper">
-
-        <!-- Header -->
-        <header id="header">
-            <h1><a href="index.html"></a></h1>
-            <nav id="nav">
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li>
-                        <!-- <a href="#" class="icon solid fa-angle-down">Layouts</a> -->
-                        <ul>
-                            <!-- <li><a href="generic.html">Generic</a></li>
-                            <li><a href="contact.html">Contact</a></li>
-                            <li><a href="elements.html">Elements</a></li> -->
-                            <!-- <li>
-                                <a href="#">Submenu</a>
-                                <ul>
-                                    <li><a href="#">Option One</a></li>
-                                    <li><a href="#">Option Two</a></li>
-                                    <li><a href="#">Option Three</a></li>
-                                    <li><a href="#">Option Four</a></li>
-                                </ul>
-                            </li> -->
-                        </ul>
-                    </li>
-                    <!-- <li><a href="#" class="button">Sign Up</a></li> -->
-                </ul>
-            </nav>
-        </header>
+<body>
+    <div>
+        <!-- Header section -->
+        <div id="header-bar">
+            <!-- <a href="index.html">Home</a> -->
+            <a href="index.html" style="float: right;">Home</a>
+        </div>
 
         <!-- Main -->
         <section id="main" class="container">
@@ -232,10 +321,6 @@
                         } else {
                             otherCount++;
                         }
-                        // console.log('正常:',correctCount)
-                        // console.log('紅綠:',redGreenColorBlindCount)
-                        // console.log('藍:',blueColorBlindCount)
-                        // console.log('其他:',otherCount)
                     }
                     
                     // 進入下一題
@@ -278,6 +363,11 @@
                     
                     // 選擇圖片
                     function toggleSelection(index) {
+                        
+                        // 清除所有選項的選取狀態
+                        smallImages.forEach(image => image.classList.remove('selected'));
+                        selectedOptions = [];
+
                         const image = smallImages[index];
                         const imageUrl = image.dataset.image;
                         if (selectedOptions.includes(imageUrl)) {
@@ -295,6 +385,8 @@
                         setMainImage(firstQuestion.main);
                         shuffleImages(firstQuestion.small);
                         updateQuestionStatus(); // 初始化時顯示題數
+                        console.log("初始化 questionStatus:", questionStatus);
+
                     }
         
                     initialize();
@@ -303,45 +395,23 @@
             </div>
         </section>
 
-        <section id="cta">
-
-            <!-- <h2>聯絡我們</h2> -->
-            <!-- <p>Blandit varius ut praesent nascetur eu penatibus nisi risus faucibus nunc.</p> -->
-            <!-- <ul class="icons"> -->
-                <!-- <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li> -->
-                <!-- <li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li> -->
-                <!-- <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li> -->
-                <!-- <li><a href="https://github.com/23322231/Visual-inspection" class="icon brands fa-github"><span class="label">Github</span></a></li> -->
-                <!-- <li><a href="#" class="icon brands fa-dribbble"><span class="label">Dribbble</span></a></li> -->
-                <!-- <li><a href="#" class="icon brands fa-google-plus"><span class="label">Google+</span></a></li> -->
-            <!-- </ul> -->
+        <!-- CTA section -->
+        <!-- <section id="cta">
             <ul>
                 <li>*免責聲明：有關近視的建議和進一步資訊，請諮詢您的視力保健專業人員。本系統之視覺模擬器僅供參考，不代表建議。</li>
             </ul>
-
-            <!-- <form>
-                <div class="row gtr-50 gtr-uniform">
-                    <div class="col-8 col-12-mobilep">
-                        <input type="email" name="email" id="email" placeholder="Email Address" />
-                    </div>
-                    <div class="col-4 col-12-mobilep">
-                        <input type="submit" value="Sign Up" class="fit" />
-                    </div>
-                </div>
-            </form> -->
-
-        </section>
+        </section> -->
 
     </div>
 
     <!-- Scripts -->
-        <script src="static/assets/js/jquery.min.js"></script>
+        <!-- <script src="static/assets/js/jquery.min.js"></script>
         <script src="static/assets/js/jquery.dropotron.min.js"></script>
         <script src="static/assets/js/jquery.scrollex.min.js"></script>
         <script src="static/assets/js/browser.min.js"></script>
         <script src="static/assets/js/breakpoints.min.js"></script>
         <script src="static/assets/js/util.js"></script>
-        <script src="static/assets/js/main.js"></script>
+        <script src="static/assets/js/main.js"></script> -->
 
 </body>
 </html>
