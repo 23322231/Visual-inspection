@@ -6,7 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>測驗結果</title>
     <style>
-        body {
+        /* Header */
+        #header-bar {
+            background-color: #444;
+            width: 100%;
+            padding: 15px 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 15;
+            text-align: left; /* 左對齊 */
+            /* margin-bottom: 80px; */
+        }
+        #header-bar a {
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 200;
+            margin-right: 20px;
+            margin-left: 10px; /* 左邊微調間距 */
+        }
+        /* body {
             margin: 0;
             padding: 0;
             display: flex;
@@ -14,21 +34,46 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #e0f7fa;
+            background-color: #ffffff;
             font-family: 'Arial', sans-serif;
             color: #333;
         }
 
         .container {
             text-align: center;
-            background-color: #ffffff;
+            background-color: #faebcc;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             max-width: 800px; /* 增加寬度來容納更多圖片 */
-            width: 100%;
+            /* width: 100%; */
+        /* }  */
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh; /* 避免被 header 遮擋 */
+            padding-top: 80px; /* 給 body 加上上填充來預留 header 的空間 */
+            background-color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            color: #333;
         }
 
+        .container {
+            text-align: center;
+            background-color: #faebcc;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            margin-top: 20px; /* 讓容器和 header 之間有些空隙 */
+        }
+        
         #imagesContainer {
             display: flex;
             flex-wrap: wrap; /* 允許圖片換行排列 */
@@ -78,7 +123,30 @@
         button:hover {
             background-color: #004d40;
         }
+        /* CTA Section */
+        #cta {
+            background: #e89980;
+            color: #f9e6df;
+            padding: 2em 0;
+            text-align: center;
+            width: 100%;
+            margin-top: auto; /* 將 CTA 區塊推到底部 */
+        }
+
+        #cta ul {
+            list-style: none;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
     </style>
+    <!-- Header section -->
+    <div id="header-bar">
+        <!-- <a href="index.html">Home</a> -->
+        <a href="http://192.168.0.154:5000/quiz.html" style="float: right;">Home</a>
+    </div>
 </head>
 <body>
     <div class="container">
@@ -192,5 +260,13 @@
             }
         }
     </script>
+
+    <!-- Footer with CTA and Disclaimer -->
+    <section id="cta">
+        <ul>
+            <li>*免責聲明：有關近視的建議和進一步資訊，請諮詢您的視力保健專業人員。本系統之視覺模擬器僅供參考，不代表建議。</li>
+        </ul>
+    </section>
+
 </body>
 </html>

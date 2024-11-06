@@ -160,7 +160,6 @@ def eye_user_check():
 def eye_result():
     return render_template('eye_result.html')
 
-
 #點圖製作功能頁面
 @app.route('/ishihara-test')
 def ishihara_test():
@@ -185,9 +184,6 @@ def image_test_result():
 def visual_simulation():
     return render_template('visual_simulation.html')
 
-
-
-
 @app.route('/open_pic')
 def open_pic():
     return render_template('open_pic.html')
@@ -199,12 +195,6 @@ def choose():
 @app.route('/myopia')
 def myopia():
     return render_template('myopia.html')
-    
-
-
-
-
-
 
 # 色盲點圖顯示題目圖片
 @app.route('/next-image')
