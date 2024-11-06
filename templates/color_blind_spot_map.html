@@ -14,7 +14,9 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #e0f7fa;
+            background-color: #ffcccc;
+            background-image: url("static/images/pic04.jpg");
+            background-size: cover;
             font-family: 'Arial', sans-serif;
             color: #333;
         }
@@ -98,7 +100,7 @@
         function updateStatus() {
             resizeCanvas(); // 確保 canvas 大小正確
             if (completedQuestions === 0) {
-                document.getElementById('status').innerText = '作答說明'; // 當完成題數為 0 時，隱藏狀態顯示
+                document.getElementById('status').innerText = '請將線條盡可能塗滿喔!'; // 當完成題數為 0 時，隱藏狀態顯示
             } else {
                 document.getElementById('status').innerText = '第' + completedQuestions + '題，還有' + (10 - completedQuestions) + '題';
     }

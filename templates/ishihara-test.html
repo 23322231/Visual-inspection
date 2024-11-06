@@ -9,14 +9,106 @@
         <script src="static/assets/js/utils-ishihara.js"></script>
         <script src="static/assets/js/shape_factories.js"></script>
         <script src="static/assets/js/ishihara.js"></script>
+        <style>
+            /* 為 Home 按鈕設置樣式 */
+            /* Basic Flex Layout for Full Height */
+            body {
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+                margin: 0;
+            }
+
+            /* Main content section to hold the canvas and button */
+            .main-content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding-bottom: 20px; /* Prevents overlap with CTA */
+            }
+
+            /* Home Button Styles */
+            #home-button {
+                display: inline-block;
+                padding: 8px 16px;
+                margin-bottom: 10px;
+                color: white;
+                background-color: #CEB195;
+                text-decoration: none;
+                border-radius: 5px;
+                font-size: 14px;
+                font-family: Arial, sans-serif;
+                transition: background-color 0.3s ease;
+            }
+
+            #top-left {
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                z-index: 10;
+            }
+
+            /* Canvas width adjustments for different screens */
+            @media (max-width: 600px) {
+                #canvas {
+                    width: 40vw;
+                    height: auto;
+                }
+            }
+
+            @media (min-width: 601px) and (max-width: 1024px) {
+                #canvas {
+                    width: 70vw;
+                    height: auto;
+                }
+            }
+
+            @media (min-width: 1025px) {
+                #canvas {
+                    width: 60vw;
+                    height: auto;
+                }
+            }
+            /* CTA Section */
+            
+            /* #cta {
+                background: #e89980;
+                color: #f9e6df;
+                padding: 1em 0;
+                text-align: center;
+                width: 100%;
+            }
+
+            #cta ul {
+                list-style: none;
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 0;
+                font-size: 14px;
+                line-height: 1.6;
+            } */
+        </style>
     </head>
     <body>
         <span id="top-left">
-            <small>在圈圈內畫出你在點圖中想呈現的圖型！ <small>(按住 ctrl 鍵可擦除筆跡)</small><br>
-        </small></span>
+            <!-- 添加 Home 按鈕 -->
+            <a id="home-button" href="index.html">Home</a>
+            <br>
+            <small>在圈圈內畫出你在點圖中想呈現的圖型！ <small><br>(按住 ctrl 鍵可擦除筆跡)</small><br>
+            </small>
+        </span>
         <center>
-            <canvas id="canvas">Your browser doesn't supports canvas.</canvas>
+            <canvas id="canvas">Your browser doesn't support canvas.</canvas>
         </center>
         <input type="file" id="image_upload" accept="image/*" style="visibility:hidden">
+
+        <!-- Footer with CTA and Disclaimer -->
+        <!-- <section id="cta">
+            <ul>
+                <li>*免責聲明：有關近視的建議和進一步資訊，請諮詢您的視力保健專業人員。本系統之視覺模擬器僅供參考，不代表建議。</li>
+            </ul>
+        </section> -->
     </body>
 </html>
