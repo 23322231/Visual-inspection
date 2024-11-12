@@ -35,7 +35,7 @@
         }
 
         h1 {
-            color: #d15b4d;
+            color: #af9d8f;
             margin-bottom: 20px;
         }
 
@@ -44,6 +44,19 @@
             background-color: #444; /* 深灰色橫條 */
             width: 100%;
             padding: 20px 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 15;
+            text-align: left; /* 左對齊 */
+        }
+        #header-bar a {
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 200;
+            margin-right: 20px;
+            margin-left: 10px; /* 左邊微調間距 */
         }
 
         /* #header {
@@ -72,7 +85,7 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 20px;
+            gap: 70px;
             margin-bottom: 20px;
         }
 
@@ -83,7 +96,7 @@
         }
 
         .image-box {
-            border: 2px solid #d15b4d;
+            border: 2px solid #af9d8f;
             padding: 10px;
             width: 300px;
             height: 300px;
@@ -120,9 +133,9 @@
         }
 
         .btn {
-            border: 2px solid #e89980;
-            color: #fff;
-            background-color: #e89980;
+            border: 2px solid #af9d8f;
+            color: #efefef;
+            background-color: #af9d8f;
             padding: 8px 20px;
             font-size: 16px;
             cursor: pointer;
@@ -146,23 +159,23 @@
         /* Radio Group Options */
         .options {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             text-align: center;
-            /* gap: 40px; */
-            /* margin-top: 20px; */
-            /* color: #666; */
-            /* flex-wrap: wrap; */
+            gap: 230px; 
+            width:100%;
+            align-items: center; /* 使選項居中對齊 */
         }
 
         .radio-group {
-            /* margin: 15px 80px; */
-            flex: 1;
+            text-align: center; /* 讓選項文字置中 */
+            width: auto; /* 去除多餘的寬度設置，以自動調整 */
+            padding-right: 10px; /* 新增右側填充，將群組稍微向左調整 */
         }
 
         /* CTA Section */
         #cta {
-            background: #e89980;
-            color: #f9e6df;
+            background: #af9d8f;
+            color: #efefef;
             padding: 2em 0;
             text-align: center;
             margin-top: 30px;
@@ -183,7 +196,7 @@
             .image-container {
                 flex-direction: column;
                 align-items: center;
-                gap: 20px;
+                gap: 5px;
             }
 
             .image-box {
@@ -194,11 +207,17 @@
             .options {
                 flex-direction: column;
                 align-items: center;
+                text-align:center;
+                gap:35px;
+                padding-left: 10px; /* 新增右側填充，將群組稍微向左調整 */
             }
 
             .radio-group {
-                margin: 0;
-                flex: 1;
+                margin: 0;                
+            }
+
+            .radio-group label {
+                margin-bottom: 5px; /* 減少 label 的 margin */
             }
         }
 
@@ -224,9 +243,7 @@
 
 <body>
     <div id="header-bar">
-        <header id="header">
-            <a href="http://192.168.1.121:5000/quiz">Home</a>
-        </header>
+        <a href="http://192.168.1.121:5000/quiz" style="float: left">VisionCare</a>
     </div>
 
     <div class="container">
