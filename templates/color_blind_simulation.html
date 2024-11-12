@@ -216,14 +216,14 @@
     </div>
 
     <div class="container">
-        <h1>色盲模擬</h1>
+        <h1>色覺障礙模擬</h1>
 
         <form method="POST" enctype="multipart/form-data">
             <div class="image-container">
                 <div class="image-box-wrapper">
                     <label>原始圖片</label>
                     <div class="image-box">
-                        <img src="../static/original.png" id="before-img" alt="Original Image">
+                        <img src="static/images/original.png" id="before-img" alt="Original Image">
                     </div>
                     <div class="upload-btn-wrapper">
                         <button class="btn">上傳圖片</button>
@@ -233,7 +233,7 @@
                 <div class="image-box-wrapper">
                     <label>模擬圖片</label>
                     <div class="image-box">
-                        <img src="../static/original.png" id="after-img" alt="Simulated Image">
+                        <img src="static/images/original.png" id="after-img" alt="Simulated Image">
                     </div>
                     <button class="btn" id="download-btn">下載圖片</button>
                 </div>
@@ -261,10 +261,12 @@
                 </div>
             </div><br>
 
-            <button class="btn" type="submit">模擬</button>
+            
+            <button class="btn" type="submit" onclick="simulate()">模擬</button>
+            <div id="simulation-result" class="smulation-result"></div>
         </form>
     </div>
-
+    <script src="static/assets/js/simulation_script.js"></script>
     <section id="cta">
         <ul>
             <li>*免責聲明：有關近視的建議和進一步資訊，請諮詢您的視力保健專業人員。本系統之視覺模擬器僅供參考，不代表建議。</li>

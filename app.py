@@ -830,6 +830,27 @@ if not os.path.exists(UPLOAD_FOLDER):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+@app.route('/simulation-result', methods=['GET','POST'])
+def simulation_result():
+    # 這些是您從 Python 計算出來的結果
+    # 接收上傳的圖片文件
+    file1 = request.files['original_image']
+    file2 = request.files['simulated_image']
+    image1 = Image.open(file1).convert('RGB')
+    image2 = Image.open(file2).convert('RGB')
+
+    # 轉為 OpenCV 格式
+    img_rgb = np.array(image1)
+    img_sim_rgb = np.array(image2)
+
+    # Example usage
+    edge_loss_ratio_ori, max_value = calculate_edge_loss(img_rgb, img_sim_rgb)
+
+    return jsonify({
+        'edge_loss_ratio_ori': edge_loss_ratio_ori,
+        'max_value': max_value
+    })
+
 
 @app.route('/simulate', methods=['POST'])
 def simulate():
