@@ -8,6 +8,10 @@ app = Flask(__name__)
 def elements():
     return render_template('color_blind_simulation.html')
 
+
+@app.route('/color_blind_simulation2')
+def color_blind_simulation2():
+    return render_template('color_blind_simulation2.html')
 #提供靜態檔案的路由，將內容類型指定為 JavaScript
 @app.route('/static/assets/js/<path:filename>')
 def serve_js(filename):
