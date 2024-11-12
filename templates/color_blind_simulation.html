@@ -101,9 +101,15 @@
         }
 
         label {
-            font-size: 18px;
+            /* font-size: 18px;
             font-weight: 600;
-            color: #555;
+            color: #555; */
+            color: #646464;
+            display: block;
+            font-size: 0.9em;
+            font-weight: 300;
+            margin: 0 0 1em 0;
+            text-align: center; /* 文字置中 */
         }
 
         /* Upload and Download Button */
@@ -121,7 +127,8 @@
             font-size: 16px;
             cursor: pointer;
             border-radius: 5px;
-            transition: background 0.3s;
+            /* transition: background 0.3s; */
+            display: inline-block; /* 設置為行內塊元素，支持置中 */
         }
 
         .btn:hover {
@@ -139,15 +146,17 @@
         /* Radio Group Options */
         .options {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 40px;
-            margin-top: 20px;
-            color: #666;
+            justify-content: space-between;
+            text-align: center;
+            /* gap: 40px; */
+            /* margin-top: 20px; */
+            /* color: #666; */
+            /* flex-wrap: wrap; */
         }
 
         .radio-group {
-            margin: 15px 80px;
+            /* margin: 15px 80px; */
+            flex: 1;
         }
 
         /* CTA Section */
@@ -189,6 +198,7 @@
 
             .radio-group {
                 margin: 0;
+                flex: 1;
             }
         }
 
@@ -245,21 +255,21 @@
 
             <div class="options">
                 <div class="radio-group">
-                    <label>選擇色覺障礙模擬類型：</label><br>
+                    <label>選擇色覺障礙模擬類型：</label>
                     <input type="radio" id="red_blindness" name="cb_type" value="0" required>
-                    <label for="red_blindness">紅色</label><br>
+                    <label for="red_blindness">紅色</label>
                     <input type="radio" id="green_blindness" name="cb_type" value="1">
-                    <label for="green_blindness">綠色</label><br>
+                    <label for="green_blindness">綠色</label>
                     <input type="radio" id="blue_blindness" name="cb_type" value="2">
                     <label for="blue_blindness">藍色</label>
                 </div>
 
                 <div class="radio-group">
-                    <label>選擇嚴重程度：</label><br>
+                    <label>選擇嚴重程度：</label>
                     <input type="radio" id="mild" name="severity" value="0" required>
-                    <label for="mild">輕微</label><br>
+                    <label for="mild">輕微</label>
                     <input type="radio" id="moderate" name="severity" value="1">
-                    <label for="moderate">中度</label><br>
+                    <label for="moderate">中度</label>
                     <input type="radio" id="severe" name="severity" value="2">
                     <label for="severe">嚴重</label>
                 </div>
