@@ -34,6 +34,10 @@ def quiz():
 def image_test():
     return render_template('image_test.html')
 
+@app.route('/image_test2')
+def image_test2():
+    return render_template('image_test2.html')
+
 @app.route('/image_test_result')
 def image_test_result():
     return render_template('image_test_result.html')
@@ -49,6 +53,40 @@ def eye_result():
 @app.route('/comfirm_colordot')
 def comfirm_colordot():
     return render_template('comfirm_colordot.html')
+
+
+
+@app.route('/handwrite')
+def handwrite():
+    return render_template('handwrite.html')
+
+@app.route('/handwrite_min')
+def handwrite_min():
+    return render_template('handwrite_min.html')
+
+@app.route('/eye_qrcode')
+def eye_qrcode():
+    return render_template('eye_qrcode.html')
+
+@app.route('/color_blind_spot_map')
+def color_blind_spot_map():
+    return render_template('color_blind_spot_map.html')
+
+@app.route('/result')
+def result():
+    return render_template('result.html')
+
+@app.route('/ishihara_test')
+def ishihara_test():
+    return render_template('ishihara-test.html')
+
+@app.route('/visual_simulation')
+def visual_simulation():
+    return render_template('visual_simulation.html')
+
+# @app.route('/eye_echart')
+# def eye_echart():
+#     return render_template('eye_echart.html')
 
 
 
