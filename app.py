@@ -200,8 +200,22 @@ def myopia():
 @app.route('/next-image')
 def next_image():
     print("執行了")
+    # order=[1,3,5,7,9,11,13,15,17,19]
+
+    # if 'current_index' not in session:
+    #     session['current_index'] = 0
+
+    # current_index = session.get('current_index',None)
+
+    # if current_index >= len(order):
+    #     return jsonify({'error': 'No more images'}), 404
+    
     random_id = random.randint(1, 30)
-    session['random_id'] = random_id  # 将random_id存储到session中
+    session['random_id'] = random_id  #將random_id存到session中
+
+    # random_id = order[current_index]
+    # session['random_id'] = random_id
+    # session['current_index'] = current_index + 1  #current_index + 1存到session中 用來記錄目前是第幾題
 
     colorblind_test = db.session.query(pic).filter(pic.id == random_id).first()
     if colorblind_test:
@@ -209,7 +223,7 @@ def next_image():
         next_image_url = f"data:image/jpeg;base64,{base64_data}"
         return jsonify({'nextImageUrl': next_image_url})
     else:
-        return jsonify({'error': 'No image found'}), 404 
+        return jsonify({'error': 'No image found'}), 404
 
 #電腦端色盲點圖功能顯示結果
 @app.route('/result_cb', methods=['POST'])
@@ -300,7 +314,7 @@ def calculate_score():
         return jsonify({'error': 'User ID not provided'}), 400
 
     try:
-        for i in range(1, 11):  # 假設有 10 個問題
+        for i in range(1, 9):  # 假設有 8 個問題
             id = i
             # 從資料庫獲取答案和用戶提交的圖像
             # get_image_from_db
@@ -352,7 +366,7 @@ def calculate_score():
         if final_score == 0.0:
             return jsonify({'error': 'No valid answers or images found'}), 400
         
-        average_final_score = final_score / 10.0  # 計算平均分數
+        average_final_score = final_score / 8.0  # 計算平均分數
         print(f"User {user_id} - Average Score: {average_final_score}")
         return jsonify({'score': average_final_score})
     
@@ -640,12 +654,6 @@ def send_width_height():
     print("0000000000000",data.get('widthPx'),data.get('heightPx'))
     return jsonify({"message": "Width and height saved successfully!"}), 200
 
-# @app.route('/get_eye_distance')
-# def get_eye_distance():
-#     #從session中獲取深度值
-#     depth=round(session['depth_value'], 2)
-#     return jsonify({'depth_value':depth})
-
 @socketio.on('request_width_height')
 def handle_request_width_height():
     # global data_store
@@ -725,7 +733,6 @@ def Etest_end():
     print("快點給我成功!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     emit('Etest_finish',broadcast=True)
 
-            
 
 @app.route('/handwrite')
 def handwrite():
@@ -759,31 +766,6 @@ def generate_url_qrcode():
     session_id = str(uuid.uuid4())  # 生成唯一的sessionID
     unique_url = f"{request.host_url}comfirm_colordot?session={session_id}"
     return jsonify(url=unique_url)
-
-#生成醫囑
-# @app.route('/generate-advice', methods=['POST'])
-# def generate_advice():
-#     data = request.json
-#     symptoms = data.get('symptoms')
-#     print(symptoms)
-    
-#     try:
-#         prompt = f"請根據以下症狀生成，一段約300字的中文醫療建議，不需要講太多細節，要中文的{symptoms}"
-#         result = subprocess.run(
-#             ['ollama', 'run', 'llama3', ], input=prompt,
-#             capture_output=True, text=True, #stderr=subprocess.PIPE,
-#             encoding='utf-8',  #指定使用 utf-8 編碼
-#             errors='ignore'    #忽略無法編碼的字符
-#         )
-#         if result.stderr:
-#             app.logger.error(f"Subprocess error: {result.stderr}")
-#         advice = result.stdout.strip()
-#         return jsonify({'advice': advice})
-
-#     except Exception as e:
-#             app.logger.error(f"Exception: {e}")
-#             return jsonify({'error': str(e)}), 500
-    
 
 # 開始手指方向辨識
 @socketio.on('start_detection') 
@@ -906,8 +888,8 @@ def generate_doctor_advice():
     print(symptoms)
     
     try:#寫在實驗裡面，他沒辦法輸出全繁體... 如何解決...
-        # 你是一位眼科醫師，請根據以下視力檢測狀況生成一段約150字的全英文建議，建議可以如何保護照顧眼睛，不需要講太多細節。
-        prompt = f"You are an ophthalmologist. Please generate a full English suggestion of about 150 words based on the following vision test conditions, suggesting how to protect and care for your eyes. You don’t need to go into too many details.{symptoms}"
+        # 你是一位眼科醫師，請根據以下視力檢測或石原色盲測驗結果生成一段約150字的全英文建議，建議可以如何保護照顧眼睛，不管狀況多糟還是要給一些建議，不需要講太多細節。
+        prompt = f"You are an ophthalmologist. Please generate a full English suggestion of about 150 words based on the following vision test or Ishihara color blindness test results. Suggest how you can protect and care for your eyes. No matter how bad the condition is, you should still give some suggestions. You don’t need to go into too many details.{symptoms}"
         result = subprocess.run(
             ['ollama', 'run', 'llama3.2', ], input=prompt,
             capture_output=True, text=True, #stderr=subprocess.PIPE,
@@ -920,8 +902,7 @@ def generate_doctor_advice():
         print("advice")
         print(advice)
         
-        
-
+    
         # 使用 translate 將英文內容翻譯為繁體中文
         # advice_back = Translator(from_lang="English",to_lang="Chinese").translate(advice)
         # print("advice_back")

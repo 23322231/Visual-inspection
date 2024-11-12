@@ -145,7 +145,7 @@
     <!-- Header section -->
     <div id="header-bar">
         <!-- <a href="index.html">Home</a> -->
-        <a href="http://192.168.0.154:5000/quiz.html" style="float: right;">Home</a>
+        <a href="http://192.168.1.121:5000/quiz.html" style="float: right;">Home</a>
     </div>
 </head>
 <body>
@@ -182,8 +182,9 @@
                     console.error('Error:', data.error);
                 } else {
                     console.log('Score:', data.score);
+                    let roundedScore = parseFloat(data.score).toFixed(1);
                     // Display the score on the frontend
-                    document.getElementById('scoreDisplay').innerText = `Score: ${data.score}`;
+                    document.getElementById('scoreDisplay').innerText = `Score: ${roundedScore}`;
                 }
             })
             .catch((error) => {
@@ -196,7 +197,7 @@
                 return;  //退出，以避免調用null對象的appendChild
             }
             
-            for (var i = 1; i <= 10; i++) {
+            for (var i = 1; i <=8; i++) {
                 fetch('/result_cb', {
                     method: 'POST', 
                     headers: {'Content-Type': 'application/json'},
@@ -230,7 +231,7 @@
         };
 
 
-        let symptoms ="這是一個石原氏色盲測驗的結果，我獲得"+score+"分"; // 取得使用者輸入的症狀描述
+        let symptoms ="這是一個石原氏色盲測驗的結果，八題我的平均分數為"+score+"分"; // 取得使用者輸入的症狀描述
         // 清空之前的結果並顯示 "生成中..."
         const adviceDiv = document.getElementById('advice');
         adviceDiv.innerText = "生成中...";

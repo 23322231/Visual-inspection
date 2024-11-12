@@ -93,7 +93,7 @@
     </div>
 
 <div class="container">
-    <div class="status" id="status">完成題數: 0/10</div>
+    <div class="status" id="status">完成題數: 0/8</div>
     <canvas id="drawingCanvas"></canvas>
     <button id="submitButton" onclick="handleButtonClick()">確認送出</button>
 </div>
@@ -105,7 +105,7 @@
         pingTimeout: 60000,  // 60 seconds
     });
 
-    var totalQuestions = 11;
+    var totalQuestions = 9;
     var completedQuestions = 0;
 
     function resizeCanvas() {
@@ -118,7 +118,8 @@
     }
 
     function updateStatus() {
-        document.getElementById('status').innerText = '第' + completedQuestions + '題，還有' + (10 - completedQuestions) + '題';
+        document.getElementById('status').innerText = '第' + completedQuestions + '題';
+        // document.getElementById('status').innerText = '第' + completedQuestions + '題，還有' + (10 - completedQuestions) + '題';
     }
 
     function handleIntroduction() {
@@ -234,7 +235,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.nextImageUrl) {
-                context.clearRect(0, 0, canvas.width, canvas.height); // 清空 canvas
+                context.clearRect(0, 0, canvas.width, canvas.height); // 清空canvas
                 canvas.style.backgroundImage = 'url(' + data.nextImageUrl + ')';
                 canvas.style.backgroundSize = 'cover'; // 確保圖片覆蓋整個 canvas
                 canvas.style.backgroundPosition = 'center'; // 圖片居中
