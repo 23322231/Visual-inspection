@@ -5,26 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>測驗結果</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        /* Header */
+        #header-bar {
+            background-color: #444;
+            width: 100%;
+            padding: 15px 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 15;
+            text-align: left; /* 左對齊 */
+            /* margin-bottom: 80px; */
         }
+        #header-bar a {
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 200;
+            margin-right: 20px;
+            margin-left: 10px; /* 左邊微調間距 */
+        }
+
+        
         body {
             font-family: Arial, sans-serif;
             max-width: 1000px;
             margin: auto;
             padding: 20px;
-            background: linear-gradient(135deg, #dfd8cced, #dfd8cccf);
+            background: #ffffff;
             color: #333;
             line-height: 1.6;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            /*box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);*/
             border-radius: 10px;
         }
         
         h2 {
             text-align: center;
-            color: #333;
+            color: #af9d8f;
+            margin-top:60px;
             margin-bottom: 20px;
             font-size: 2rem;
             font-weight: bold;
@@ -84,14 +102,45 @@
         #advice {
             margin-top: 30px;
             padding: 15px;
-            background-color: #fff9e6;
-            color: #8a6d3b;
+            background-color: #cbb7a8;
+            color: #fefefe;
             font-size: 1.1rem;
             border: 1px solid #faebcc;
             border-radius: 6px;
             text-align: center;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            /*padding-bottom: 100px;*/ /* 增加底部間距，避免內容被CTA遮住 */
         }
+
+        /* CTA Section */
+        #cta {
+            /*background: #af9d8f;
+            color: #efefef;
+            padding: 2em 0;
+            text-align: center;
+            width: 100%;
+            margin-top: auto;*/ /* 將 CTA 區塊推到底部 */
+
+            background: #af9d8f;
+            color: #efefef;
+            padding: 2em 0;
+            text-align: center;
+            width: 100%;
+            position: fixed; /* 固定位置 */
+            bottom: 0; /* 置於底部 */
+            left: 0;
+            z-index: 10;
+        }
+
+        #cta ul {
+            list-style: none;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .question img {
@@ -104,6 +153,12 @@
     </style>
 </head>
 <body>
+    <!-- Header section -->
+    <div id="header-bar">
+        <!-- <a href="index.html">Home</a> -->
+        <a href="index.html" style="float: left;">VisionCare</a>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 
@@ -244,6 +299,11 @@
             fetchAdvice();
         }
     </script>
+    <section id="cta">
+        <ul>
+            <li>*免責聲明：有關近視的建議和進一步資訊，請諮詢您的視力保健專業人員。本系統之視覺模擬器僅供參考，不代表建議。</li>
+        </ul>
+    </section>
     
 </body>
 </html>
