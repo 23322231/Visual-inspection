@@ -5,14 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>測驗完成</title>
     <style>
+        /* Header */
+        #header-bar {
+            background-color: #444;
+            width: 100%;
+            padding: 15px 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 15;
+            text-align: left; /* 左對齊 */
+            /* margin-bottom: 80px; */
+        }
+        #header-bar a {
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 200;
+            margin-right: 20px;
+            margin-left: 10px; /* 左邊微調間距 */
+        }
         body {
             margin: 0;
             padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-image: url("static/images/pic04.jpg");
+            height: 80vh;
+            background-color:f0f0f0;
             background-size: cover;
             background-position: center;
             font-family: 'Arial', sans-serif;
@@ -21,15 +41,17 @@
 
         .container {
             text-align: center;
-            background-color: rgba(225, 185, 185, 0.907); /* 半透明背景 */
+            background-color: #af9d8f; 
             padding: 40px;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             max-width: 400px;
+            margin-top:70px;
+            
         }
 
         h1 {
-            color: #4b2323; 
+            color: #fefefe; 
             font-size: 2.5em;
             margin-bottom: 20px;
         }
@@ -44,7 +66,7 @@
 
         p {
             font-size: 1.2em;
-            color: #4b2323;
+            color: #fefefe;
             margin-top: 20px;
         }
 
@@ -53,7 +75,7 @@
             padding: 10px 20px;
             font-size: 1em;
             color: #fff;
-            background-color: #d9534f;
+            background-color: #cbb7a8;
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -61,7 +83,47 @@
         }
 
         .exit-button:hover {
-            background-color: #df9898;
+            background-color: #cbb7a8;
+        }
+
+        /* CTA Section */
+        #cta {
+            /*background: #af9d8f;
+            color: #efefef;
+            padding: 2em 0;
+            text-align: center;
+            width: 100%;
+            margin-top: auto;*/ /* 將 CTA 區塊推到底部 */
+
+            background: #af9d8f;
+            color: #efefef;
+            padding: 2em 0;
+            text-align: center;
+            width: 100%;
+            position: fixed; /* 固定位置 */
+            bottom: 0; /* 置於底部 */
+            left: 0;
+            z-index: 10;
+        }
+
+        #cta ul {
+            list-style: none;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-height: 600px) {
+            body {
+                padding-bottom: 150px; /* 增加 padding-bottom 以在更小視窗中保持距離 */
+            }
+
+            .container {
+                margin-bottom: 30px; /* 增加距離確保不會緊貼 CTA */
+            }
         }
     </style>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
@@ -91,11 +153,21 @@
 </head>
 
 <body>
+    <div id="header-bar">
+        <!-- <a href="index.html">Home</a> -->
+        <a href="index.html" style="float: left;">VisionCare</a>
+    </div>
+
     <div class="container">
         <h1>恭喜您完成測驗!</h1>
         <!-- <img src="static/images/welldone.gif" alt="完成測驗" /> -->
         <p>請至電腦查看您的測驗結果~</p>
         <button class="exit-button" onclick="closePage()">離開</button>
     </div>
+    <section id="cta">
+        <ul>
+            <li>*免責聲明：有關近視的建議和進一步資訊，請諮詢您的視力保健專業人員。本系統之視覺模擬器僅供參考，不代表建議。</li>
+        </ul>
+    </section>
 </body>
 </html>
