@@ -5,15 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>調整視力測驗圖片大小</title>
     <style>
-        
+        /* Header */
+        #header-bar {
+            background-color: #444;
+            width: 100%;
+            padding: 15px 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 15;
+            text-align: left; /* 左對齊 */
+            /* margin-bottom: 80px; */
+        }
+        #header-bar a {
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 200;
+            margin-right: 20px;
+            margin-left: 10px; /* 左邊微調間距 */
+        }
+
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            /* background-color: #f8e6e6; */
-            background-image:url("static/images/pic04.jpg");
+            background-color: #cbb7a8;
+            
             background-size: cover;
             font-family: Arial, sans-serif;
             color: #4d4d4d;
@@ -29,7 +49,7 @@
         }
         h1 {
             font-size: 1.5em;
-            color: #df9898;
+            color: #af9d8f;
         }
         .instruction {
             margin: 10px 0;
@@ -37,7 +57,7 @@
             color: #666;
         }
         #referenceObject {
-            border: 2px solid #df9898;
+            border: 2px solid #af9d8f;
             width: 100px;
             height: calc(100px / 1.618);
             margin: 15px auto;
@@ -51,7 +71,7 @@
             appearance: none;
             width: 100%;
             height: 8px;
-            background: linear-gradient(80deg, #df9898, #f8c1c1);
+            background: linear-gradient(80deg, #af9d8f, #cbb7a8);
             outline: none;
             border-radius: 4px;
             cursor: pointer;
@@ -62,7 +82,7 @@
             width: 20px;
             height: 20px;
             background: #ffffff;
-            border: 2px solid #e89980;
+            border: 2px solid #af9d8f;
             border-radius: 50%;
             cursor: pointer;
             box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
@@ -71,7 +91,7 @@
             width: 20px;
             height: 20px;
             background: #ffffff;
-            border: 2px solid #e89980;
+            border: 2px solid #af9d8f;
             border-radius: 50%;
             cursor: pointer;
             box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
@@ -81,14 +101,14 @@
             padding: 10px 20px;
             font-size: 1em;
             color: #fff;
-            background-color: #e89980;
+            background-color: #cbb7a8;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
         }
         button:hover {
-            background-color: #d47a7a;
+            background-color: #af9d8f;
         }
         .back-button {
             position: absolute;
@@ -109,8 +129,11 @@
     </style>
 </head>
 <body>
+    <div id="header-bar">
+        <!-- <a href="index.html">Home</a> -->
+        <a href="index.html" style="float: left;">VisionCare</a>
+    </div>
 
-    <button class="back-button" onclick="history.back()">回前頁</button>
 
     <div class="container">
         <h1>調整E字測驗圖片大小</h1>
