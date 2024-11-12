@@ -5,6 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>確認辨識頁面</title>
     <style>
+        /* Header */
+        #header-bar {
+            background-color: #444;
+            width: 100%;
+            padding: 15px 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 15;
+            text-align: left; /* 左對齊 */
+            /* margin-bottom: 80px; */
+        }
+        #header-bar a {
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 200;
+            margin-right: 20px;
+            margin-left: 10px; /* 左邊微調間距 */
+        }
+
         body {
             display: flex;
             justify-content: center;
@@ -19,7 +40,7 @@
             text-align: center;
             padding: 20px;
             border-radius: 10px;
-            background-color: #e99980;
+            background-color: #af9d8f;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             max-width: 80%;
             margin: 0 auto;
@@ -50,7 +71,7 @@
         }
 
         .start-btn {
-            background-color: #e2b19e;
+            background-color: #cbb7a8;
         }
 
         .confirm-btn {
@@ -70,6 +91,11 @@
     </style>
 </head>
 <body>
+    <div id="header-bar">
+        <!-- <a href="index.html">Home</a> -->
+        <a href="index.html" style="float: left;">VisionCare</a>
+    </div>
+
     <div class="confirmation-box">
         <h1 id="direction-text">測驗中請不要移動您的位置，按照螢幕上的E字圖片缺口用食指比出正確方向，<br>並使用手機確認您的作答方向</h1>
         <p id="countdown-text"></p>
