@@ -6,31 +6,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>確認是否進入作答畫面的頁面</title>
     <style>
+        /* Header */
+        #header-bar {
+            background-color: #444;
+            width: 100%;
+            padding: 15px 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 15;
+            text-align: left; /* 左對齊 */
+            /* margin-bottom: 80px; */
+        }
+        #header-bar a {
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 200;
+            margin-right: 20px;
+            margin-left: 10px; /* 左邊微調間距 */
+        }
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f0f8ff;
-            background-image: url("static/images/pic04.jpg");
+            background-color: #ffffff;
+            /*background-image: url("static/images/pic04.jpg");*/
             background-size: cover;
             font-family: 'Arial', sans-serif;
         }
         .container {
             text-align: center;
-            background-color: #ffffff;
+            background-color: #cbb7a8;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         h1 {
             font-size: 2em;
-            color: #333333;
+            color: #fefefe;
             margin-bottom: 20px;
         }
         button {
-            background-color: #df9898;
+            background-color: #af9d8f;
             color: white;
             border: none;
             padding: 15px 30px;
@@ -96,6 +116,10 @@
     </script>
 </head>
 <body>
+    <div id="header-bar">
+        <!-- <a href="index.html">Home</a> -->
+        <a href="index.html" style="float: left;">VisionCare</a>
+    </div>
     <div class="container">
         <h1>進入色盲點圖測驗</h1>
         <button onclick="generateUniqueURL()">確認</button>
