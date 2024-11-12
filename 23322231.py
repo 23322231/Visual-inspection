@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify, session
 from flask import Response,send_from_directory
 
 app = Flask(__name__)
-
+3
 #點圖製作功能頁面
 @app.route('/')
 def elements():
@@ -21,6 +21,10 @@ def serve_js(filename):
 def eye_echart():
     return render_template('eye_echart.html')
 
+@app.route('/eye_Etest')
+def eye_Etest():
+    return render_template('eye_Etest.html')
+
 
 @app.route('/eye_distance')
 def eye_distance():
@@ -33,6 +37,12 @@ def index():
 @app.route('/quiz')
 def quiz():
     return render_template('quiz.html')
+
+@app.route('/eye_user_check')
+def eye_user_check():
+    return render_template('eye_user_check.html')
+
+
 
 @app.route('/image_test')
 def image_test():
@@ -57,6 +67,12 @@ def eye_result():
 @app.route('/comfirm_colordot')
 def comfirm_colordot():
     return render_template('comfirm_colordot.html')
+
+@app.route('/eye_dis_computer')
+def eye_dis_computer():
+    return render_template('eye_dis_computer.html')
+
+
 
 
 
