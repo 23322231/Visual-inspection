@@ -71,7 +71,7 @@
 </head>
 <body>
     <div class="confirmation-box">
-        <h1 id="direction-text">請在這確認您的作答方向</h1>
+        <h1 id="direction-text">測驗中請不要移動您的位置，按照螢幕上的E字圖片缺口用食指比出正確方向，<br>並使用手機確認您的作答方向</h1>
         <p id="countdown-text"></p>
 
         <div class="button-group">
@@ -110,7 +110,7 @@
         function startCountdown() {
             document.getElementById('retry-btn').style.display = 'none';
             document.getElementById('giveup-btn').style.display = 'none';
-            let seconds = 5;
+            let seconds = 3;
             const countdownText = document.getElementById('countdown-text');
 
             countdownText.textContent = `倒數：${seconds} 秒 | 偵測方向: ${currentDirection}`;

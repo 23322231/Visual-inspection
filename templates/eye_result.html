@@ -15,12 +15,13 @@
             max-width: 1000px;
             margin: auto;
             padding: 20px;
-            background: linear-gradient(135deg, #d3eaff, #e6e6fa);
+            background: linear-gradient(135deg, #dfd8cced, #dfd8cccf);
             color: #333;
             line-height: 1.6;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
             border-radius: 10px;
         }
+        
         h2 {
             text-align: center;
             color: #333;
@@ -114,7 +115,9 @@
         let answer = [];
         let correct = [];
         let numberOftest = 0;
-        let degree = 0;
+        var degree = 5;
+        var degree_end = 5;
+        var symptoms = "";
 
         var uuid = location.href.split('=').pop();
 
@@ -126,8 +129,13 @@
             correct = storedData['correct'];
             numberOftest = storedData['numberOftest'];
             degree = storedData['degree'];
+            degree=Math.round(degree*10)/10;
+            degree_end=String(degree);
+            console.log(degree_end)
+            console.log(typeof degree_end)
+            symptoms ="這是一個E字視力檢查的結果，不是石原色盲測試，我在E字視力檢查相當於視力"+String(degree_end)+"時連續答錯2題後結束測驗"; // 取得使用者輸入的症狀描述
 
-            console.log(degree)
+
             renderResults();
         }
 
@@ -199,7 +207,6 @@
             });
         }
 
-        let symptoms ="這是一個E字視力檢查的結果，我在視力相當於視力"+degree+"時連續答錯2題後結束測驗"; // 取得使用者輸入的症狀描述
         // 清空之前的結果並顯示 "生成中..."
         const adviceDiv = document.getElementById('advice');
         adviceDiv.innerText = "生成中...";

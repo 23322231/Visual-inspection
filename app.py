@@ -30,6 +30,8 @@ import mediapipe as mp
 import tensorflow as tf
 import detect_face
 import opencc  #簡體轉繁體
+from gradient import calculate_edge_loss    # 引用 gradient.py 計算梯度差異並算邊緣消失比例功能
+from color_blind_simulation import simulate_color_blindness     # 引用 color_blind_simulation.py 色覺辨識障礙功能
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
@@ -909,8 +911,8 @@ def generate_doctor_advice():
     print(symptoms)
     
     try:#寫在實驗裡面，他沒辦法輸出全繁體... 如何解決...
-        # 你是一位眼科醫師，請根據以下視力檢測或石原色盲測驗結果生成一段約150字的全英文建議，建議可以如何保護照顧眼睛，不管狀況多糟還是要給一些建議，不需要講太多細節。
-        prompt = f"You are an ophthalmologist. Please generate a full English suggestion of about 150 words based on the following vision test or Ishihara color blindness test results. Suggest how you can protect and care for your eyes. No matter how bad the condition is, you should still give some suggestions. You don’t need to go into too many details.{symptoms}"
+        # 你是一位眼科醫師，請根據以下視力檢測結果生成一段約150字的全英文建議，建議可以如何保護照顧眼睛，不管狀況多糟還是要給一些建議，不需要講太多細節。
+        prompt = f"You are an ophthalmology researcher. Please generate a 150-word piece of advice in English based on the following vision test results, suggesting how to protect and care for your eyes. No matter how bad the condition is, you still need to give some advice. You don’t need to go into too many details.{symptoms}"
         result = subprocess.run(
             ['ollama', 'run', 'llama3.2', ], input=prompt,
             capture_output=True, text=True, #stderr=subprocess.PIPE,

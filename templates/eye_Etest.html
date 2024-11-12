@@ -9,6 +9,16 @@
             text-align: center;
             font-family: Arial, sans-serif;
         }
+        .imageContainer {
+            width: 100px;
+            height: 100px;
+            text-align: center;
+        }
+        img {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+        }
         #testImage {
             display: none;
             margin-top: 20px;
@@ -20,7 +30,7 @@
 
     <div id="imageContainer">
         <!-- 這裡將會動態顯示圖片 -->
-        <img id="initialImage" src="static/images/1280.jpg" style="width:300px;"> <!-- 初始圖片 -->
+        <img id="initialImage" src="static/images/enter_test.png" style="width:300px;">
     </div>
     <!-- <button id="next-btn">確認</button> -->
 
