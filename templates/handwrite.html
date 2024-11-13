@@ -53,9 +53,9 @@
         canvas {
             background-size: cover; /* 背景圖片覆蓋整個 canvas */
             background-position: center; /* 圖片居中 */
-            border: 4px solid #af9d8f; /* 更粗的綠框 */
+            /* border: 4px solid #af9d8f;  */
             border-radius: 15px; /* 圓角變大 */
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* 更強的陰影效果 */
+            /* box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); 更強的陰影效果 */
             width: 80%;
             height: auto;
             aspect-ratio: 1; /* 保持正方形 */
@@ -131,18 +131,18 @@
     <!-- Header section -->
     <div id="header-bar">
         <!-- <a href="index.html">Home</a> -->
-        <a href="http://192.168.0.154:5000/index.html" style="float: left;">VisionCare</a>
+        <a href="https://53e1-2001-b011-2003-35a3-94dc-b89a-2dee-8bed.ngrok-free.app/index.html" style="float: left;">VisionCare</a>
     </div>
 
 <div class="container">
     <div class="status" id="status">完成題數: 0/8</div>
     <canvas id="drawingCanvas"></canvas>
     <div class="button-container">
-        <div>
+        
             <button class="btn clearButton-hidden" id="clearButton" onclick="clearCanvas()">清除重畫</button> <!-- 預設隱藏 clearButton -->
         
             <button class="btn" button id="submitButton" onclick="handleButtonClick()">確認送出</button>
-        </div>
+        
     </div>
     
     
@@ -150,7 +150,7 @@
 
 <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 <script>
-    var socket = io.connect('http://192.168.1.121:5000', {
+    var socket = io.connect('https://53e1-2001-b011-2003-35a3-94dc-b89a-2dee-8bed.ngrok-free.app', {
         pingInterval: 25000, // 25 seconds
         pingTimeout: 60000,  // 60 seconds
     });
@@ -192,7 +192,7 @@
     function resetToDrawingMode() {
         updateStatus();
         var canvas = document.getElementById('drawingCanvas');
-        canvas.style.border = '4px solid #00796b'; 
+        // canvas.style.border = '4px solid #00796b'; 
         canvas.addEventListener('touchstart', startDrawing);
         canvas.addEventListener('touchmove', draw);
         canvas.addEventListener('touchend', stopDrawing);

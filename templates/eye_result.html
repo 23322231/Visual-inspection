@@ -109,7 +109,7 @@
             border-radius: 6px;
             text-align: center;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            /*padding-bottom: 100px;*/ /* 增加底部間距，避免內容被CTA遮住 */
+            margin-bottom: 100px;
         }
 
         /* CTA Section */
@@ -156,7 +156,7 @@
     <!-- Header section -->
     <div id="header-bar">
         <!-- <a href="index.html">Home</a> -->
-        <a href="index.html" style="float: left;">VisionCare</a>
+        <a href="https://53e1-2001-b011-2003-35a3-94dc-b89a-2dee-8bed.ngrok-free.app/quiz" style="float: left;">VisionCare</a>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -166,7 +166,7 @@
     <div id="results" class="grid-container"></div>
     <div id="advice" class="result">醫囑將顯示在這裡...</div>
     <script>
-        var socket = io.connect('http://192.168.1.121:5000');
+        var socket = io.connect('https://53e1-2001-b011-2003-35a3-94dc-b89a-2dee-8bed.ngrok-free.app');
         let answer = [];
         let correct = [];
         let numberOftest = 0;
@@ -188,7 +188,7 @@
             degree_end=String(degree);
             console.log(degree_end)
             console.log(typeof degree_end)
-            symptoms ="這是一個E字視力檢查的結果，不是石原色盲測試，我在E字視力檢查相當於視力"+String(degree_end)+"時連續答錯2題後結束測驗"; // 取得使用者輸入的症狀描述
+            symptoms ="這是一個E字視力檢查的結果，不是石原色盲測試，我的E字視力檢查結果為"+String(degree_end)+"，其中0.1表示視力非常差，1.5表示視力極好"; // 取得使用者輸入的症狀描述
 
 
             renderResults();
