@@ -113,11 +113,11 @@ a {
   -ms-transition: color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
   transition: color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
   border-bottom: dotted 1px;
-  color: #af9d8f;
+  color: #999;
   text-decoration: none; }
   a:hover {
-    border-bottom-color: #af9d8f;
-    color: #af9d8f !important; }
+    border-bottom-color: #999;
+    color: #999 !important; }
     a:hover strong {
       color: inherit; }
 
@@ -132,15 +132,16 @@ p {
   margin: 0 0 2em 0; }
 
 h1, h2, h3, h4, h5, h6 {
-  color: #3d4449;
-  font-family: "Roboto Slab", serif;
-  font-weight: 700;
-  line-height: 1.5;
-  margin: 0 0 1em 0; }
+  color: #646464;
+  /* font-family: "Roboto Slab", serif; */
+  font-weight: 300;
+  line-height: 1em;
+  margin: 0 0 0.5em 0; }
   h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
     color: inherit;
     text-decoration: none;
-    border-bottom: 0; }
+    /* border-bottom: 0; */
+   }
 
 h1 {
   font-size: 4em;
@@ -148,7 +149,10 @@ h1 {
   line-height: 1.3; }
 
 h2 {
-  font-size: 1.75em; }
+  font-size: 2.25em; 
+  line-height: 1.5em;
+  letter-spacing: -0.035em;
+}
 
 h3 {
   font-size: 1.25em; }
@@ -1346,15 +1350,18 @@ ul.icons {
   cursor: default;
   list-style: none;
   padding-left: 0; }
-  ul.icons li {
-    display: inline-block;
-    padding: 0 1em 0 0; }
-    ul.icons li:last-child {
-      padding-right: 0; }
-    ul.icons li .icon {
-      color: inherit; }
-      ul.icons li .icon:before {
-        font-size: 1.25em; }
+ul.icons li {
+  display: inline-block;
+  padding: 0 1.25em 0 0; }
+ul.icons li:last-child {
+  padding-right: 0; }
+ul.icons li .icon {
+  color: inherit; }
+ul.icons li .icon:before {
+  font-size: 1.75em; }
+ul.icons li .icon:hover{
+  color: #ffffff !important;
+}
 
 
 
@@ -1380,7 +1387,7 @@ ul.contact {
       font-family: 'Font Awesome 5 Free';
       font-weight: 400; }
     ul.contact li:before {
-      color: #af9d8f;
+      color: #999; /* no */
       display: inline-block;
       font-size: 1.5em;
       height: 1.125em;
@@ -1425,12 +1432,12 @@ ul.pagination {
       padding: 0 0.5em;
       text-align: center; }
       ul.pagination li > .page.active {
-        background-color: #af9d8f;
+        background-color: #777; /*no*/
         color: #ffffff !important; }
         ul.pagination li > .page.active:hover {
-          background-color: #af9d8f; }
+          background-color: #999; } /*no*/
         ul.pagination li > .page.active:active {
-          background-color: #af9d8f; }
+          background-color: #999; } /*no*/
     ul.pagination li:first-child {
       padding-right: 0.75em; }
     ul.pagination li:last-child {
@@ -1497,19 +1504,19 @@ button,
   -ms-transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
   transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
   background-color: transparent;
-  border-radius: 0.375em;
+  border-radius: 6px;
   border: 0;
-  box-shadow: inset 0 0 0 2px #af9d8f;
-  color: #af9d8f !important;
+  box-shadow: inset 0 0 0 2px rgba(225, 220, 220, 0.653); /* 進入 邊框顏色 */
+  color: #999 !important; /*進入 字體顏色*/
   cursor: pointer;
   display: inline-block;
-  font-family: "Roboto Slab", serif;
-  font-size: 0.8em;
-  font-weight: 700;
-  height: 3.5em;
-  letter-spacing: 0.075em;
-  line-height: 3.5em;
-  padding: 0 2.25em;
+  font-family: "Source Sans Pro", sans-serif;
+  /* font-size: 0.8em; */
+  font-weight: 400;
+  height: 3em;
+  /* letter-spacing: 0.075em; */
+  line-height: 3em;
+  padding: 0 2em;
   text-align: center;
   text-decoration: none;
   text-transform: uppercase;
@@ -1519,7 +1526,7 @@ button,
   input[type="button"]:hover,
   button:hover,
   .button:hover {
-    background-color: rgba(245, 106, 106, 0.05); }
+    background-color:#e5e5e547; } /*進入button的hover背景顏色*/
   input[type="submit"]:active,
   input[type="reset"]:active,
   input[type="button"]:active,
@@ -1543,7 +1550,7 @@ button,
   input[type="button"].small,
   button.small,
   .button.small {
-    font-size: 0.6em; }
+    font-size: 1em; }
   input[type="submit"].large,
   input[type="reset"].large,
   input[type="button"].large,
@@ -1557,7 +1564,7 @@ button,
   input[type="button"].primary,
   button.primary,
   .button.primary {
-    background-color: #af9d8f;
+    background-color: #777;
     box-shadow: none;
     color: #ffffff !important; }
     input[type="submit"].primary:hover,
@@ -1565,13 +1572,13 @@ button,
     input[type="button"].primary:hover,
     button.primary:hover,
     .button.primary:hover {
-      background-color: #f67878; }
+      background-color: #777; }
     input[type="submit"].primary:active,
     input[type="reset"].primary:active,
     input[type="button"].primary:active,
     button.primary:active,
     .button.primary:active {
-      background-color: #f45c5c; }
+      background-color: #777; }
   input[type="submit"].disabled, input[type="submit"]:disabled,
   input[type="reset"].disabled,
   input[type="reset"]:disabled,
@@ -1646,7 +1653,7 @@ button,
       text-align: center;
       width: 10em; }
       .features article .icon:before {
-        color: #af9d8f;
+        color: #777;
         font-size: 2.75rem;
         position: relative;
         top: 0.05em; }
@@ -1656,7 +1663,7 @@ button,
         -ms-transform: rotate(45deg);
         transform: rotate(45deg);
         border-radius: 0.25rem;
-        border: solid 2px rgba(210, 215, 217, 0.75);
+        border: solid 2px rgba(153, 153, 153, 0.25);
         content: '';
         display: block;
         height: 7em;
@@ -2298,7 +2305,7 @@ button,
     font-size: 0.9em;
     padding: 0.625em 0; }
     #menu ul a:hover, #menu ul span:hover {
-      color: #af9d8f; }
+      color: #999; }
     #menu ul a.opener, #menu ul span.opener {
       -moz-transition: color 0.2s ease-in-out;
       -webkit-transition: color 0.2s ease-in-out;
@@ -2328,7 +2335,7 @@ button,
         position: absolute;
         right: 0; }
       #menu ul a.opener:hover:before, #menu ul span.opener:hover:before {
-        color: #af9d8f; }
+        color: #9fa3a6; }
       #menu ul a.opener.active + ul, #menu ul span.opener.active + ul {
         display: block; }
       #menu ul a.opener.active:before, #menu ul span.opener.active:before {
