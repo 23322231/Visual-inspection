@@ -33,7 +33,7 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-image: url("static/images/pic04.jpg");
+            background-color: #fff;
             background-size: cover;
             font-family: 'Arial', sans-serif;
             color: #333;
@@ -42,21 +42,21 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: rgba(255, 255, 255, 0.8); /* 背景透明度 */
+            background-color: #af9d8a;
             padding: 20px;
             border-radius: 20px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* 增強陰影效果 */
-            width: 90%;
+            width: 80%;
             margin-top: 50px;
-            max-width: 500px; /* 調整容器寬度 */
+            max-width: 430px; /* 調整容器寬度 */
         }
         canvas {
             background-size: cover; /* 背景圖片覆蓋整個 canvas */
             background-position: center; /* 圖片居中 */
-            border: 4px solid #e89980; /* 更粗的綠框 */
+            border: 4px solid #af9d8f; /* 更粗的綠框 */
             border-radius: 15px; /* 圓角變大 */
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* 更強的陰影效果 */
-            width: 100%;
+            width: 80%;
             height: auto;
             aspect-ratio: 1; /* 保持正方形 */
             margin-bottom: 30px; /* 調整間距 */
@@ -65,37 +65,87 @@
             padding: 15px 30px; /* 增加按鈕內邊距 */
             font-size: 18px; /* 增加按鈕字體大小 */
             color: #fff;
-            background-color: #e89980;
+            background-color: #cbb7a8;
             border: none;
             border-radius: 25px; /* 更圓的按鈕 */
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 按鈕陰影加強 */
             transition: background-color 0.3s ease, transform 0.2s ease;
+            
         }
         button:hover {
-            background-color: #f67f5b; /* 按鈕懸停顏色 */
+            background-color: #cbb7a8; /* 按鈕懸停顏色 */
             transform: scale(1.05); /* 懸停時微放大 */
         }
         .status {
             font-size: 22px; /* 更大字體 */
             font-weight: bold;
-            color: #e89980; /* 狀態文字顏色 */
+            color: #fefefe; /* 狀態文字顏色 */
             margin-bottom: 15px;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* 增加狀態文字陰影 */
         }
+        .btn {
+            border: 2px solid #cbb7a8;
+            color: white;
+            background-color: #cbb7a8;
+            padding: 8px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center; /* 將按鈕置中 */
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 40px;
+        }
+        /* 當 clearButton 隱藏時，置中 submitButton */
+        .button-container .btn {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        /* 需要時顯示 clearButton */
+        .clearButton-hidden {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            canvas {
+                height: 300px;
+                /* aspect-ratio: 1;  */
+                margin-bottom: 30px; 
+            }
+            .container {
+                margin-top: 160px;
+                /* margin-bottom: 50PX; */
+                /* max-width: 400px; 調整容器寬度 */
+                width: 370px;
+                
+            }
+        }
+
     </style>
 </head>
 <body>
     <!-- Header section -->
     <div id="header-bar">
         <!-- <a href="index.html">Home</a> -->
-        <a href="http://192.168.0.154:5000/index.html" style="float: right;">Home</a>
+        <a href="http://192.168.0.154:5000/index.html" style="float: left;">VisionCare</a>
     </div>
 
 <div class="container">
     <div class="status" id="status">完成題數: 0/8</div>
     <canvas id="drawingCanvas"></canvas>
-    <button id="submitButton" onclick="handleButtonClick()">確認送出</button>
+    <div class="button-container">
+        <div>
+            <button class="btn clearButton-hidden" id="clearButton" onclick="clearCanvas()">清除重畫</button> <!-- 預設隱藏 clearButton -->
+        
+            <button class="btn" button id="submitButton" onclick="handleButtonClick()">確認送出</button>
+        </div>
+    </div>
+    
+    
 </div>
 
 <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
@@ -125,11 +175,13 @@
     function handleIntroduction() {
         document.getElementById('status').innerHTML = '請在手機上用手指描出您看到的圖案<br>(等電腦端同步畫面後再按下"知道啦")';
         var canvas = document.getElementById('drawingCanvas');
+        var clearButton = document.getElementById('clearButton');
         canvas.removeEventListener('touchstart', startDrawing);
         canvas.removeEventListener('touchmove', draw);
         canvas.removeEventListener('touchend', stopDrawing);
         canvas.style.border = 'none';
         document.getElementById('submitButton').innerText = '知道啦';
+        clearButton.style.display = 'none';  // 隱藏 clearButton
         document.getElementById('submitButton').onclick = function() {
             completedQuestions++;
             resetToDrawingMode();
@@ -146,6 +198,7 @@
         canvas.addEventListener('touchend', stopDrawing);
         var submitButton = document.getElementById('submitButton');
         submitButton.innerText = '確認送出';
+        clearButton.style.display = 'inline-block';  // 顯示 clearButton
         submitButton.onclick = function() {
             saveImage();
         };
@@ -273,6 +326,12 @@
     window.onresize = function() {
         resizeCanvas(); // 確保 canvas 在窗口大小變更時保持正方形
     };
+
+    // 清除畫布的函數
+    function clearCanvas() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
 </script>
 
 </body>
