@@ -2209,14 +2209,14 @@
 		input[type="radio"]:checked + label:before {
 			background: #666;
 			border-color: #666;
-			color: #ffffff;
-			content: '\f00c';
+			/* color: #ffffff; */
+			/* content: '\f00c'; */
 		}
 
 		input[type="checkbox"]:focus + label:before,
 		input[type="radio"]:focus + label:before {
-			border-color: #e89980;
-			box-shadow: 0 0 0 1px #e89980;
+			border-color: #666;
+			box-shadow: 0 0 0 1px #666;
 		}
 
 	input[type="checkbox"] + label:before {
