@@ -79,8 +79,24 @@
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             margin: 50px auto 0; /* 往下移動 */
-            max-width: 400px;
-            text-align: center;
+            
+        }
+        .exit-button {
+            margin-top: 30px;
+            margin-bottom: 30px;
+            padding: 10px 20px;
+            font-size: 1em;
+            color: #999;
+            background-color: #fefefe;
+            border: 1.25px solid #999;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100px;
+        }
+
+        .exit-button:hover {
+            background-color: #e5e5e5;
         }
 
         /* CTA Section */
@@ -137,9 +153,16 @@
             } else {
                 document.getElementById('result').innerText = "無法獲取測驗結果。";
             }
+
+            function closePage() {
+            if (window.confirm("確定要離開此頁面嗎？")) {
+                // window.close(); // 嘗試關閉當前頁面
+                window.location.href = window.location.origin + '/quiz';
+            }
+        }
         </script>
     </div>
-
+    <div align="center"><button class="exit-button" onclick="closePage()">離開</button></div>
     <!-- Footer with CTA and Disclaimer -->
     <section id="cta">
         <ul>

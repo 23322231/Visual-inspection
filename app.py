@@ -316,7 +316,7 @@ def calculate_score():
         return jsonify({'error': 'User ID not provided'}), 400
 
     try:
-        for i in range(1, 9):  # 假設有 8 個問題
+        for i in range(1, 6):  # 假設有 5 個問題
             id = i
             # 從資料庫獲取答案和用戶提交的圖像
             # get_image_from_db
@@ -368,7 +368,7 @@ def calculate_score():
         if final_score == 0.0:
             return jsonify({'error': 'No valid answers or images found'}), 400
         
-        average_final_score = final_score / 8.0  # 計算平均分數
+        average_final_score = final_score / 5.0  # 計算平均分數
         print(f"User {user_id} - Average Score: {average_final_score}")
         return jsonify({'score': average_final_score})
     
@@ -710,7 +710,7 @@ def confirm_eye_dis(data):
 
         #發去給eye_dis_computer.html 讓他跳轉到測驗的畫面
         print(depth)
-        print("8888888888888888888888888888888888888")
+        
         emit('eye_into_test_confirm', {'eye_user_id': url_suffix,'depth_value':depth},broadcast=True) #傳給qrcode.html 告訴她可以跳轉到顯示題目的畫面了
     else:
         print('No URL suffix provided.')

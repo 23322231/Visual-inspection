@@ -126,6 +126,22 @@
         button:hover {
             background-color: #004d40;
         }
+
+        .exit-button {
+            margin-top: 30px;
+            padding: 10px 20px;
+            font-size: 1em;
+            color: #999;
+            background-color: #fefefe;
+            border: 1.25px solid #999;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .exit-button:hover {
+            background-color: #e5e5e5;
+        }
         /* CTA Section */
         #cta {
             background: #af9d8f;
@@ -200,7 +216,7 @@
                 return;  //退出，以避免調用null對象的appendChild
             }
             
-            for (var i = 1; i <=8; i++) {
+            for (var i = 1; i <=5; i++) {
                 fetch('/result_cb', {
                     method: 'POST', 
                     headers: {'Content-Type': 'application/json'},
@@ -263,14 +279,24 @@
                 adviceDiv.innerText = `錯誤：${error.message}`;
             }
         }
-    </script>
 
+        // 關閉頁面或返回主頁
+        function closePage() {
+            if (window.confirm("確定要離開此頁面嗎？")) {
+                // window.close(); // 嘗試關閉當前頁面
+                window.location.href = window.location.origin + '/quiz';
+            }
+        }
+    </script>
+    <button class="exit-button" onclick="closePage()">離開</button>
     <!-- Footer with CTA and Disclaimer -->
     <section id="cta">
         <ul>
             <li>*免責聲明：有關近視的建議和進一步資訊，請諮詢您的視力保健專業人員。本系統之視覺模擬器僅供參考，不代表建議。</li>
         </ul>
     </section>
+
+    
 
 </body>
 </html>

@@ -112,6 +112,26 @@
             margin-bottom: 100px;
         }
 
+        .exit-button {
+            /* margin-top: 30px; */
+            margin-bottom: 130px;
+            padding: 10px 20px;
+            font-size: 1em;
+            color: #999;
+            background-color: #fefefe;
+            border: 1.25px solid #999;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            align-items: center;
+            text-align: center;
+            display: flex;
+        }
+
+        .exit-button:hover {
+            background-color: #e5e5e5;
+        }
+
         /* CTA Section */
         #cta {
             /*background: #af9d8f;
@@ -298,7 +318,16 @@
             fetchTestResults();
             fetchAdvice();
         }
+
+        // 關閉頁面或返回主頁
+        function closePage() {
+            if (window.confirm("確定要離開此頁面嗎？")) {
+                // window.close(); // 嘗試關閉當前頁面
+                window.location.href = window.location.origin + '/quiz';
+            }
+        }
     </script>
+    <div align="center"><button class="exit-button" onclick="closePage()">離開</button></div>
     <section id="cta">
         <ul>
             <li>*免責聲明：有關近視的建議和進一步資訊，請諮詢您的視力保健專業人員。本系統之視覺模擬器僅供參考，不代表建議。</li>

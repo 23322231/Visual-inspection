@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="static/css/minchi.css" />
+    <link rel="stylesheet" href="static/css/color_sim.css" />
     <title>Color Blindness Simulator</title>
     <style>
         @import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700");
@@ -126,15 +126,8 @@
             text-align: center; /* 文字置中 */
         }
 
-        /* Upload and Download Button */
-        .upload-btn-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-        }
-
         .btn {
-            border: 2px solid #af9d8f;
+            border: 0px solid #af9d8f;
             color: #efefef;
             background-color: #af9d8f;
             padding: 8px 20px;
@@ -146,7 +139,32 @@
         }
 
         .btn:hover {
-            background-color: #b94c42;
+            background-color: #cbb7a8;
+        }
+
+        /* Upload and Download Button */
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+        }
+
+        .upload-btn-wrapper .btn {
+            background-color: #af9d8f; /* 按鈕的基本背景顏色 */
+            border: none;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            
+        }
+
+        .upload-btn-wrapper .btn:hover {
+            background-color: #cbb7a8;
         }
 
         .upload-btn-wrapper input[type=file] {
@@ -156,6 +174,7 @@
             top: 0;
             opacity: 0;
         }
+        
 
         /* Radio Group Options */
         .options {
@@ -166,22 +185,40 @@
             width:100%;
             align-items: center; /* 使選項居中對齊 */
         }
-        .buttons {
-            padding: 12px 30px; /* 增加按鈕內邊距 */
-            font-size: 18px; /* 增加按鈕字體大小 */
-            color: #fff;
-            background-color: #e89980;
-            border: none;
-            border-radius: 6px; /* 較方的按鈕 */
+
+        /* button {
+            border: 2px solid #af9d8f;
+            color: #efefef;
+            background-color: #af9d8f;
+            padding: 8px 20px;
+            font-size: 16px;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 按鈕陰影加強 */
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
+            border-radius: 5px; */
+            /* transition: background 0.3s; */
+            /* display: inline-block; 設置為行內塊元素，支持置中 */
+        /* } */
+        /* .buttons { */
+            /* padding: 12px 30px; 增加按鈕內邊距 */
+            /* font-size: 500px; 增加按鈕字體大小 */
+            /* color: #fff;
+            background-color: #e89980;
+            border: none; */
+            /* border-radius: 6px; 較方的按鈕 */
+            /* cursor: pointer; */
+            /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); 按鈕陰影加強 */
+            /* transition: background-color 0.3s ease, transform 0.2s ease;
+        } */
 
         .radio-group {
             text-align: center; /* 讓選項文字置中 */
             width: auto; /* 去除多餘的寬度設置，以自動調整 */
             padding-left: 15px; 
+        }
+
+        .simulation-result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #af9d8f;
         }
 
         /* CTA Section */
