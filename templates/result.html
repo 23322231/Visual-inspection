@@ -184,6 +184,7 @@
     </script>
     <script>
         let score;
+        var symptoms="";
         // 頁面載入完成後初始化
         window.onload = function() {
 
@@ -201,7 +202,8 @@
                     console.error('Error:', data.error);
                 } else {
                     console.log('Score:', data.score);
-                    let roundedScore = parseFloat(data.score).toFixed(1);
+                    var roundedScore = parseFloat(data.score).toFixed(1);
+                    symptoms ="這是一個石原氏色盲測驗的結果，五題我的平均分數為"+String(roundedScore)+"分"; // 取得使用者輸入的症狀描述
                     // Display the score on the frontend
                     document.getElementById('scoreDisplay').innerText = `Score: ${roundedScore}`;
                 }
@@ -250,7 +252,7 @@
         };
 
 
-        let symptoms ="這是一個石原氏色盲測驗的結果，八題我的平均分數為"+score+"分"; // 取得使用者輸入的症狀描述
+        // let symptoms ="這是一個石原氏色盲測驗的結果，五題我的平均分數為"+score+"分"; // 取得使用者輸入的症狀描述
         // 清空之前的結果並顯示 "生成中..."
         const adviceDiv = document.getElementById('advice');
         adviceDiv.innerText = "生成中...";
