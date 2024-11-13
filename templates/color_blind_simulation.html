@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="static/css/minchi.css" />
+    
     <title>Color Blindness Simulator</title>
     <style>
         @import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700");
@@ -86,8 +86,7 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 70px;
-            margin-bottom: 15px;
-            margin-top: 50px;
+            margin-bottom: 20px;
         }
 
         .image-box-wrapper {
@@ -162,26 +161,15 @@
             display: flex;
             justify-content: center;
             text-align: center;
-            gap: 120px; 
+            gap: 230px; 
             width:100%;
             align-items: center; /* 使選項居中對齊 */
-        }
-        .buttons {
-            padding: 12px 30px; /* 增加按鈕內邊距 */
-            font-size: 18px; /* 增加按鈕字體大小 */
-            color: #fff;
-            background-color: #e89980;
-            border: none;
-            border-radius: 6px; /* 較方的按鈕 */
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 按鈕陰影加強 */
-            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
         .radio-group {
             text-align: center; /* 讓選項文字置中 */
             width: auto; /* 去除多餘的寬度設置，以自動調整 */
-            padding-left: 15px; 
+            padding-right: 10px; /* 新增右側填充，將群組稍微向左調整 */
         }
 
         /* CTA Section */
@@ -255,7 +243,7 @@
 
 <body>
     <div id="header-bar">
-        <a href="https://53e1-2001-b011-2003-35a3-94dc-b89a-2dee-8bed.ngrok-free.app/quiz" style="float: left">VisionCare</a>
+        <a href="http://192.168.1.121:5000/quiz" style="float: left">VisionCare</a>
     </div>
 
     <div class="container">
