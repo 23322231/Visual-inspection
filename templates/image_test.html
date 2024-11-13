@@ -50,6 +50,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin-left:5px;
         }
         .small-image {
             width: 300px;
@@ -112,6 +113,43 @@
             line-height: 1.6;
             max-width: 800px;
         }
+
+        /* 調整稍小螢幕下的顯示方式 */
+        @media screen and (max-width: 1123px) {
+            .main-image {
+                width: 40%;
+                height: auto;
+                aspect-ratio: 3 / 2; /* 保持圖片比例 */
+                margin-bottom: 10px;
+            }
+            .small-images {
+                /*flex-direction: column;*/ /* 改成垂直排列 */
+                width: 100%; /* 滿版寬度 */
+            }
+            .small-image-container {
+                width: 100%; /* 保持滿版寬度 */
+                margin: 5px 0; /* 增加間距 */
+                text-align: center; /* 中心對齊 */
+                margin-left:5px;
+            }
+            .small-image {
+                width: 80%; /* 增加寬度，讓圖片在窄螢幕上更清晰 */
+                height: auto;
+                flex-direction: column;
+                align-items: center; /* 確保按鈕在中間 */
+                aspect-ratio: 3 / 2; /* 保持圖片比例 */
+            }
+            button {
+                width: 80%;
+                padding: 10px;
+                font-size: 16px;
+                margin-top: 20px;
+            }
+            .question-status {
+                font-size: 20px;
+            }
+        }
+
         /* 調整在小螢幕下的顯示方式 */
         @media screen and (max-width: 768px) {
             .main-image {
@@ -122,7 +160,7 @@
             }
             .small-images {
                 flex-direction: column; /* 改成垂直排列 */
-                width: 100%; /* 滿版寬度 */
+                width: 80%; /* 滿版寬度 */
             }
             .small-image-container {
                 width: 100%; /* 保持滿版寬度 */
@@ -177,10 +215,10 @@
 <body>
     <div>
         <!-- Header section -->
-        <div id="header-bar">
+        <!--<div id="header-bar">-->
             <!-- <a href="index.html">Home</a> -->
-            <a href="https://53e1-2001-b011-2003-35a3-94dc-b89a-2dee-8bed.ngrok-free.app/quiz" style="float: left;">VisionCare</a>
-        </div>
+            <!--<a href="https://53e1-2001-b011-2003-35a3-94dc-b89a-2dee-8bed.ngrok-free.app/quiz" style="float: left;">VisionCare</a>-->
+        <!--</div>-->
 
         <!-- Main -->
         <section id="main" class="container">
