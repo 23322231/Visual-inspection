@@ -6,6 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>色盲點圖測驗題目(電腦端)</title>
     <style>
+        /* Header */
+        #header-bar {
+            background-color: #444;
+            width: 100%;
+            padding: 15px 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 15;
+            text-align: left; /* 左對齊 */
+            /* margin-bottom: 80px; */
+        }
+        #header-bar a {
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 200;
+            margin-right: 20px;
+            margin-left: 10px; /* 左邊微調間距 */
+        }
         body {
             margin: 0;
             padding: 0;
@@ -14,29 +34,29 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #ffcccc;
-            background-image: url("static/images/pic04.jpg");
+            background-color: #ffffff;
             background-size: cover;
             font-family: 'Arial', sans-serif;
-            color: #333;
+            color: #fefefe;
         }
         .container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #ffffff;
+            background-color: #af9d8f;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            width: 90%;
+            width: 70%;
             max-width: 500px;
+            margin-top: 80px;
         }
         canvas {
             background-size: cover;
-            border: 2px solid #e89980;
+            border: 2px solid #af9d8f;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            width: 100%;
+            width: 80%;
             height: auto;
             aspect-ratio: 1 / 1; /* 保持正方形 */
             margin-bottom: 20px;
@@ -55,15 +75,21 @@
             border: none;
             border-radius: 20px;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
             transition: background-color 0.3s ease;
         }
-        button:hover {
+        /* button:hover {
             background-color: #e89980;
-        }
+        } */
     </style>
 </head>
 <body>
+    <!-- Header section -->
+    <div id="header-bar">
+        <!-- <a href="index.html">Home</a> -->
+        <a href="index.html" style="float: left;">VisionCare</a>
+    </div>
+
     <div class="container">
         <!-- 顯示完成題數的狀態 -->
         <div class="status" id="status">完成題數: 0/8</div>
