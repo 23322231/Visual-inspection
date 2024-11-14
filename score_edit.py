@@ -49,7 +49,9 @@ def Score_calculation(image_ans, image_user):
     black_pixel_count_ans = len(black_pixels_ans[0])
 
     # 計算吻合度 (與答案吻合的軌跡 / 答案軌跡)
-    similarity = black_pixel_count / black_pixel_count_ans
+    similarity = black_pixel_count/ (black_pixel_count_ans + 1e-10)
+    if(black_pixel_count == 0 and black_pixel_count_ans == 0):
+        similarity = 1.0
 
     # 計算與最近吻合軌跡的距離
     distance_transform = cv2.distanceTransform(and_result, cv2.DIST_L2, 3)
@@ -58,7 +60,7 @@ def Score_calculation(image_ans, image_user):
     unmatched_pixel = np.where(xor_result == 255)
     score = 100  # 滿分 100
 
-    if similarity < 0.4:  # 吻合度 < 0.4，直接設為 0 分 (色盲)
+    if similarity < 0.3:  # 吻合度 < 0.3，直接設為 0 分 (色盲)
         score = 0
 
     for y, x in zip(unmatched_pixel[0], unmatched_pixel[1]):
