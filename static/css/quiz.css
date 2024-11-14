@@ -1514,6 +1514,7 @@ button,
   color: #999 !important; /*進入 字體顏色*/
   cursor: pointer;
   display: inline-block;
+
   font-family: "Source Sans Pro", sans-serif;
   /* font-size: 0.8em; */
   font-weight: 400;
@@ -1536,7 +1537,7 @@ button,
   input[type="button"]:active,
   button:active,
   .button:active {
-    background-color: rgba(245, 106, 106, 0.15); }
+    background-color: rgba(180, 178, 178, 0.22); }/*點擊的顏色*/
   input[type="submit"].icon:before,
   input[type="reset"].icon:before,
   input[type="button"].icon:before,

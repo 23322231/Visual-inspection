@@ -60,7 +60,12 @@ with mp_hands.Hands(
 
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
-                
+                # 繪製手部骨架
+                mp_drawing.draw_landmarks(
+                    img, hand_landmarks, mp_hands.HAND_CONNECTIONS,
+                    mp_drawing_styles.get_default_hand_landmarks_style(),
+                    mp_drawing_styles.get_default_hand_connections_style()
+                )
 
                 #取得食指(8)和(5)的座標
                 finger_tip = [
