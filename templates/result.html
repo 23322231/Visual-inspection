@@ -164,7 +164,7 @@
     <!-- Header section -->
     <div id="header-bar">
         <!-- <a href="index.html">Home</a> -->
-        <a href="https://53e1-2001-b011-2003-35a3-94dc-b89a-2dee-8bed.ngrok-free.app/quiz" style="float: left;">VisionCare</a>
+        <a href="https://3bd4-2001-b011-2003-35a3-30fd-207e-2c70-5bff.ngrok-free.app/quiz" style="float: left;">VisionCare</a>
     </div>
 </head>
 <body>
@@ -177,7 +177,7 @@
 
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
-        var socket = io.connect('https://53e1-2001-b011-2003-35a3-94dc-b89a-2dee-8bed.ngrok-free.app', {
+        var socket = io.connect('https://3bd4-2001-b011-2003-35a3-30fd-207e-2c70-5bff.ngrok-free.app', {
             pingInterval: 25000, // 25 seconds
             pingTimeout: 60000,  // 60 seconds
         });
@@ -204,6 +204,7 @@
                     console.log('Score:', data.score);
                     var roundedScore = parseFloat(data.score).toFixed(1);
                     symptoms ="這是一個石原氏色盲測驗的結果，五題我的平均分數為"+String(roundedScore)+"分"; // 取得使用者輸入的症狀描述
+                    //symptoms ="這是一個石原氏色盲測驗的結果，我的分數為滿分";//測試用
                     // Display the score on the frontend
                     document.getElementById('scoreDisplay').innerText = `Score: ${roundedScore}`;
                 }

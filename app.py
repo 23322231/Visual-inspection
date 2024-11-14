@@ -325,12 +325,12 @@ def calculate_score():
             answer_image = db.session.query(ans).filter_by(id_ans_cb=question_id).first()
 
             if not user_answer:
-                # 如果用戶的回答不存在，記錄錯誤並繼續
+                # 如果用戶的回答不存在，記印出錯誤並繼續
                 print(f"User answer not found for question {question_id}")
                 continue
 
             if not answer_image:
-                #如果答案不存在，紀錄錯誤然後繼續
+                #如果答案不存在，印出錯誤然後繼續
                 print(f"Answer image not found for question {question_id}")
                 continue
             
