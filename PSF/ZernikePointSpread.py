@@ -5,15 +5,12 @@ import Wrap
 import math
 import cv2
 import sys
-from wolframclient.evaluation import WolframLanguageSession
-from wolframclient.language import wl, wlexpr
 import itertools
-import pyfftw
 from scipy.fft import ifft2, ifftshift
 from PIL import Image
 from typing import List, Tuple, Union
 import decimal
-
+import time
 
 # 論文第六頁內有提到參數的相關設置
 def zernikePointSpread(coefficients, spectrum=None, **kwargs):
@@ -469,22 +466,23 @@ spectra_B = np.array([[415,0.000458],[435, 0.0503],[455, 0.157],[475, 0.217],[49
 # plt.show()
 
 ########## 單純計算單一波長的 PSF #######################
-
+# 記錄開始時間
+start_time = time.time()
 # degree 設定大一點，才可以包含住比較大的PSF
-# degree=0.5
+degree=0.5
 
-# diopter=1.0 # 設定近視-(遠視+)度數
+diopter=1.0 # 設定近視-(遠視+)度數
 
-# psf=np.zeros([256,256,20])
+psf=np.zeros([256,256,20])
 
-# # 讀取要處理的圖片
-# img_gray=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_e.png")
+# 讀取要處理的圖片
+img_gray=cv2.imread("C:\\Users\\user\\Documents\\GitHub\\Visual-inspection\\PSF\\letter_e.png")
 
-# # 圖片左右翻轉(因為文章中的 Basis 的 Image 有提到，卷積是從圖片的底部開始做的)
-# # 不知道為啥是左右翻轉
-# img_gray_flip=cv2.flip(img_gray, 1)
-# psf_num=0
-# # 在 zernike 參數內加 Defocus，計算近視(遠視)
+# 圖片左右翻轉(因為文章中的 Basis 的 Image 有提到，卷積是從圖片的底部開始做的)
+# 不知道為啥是左右翻轉
+img_gray_flip=cv2.flip(img_gray, 1)
+psf_num=0
+# 在 zernike 參數內加 Defocus，計算近視(遠視)
 # for i in np.arange(-2,2.25,0.25):
 #     print(psf_num, i)
 #     # Defocus 計算近視(遠視)係數
@@ -498,17 +496,30 @@ spectra_B = np.array([[415,0.000458],[435, 0.0503],[455, 0.157],[475, 0.217],[49
 #     s=str(img_num)+'_img.jpg'
 #     cv2.imwrite(s, img_blur)  # 存成 jpg
 #     psf_num+=1
-        
+Defocus=InverseEquivalentDefocus(diopters=diopter,pupildiameter=4)  
+c_pupil_4_defocus=np.append(zc_pupil_4,[[2,0,Defocus]],axis=0)
+psf=zernikePointSpread(c_pupil_4_defocus, Degrees=degree, PupilDiameter=4)
+print(Wrap.wrap(psf))
+img_blur=cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf))
+img_blur=cv2.flip(img_blur,1) # 把圖片翻回來
+# plt.imshow(img_blur)
+# plt.show()
 
-# # 輸出 PSF 圖片
-# # for i in range(9):
-# #     plt.title(i/2-2)
-# #     psf_img = PSFPlot(psf=psf[:,:,i], Degrees=degree)
-# #     plt.show()
+# 記錄結束時間
+end_time = time.time()
+
+# 計算執行時間（以秒為單位）
+execution_time = end_time - start_time
+print(f"執行時間: {execution_time:.4f} 秒")
+# 輸出 PSF 圖片
+# for i in range(9):
+#     plt.title(i/2-2)
+#     psf_img = PSFPlot(psf=psf[:,:,i], Degrees=degree)
+#     plt.show()
 
 
-# plt.figure()
-# # 對圖片做處理
+plt.figure()
+# 對圖片做處理
 
 # img_blur_n2= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,0]))
 # img_blur_n1_5= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf[:,:,1]))
@@ -567,49 +578,49 @@ spectra_B = np.array([[415,0.000458],[435, 0.0503],[455, 0.157],[475, 0.217],[49
 # plt.show()
 
 ########### 計算散光加 defocus #########################
-diopter=0.5 # 設定近視-(遠視+)度數
-degree=0.5 #設定 PSF 大小
-astigmatism=0.2 # 散光度數
-angle=np.pi/12 #散光角度(以弧度為單位 in radians)，以15度為間格
+# diopter=0.5 # 設定近視-(遠視+)度數
+# degree=0.5 #設定 PSF 大小
+# astigmatism=0.2 # 散光度數
+# angle=np.pi/12 #散光角度(以弧度為單位 in radians)，以15度為間格
 
-# 讀取要處理的圖片
-img_gray=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_e.png")
+# # 讀取要處理的圖片
+# img_gray=cv2.imread("C:\\xampp\\htdocs\\Visual-inspection\\PSF\\letter_e.png")
 
-for astigmatism in np.arange(0.25,2.25,0.25): # 散光度數
-    for i in range(0,13):
-        for diopter in np.arange(-2,2.25,0.25): # 設定近視-(遠視+)度數
-            zc = SpheroCylindricalCoefficients(defocus=diopter, astigmatism=astigmatism, angle=angle*i, pupil=4)  
-            zc=[[2,-2,zc[0]],[2,0,zc[1]],[2,2,zc[2]]]
-            psf=zernikePointSpread(coefficients=zc, Degrees=degree, PupilDiameter=4)
-            # 圖片左右翻轉(因為文章中的 Basis 的 Image 有提到，卷積是從圖片的底部開始做的)
-            # 不知道為啥是左右翻轉
-            img_gray_flip=cv2.flip(img_gray, 1)
-            img_blur= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf))
-            img_blur=cv2.flip(img_blur,1) # 把圖片翻回來
+# for astigmatism in np.arange(0.25,2.25,0.25): # 散光度數
+#     for i in range(0,13):
+#         for diopter in np.arange(-2,2.25,0.25): # 設定近視-(遠視+)度數
+#             zc = SpheroCylindricalCoefficients(defocus=diopter, astigmatism=astigmatism, angle=angle*i, pupil=4)  
+#             zc=[[2,-2,zc[0]],[2,0,zc[1]],[2,2,zc[2]]]
+#             psf=zernikePointSpread(coefficients=zc, Degrees=degree, PupilDiameter=4)
+#             # 圖片左右翻轉(因為文章中的 Basis 的 Image 有提到，卷積是從圖片的底部開始做的)
+#             # 不知道為啥是左右翻轉
+#             img_gray_flip=cv2.flip(img_gray, 1)
+#             img_blur= cv2.filter2D(src=img_gray_flip, ddepth=-1, kernel=Wrap.wrap(psf))
+#             img_blur=cv2.flip(img_blur,1) # 把圖片翻回來
             
-            img_num_astigmatism=astigmatism*100
-            img_num_angle=15*i
-            img_num=diopter*100
-            s=str(img_num_astigmatism)+'_'+str(img_num_angle)+'_'+str(img_num)+'_img.jpg'
-            cv2.imwrite(s, img_blur)  # 存成 jpg
+#             img_num_astigmatism=astigmatism*100
+#             img_num_angle=15*i
+#             img_num=diopter*100
+#             s=str(img_num_astigmatism)+'_'+str(img_num_angle)+'_'+str(img_num)+'_img.jpg'
+#             cv2.imwrite(s, img_blur)  # 存成 jpg
             
 
-print(zc)
-psf=zernikePointSpread(coefficients=zc, Degrees=degree, PupilDiameter=6)
-psf_img = PSFPlot(psf=psf, Degrees=degree)
-plt.show()
+# print(zc)
+# psf=zernikePointSpread(coefficients=zc, Degrees=degree, PupilDiameter=6)
+# psf_img = PSFPlot(psf=psf, Degrees=degree)
+# plt.show()
 
 
 
-plt.figure()
+# plt.figure()
 
 
-plt.subplot(1, 2, 1)
-plt.title("Blur")
-img_blur=cv2.flip(img_blur,1) # 把圖片翻回來
-plt.imshow(img_blur)
+# plt.subplot(1, 2, 1)
+# plt.title("Blur")
+# img_blur=cv2.flip(img_blur,1) # 把圖片翻回來
+# plt.imshow(img_blur)
 
-plt.subplot(1, 2, 2)
-plt.title("Original")
-plt.imshow(img_gray)
-plt.show()
+# plt.subplot(1, 2, 2)
+# plt.title("Original")
+# plt.imshow(img_gray)
+# plt.show()
