@@ -4,28 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/css/confirm_colordot.css" />
     <title>確認是否進入作答畫面的頁面</title>
     <style>
-        /* Header */
-        #header-bar {
-            background-color: #444;
-            width: 100%;
-            padding: 15px 10px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 15;
-            text-align: left; /* 左對齊 */
-            /* margin-bottom: 80px; */
-        }
-        #header-bar a {
-            text-decoration: none;
-            color: #ffffff;
-            font-size: 17px;
-            font-weight: 200;
-            margin-right: 20px;
-            margin-left: 10px; /* 左邊微調間距 */
-        }
+        @import url("fontawesome-all.min.css");
+        @import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,300italic,400italic");
         body {
             display: flex;
             justify-content: center;
@@ -35,7 +18,7 @@
             background-color: #ffffff;
             /*background-image: url("static/images/pic04.jpg");*/
             background-size: cover;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Source Sans Pro', sans-serif;
         }
         .container {
             text-align: center;
@@ -49,6 +32,45 @@
             color: #fefefe;
             margin-bottom: 20px;
         }
+        /* Header */
+        #header-bar {
+            background-color: #444;
+            color:#bbb;
+            width: 100%;
+            /* padding: 15px 10px; */
+            position: fixed;
+            cursor:default;
+            top: 0;
+            left: 0;
+            z-index: 10000;
+            height: 3.25em;
+            line-height: 3.25em;
+            font-family: 'Source Sans Pro', sans-serif;
+            /*text-align: left; /* 左對齊 */
+            /* margin-bottom: 80px; */
+        }
+        #header-bar a {
+            text-decoration: none;
+            color: #bbb;
+            font-size: 17.5px;
+            /* font-weight: 100; */
+            /* margin-right: 20px; */
+            margin-left: 20.5px; /* 左邊微調間距 */
+        }
+        #header {
+            max-width: 100%;
+            margin: 0 auto;
+            text-align: right;
+            padding-right: 10px; /* 增加右側內邊距 */
+        }
+
+        #header a {
+            text-decoration: none;
+            color: #BBBBBB; /* 白色的Home文字 */
+            font-size: 17.333px;
+            font-weight: 200;
+            /* padding: 0px 17.333px; */
+        }
         button {
             background-color: #af9d8f;
             color: white;
@@ -60,7 +82,7 @@
             transition: background-color 0.3s ease;
         }
         button:hover {
-            background-color: #af9d8f;
+            background-color: #a59081;
         }
     </style>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
