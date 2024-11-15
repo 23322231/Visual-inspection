@@ -3,27 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/css/eye_dis_computer.css" />
     <title>距離測量中</title>
     <style>
-        #header-bar {
-            background-color: #444;
-            width: 100%;
-            padding: 15px 10px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 15;
-            text-align: left; /* 左對齊 */
-            /* margin-bottom: 80px; */
-        }
-        #header-bar a {
-            text-decoration: none;
-            color: #ffffff;
-            font-size: 17px;
-            font-weight: 200;
-            margin-right: 20px;
-            margin-left: 10px; /* 左邊微調間距 */
-        }
+        
         
         body {
             margin: 0;
@@ -32,15 +15,38 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f9f4ef;
-            font-family: 'Arial', sans-serif;
+            background-color: #ffffff;
+            /* font-family: 'Arial', sans-serif; */
             color: #333;
+        }
+
+        #header-bar {
+            background-color: #444; /* 深灰色橫條 */
+            color:#bbb;
+            width: 100%;
+            /* padding: 10px 10px; */
+            position: fixed;
+            cursor:default;
+            top: 0;
+            left: 0;
+            z-index: 10000;
+            height: 3.25em;
+            line-height: 3.25em;
+            /*text-align: left; /* 左對齊 */
+        }
+        #header-bar a {
+            text-decoration: none;
+            color: #BBBBBB;
+            font-size: 17.5px;
+            font-weight: 200;
+            /* margin-right: 20px; */
+            margin-left: 20.5px; /* 左邊微調間距 */
         }
 
         .container {
             text-align: center;
             background-color: #af9d8f;
-            padding: 50px;
+            padding: 45px;
             border-radius: 15px;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
         }
@@ -52,10 +58,11 @@
         }
 
         .loading {
-            margin-top: 20px;
+            margin-top: 30px;
             font-size: 1.5em;
             color: #ffffff;
             font-style: italic;
+            margin-bottom: -5px;
         }
 
         /* 添加一個簡單的動畫效果 */
