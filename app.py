@@ -912,7 +912,10 @@ def generate_doctor_advice():
     
     try:#寫在實驗裡面，他沒辦法輸出全繁體... 如何解決...
         # 你是一位眼科醫師，請根據以下視力檢測結果生成一段約150字的全英文建議，建議可以如何保護照顧眼睛，不管狀況多糟還是要給一些建議，不需要講太多細節。
-        prompt = f"You are an ophthalmology researcher. Please generate a 150-word piece of advice in English based on the following vision test results, suggesting how to protect and care for your eyes. No matter how bad the condition is, you still need to give some advice. You don’t need to go into too many details.{symptoms}"
+        prompt = f"You are an ophthalmology researcher. Please generate a 150-word piece of advice 
+        in English based on the following vision test results, suggesting how to protect and care 
+        for your eyes. No matter how bad the condition is, you still need to give some advice. 
+        You don’t need to go into too many details.{symptoms}"
         result = subprocess.run(
             ['ollama', 'run', 'llama3.2', ], input=prompt,
             capture_output=True, text=True, #stderr=subprocess.PIPE,
