@@ -203,7 +203,7 @@
                 } else {
                     console.log('Score:', data.score);
                     var roundedScore = parseFloat(data.score).toFixed(1);
-                    symptoms ="這是一個石原氏色盲測驗的結果，五題我的平均分數為"+String(roundedScore)+"分"; // 取得使用者輸入的症狀描述
+                    symptoms ="這是一個石原氏色盲測驗的結果，總共五題，而我的平均分數為"+String(roundedScore)+"分"; // 取得使用者輸入的症狀描述
                     //symptoms ="這是一個石原氏色盲測驗的結果，我的分數為滿分";//測試用
                     // Display the score on the frontend
                     document.getElementById('scoreDisplay').innerText = `Score: ${roundedScore}`;
