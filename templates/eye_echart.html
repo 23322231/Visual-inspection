@@ -3,28 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/css/eye_echart.css" />
     <title>調整視力測驗圖片大小</title>
     <style>
-        /* Header */
-        #header-bar {
-            background-color: #444;
-            width: 100%;
-            padding: 15px 10px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 15;
-            text-align: left; /* 左對齊 */
-            /* margin-bottom: 80px; */
-        }
-        #header-bar a {
-            text-decoration: none;
-            color: #ffffff;
-            font-size: 17px;
-            font-weight: 200;
-            margin-right: 20px;
-            margin-left: 10px; /* 左邊微調間距 */
-        }
+        
 
         body {
             display: flex;
@@ -54,7 +36,34 @@
         .instruction {
             margin: 10px 0;
             font-size: 1em;
+            font-weight:500;
             color: #666;
+        }
+        /* Header */
+        #header-bar {
+            background-color: #444;
+            color:#bbb;
+            width: 100%;
+            /* padding: 15px 10px; */
+            position: fixed;
+            cursor:default;
+            top: 0;
+            left: 0;
+            z-index: 10000;
+            height: 3.25em;
+            line-height: 3.25em;
+            font-family: 'Source Sans Pro', sans-serif;
+            font-family: 'Source Sans Pro', sans-serif;
+            /*text-align: left; /* 左對齊 */
+            /* margin-bottom: 80px; */
+        }
+        #header-bar a {
+            text-decoration: none;
+            color: #bbb;
+            font-size: 17.5px;
+            /* font-weight: 100; */
+            /* margin-right: 20px; */
+            margin-left: 20.5px; /* 左邊微調間距 */
         }
         #referenceObject {
             border: 2px solid #af9d8f;
