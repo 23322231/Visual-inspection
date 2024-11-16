@@ -151,9 +151,10 @@
 	h1, h2, h3, h4, h5, h6 { 
 		color: #646464;
 		font-weight: 300;
-		line-height: 1em;
-		margin: 0 0 0.5em 0;
-        margin-top: 20px;
+		line-height: 2em;
+		font-family: Arial, Helvetica, sans-serif;
+		/* margin: 0 0 0.5em 0; */
+        margin-top: 50px;
 	}
 
 		h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
