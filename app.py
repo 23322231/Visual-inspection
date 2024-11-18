@@ -208,13 +208,13 @@ def next_image():
     print("執行了")
     
     if 'random_id' not in session:
-        random_id = random.randint(1, 30)
+        random_id = random.randint(1, 30)#1-30
         session['random_id'] = random_id  #將random_id存到session中
         print("NOT")
     else:
         new_random_id=session['random_id']
-        if(new_random_id==29):
-            new_random_id=0
+        if(new_random_id>27):
+            new_random_id=1
         random_id=new_random_id+2
         session['random_id'] = random_id
         print("YES")
