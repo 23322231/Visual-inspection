@@ -14,7 +14,7 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #cbb7a8;
+            background-color: #fefefe;
             
             background-size: cover;
             font-family: Arial, sans-serif;
@@ -71,40 +71,8 @@
             height: calc(100px / 1.618);
             margin: 15px auto;
         }
-        #sliderContainer {
-            margin: 20px auto;
-            width: 100%;
-        }
-        input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 8px;
-            background: linear-gradient(80deg, #af9d8f, #cbb7a8);
-            outline: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            background: #ffffff;
-            border: 2px solid #af9d8f;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-        }
-        input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            background: #ffffff;
-            border: 2px solid #af9d8f;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-        }
+        
+        
         button {
             margin-top: 20px;
             padding: 10px 20px;
@@ -126,15 +94,41 @@
             padding: 10px 15px;
             font-size: 1em;
             color: #fff;
-            /* background-color: #e89980; */
             border: none;
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        /* .back-button:hover { */
-            /* background-color: #d47a7a; */
-        /* } */
+        .image-grid {
+        display: grid;
+        grid-template-rows: auto auto;
+        gap: 10px;
+        margin-top: 20px;
+        justify-items: center;
+        }
+        .main-image img {
+            width: 200px;
+            height: auto;
+            border: 2px solid #af9d8f;
+            border-radius: 5px;
+        }
+        .option-images {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 400px;
+        }
+        .option-images img {
+            width: 80px;
+            height: auto;
+            border: 2px solid #af9d8f;
+            border-radius: 5px;
+        }
+        .highlight{
+            color: red;
+            font-weight: bold;
+        }
+        
     </style>
 </head>
 <body>
@@ -145,20 +139,24 @@
 
 
     <div class="container">
-        <h1>調整E字測驗圖片大小</h1>
+        <h1>測驗說明</h1>
         <p class="instruction">
-            可使用任何標準尺寸的卡片，如身分證、健保卡或提款卡，並調整下方滑桿，使其與物品大小一致。
+            請從下方四張圖片選擇出和題目圖片相同的選項<br><strong class="highlight">*注意*:可複選!</strong><br>如需取消選取，請再次點擊已選取的選項。
         </p>
 
-        <div id="referenceObject"></div>
-        <p class="instruction">寬度：<span id="widthDisplay">100</span> 像素 | 高度：<span id="heightDisplay">62</span> 像素</p>
-
-        <div id="sliderContainer">
-            <label for="sizeSlider">調整大小:</label>
-            <input type="range" id="sizeSlider" min="50" max="500" value="100">
+        <div class="image-grid">
+            <div class="main-image">
+                <img src="static/cb_test_image/rainbow.jpg" alt="主題目圖片">
+            </div>
+            <div class="option-images">
+                <img src="static/cb_test_image/rainbow_tri.jpg" alt="選項1">
+                <img src="static/cb_test_image/rainbow_pro.jpg" alt="選項2">
+                <img src="static/cb_test_image/rainbow.jpg" alt="選項3">
+                <img src="static/cb_test_image/rainbow_deu.jpg" alt="選項4">
+            </div>
         </div>
 
-        <button onclick="confirmAndRedirect()">確認</button>
+        <button onclick="confirm()">確認</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -172,47 +170,10 @@
             console.log('WebSocket 連接已打開');
         });
 
-        const referenceObject = document.getElementById('referenceObject');
-        const widthDisplay = document.getElementById('widthDisplay');
-        const heightDisplay = document.getElementById('heightDisplay');
-        const sizeSlider = document.getElementById('sizeSlider');
-        const goldenRatio = 1.618;
+        
 
-        // 更新方框大小
-        sizeSlider.addEventListener('input', updateSize);
-
-        function updateSize() {
-            const containerWidth = document.querySelector('.container').offsetWidth * 0.9; // 容器的 90% 寬度
-            let widthPx = sizeSlider.value;
-
-            // 限制框框寬度
-            if (widthPx > containerWidth) {
-                widthPx = containerWidth;
-            }
-
-            const heightPx = widthPx / goldenRatio;
-
-            referenceObject.style.width = widthPx + 'px';
-            referenceObject.style.height = heightPx + 'px';
-
-            widthDisplay.textContent = Math.round(widthPx);
-            heightDisplay.textContent = Math.round(heightPx);
-        }
-
-        // 確認並跳轉到顯示 E 字圖片的頁面，發送寬度數據
-        function confirmAndRedirect() {
-            const widthPx = referenceObject.offsetWidth;
-            const heightPx = referenceObject.offsetHeight;
-
-            fetch('/send_width_height', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 'widthPx': widthPx, 'heightPx': heightPx })
-            }).then(response => {
-                console.log('Data saved to session');
-            });
-
-            const newUrl = `${window.location.origin}/eye_qrcode?session=${location.href.split('=').pop()}`; 
+        function confirm() {
+            const newUrl = `${window.location.origin}/image_test`; 
             window.location.href = newUrl;
         }
     </script>

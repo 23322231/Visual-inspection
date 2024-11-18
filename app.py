@@ -173,6 +173,10 @@ def color_blind_simulation():
     return render_template('color_blind_simulation.html')
 
 # 色覺障礙圖片測驗
+@app.route('/image_test_enter')
+def image_test_enter():
+    return render_template('image_test_enter.html')
+
 @app.route('/image_test')
 def image_test():
     return render_template('image_test.html')

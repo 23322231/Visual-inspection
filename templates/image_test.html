@@ -6,27 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>圖片測驗</title>
     <style>
-        /* Header */
-        #header-bar {
-            background-color: #444;
-            color: #BBBBBB;
-            width: 100%;
-            padding: 15px 10px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 15;
-            text-align: left; /* 左對齊 */
-            /* margin-bottom: 80px; */
-        }
-        #header-bar a {
-            text-decoration: none;
-            color: #BBBBBB;
-            font-size: 17px;
-            font-weight: 200;
-            margin-right: 20px;
-            margin-left: 10px; /* 左邊微調間距 */
-        }
         .image-test-container {
             display: flex;
             flex-direction: column;
@@ -45,13 +24,16 @@
         .small-images {
             display: flex;
             justify-content: center;  /* 水平置中 */
-            width: 80%;
+            width: 100%;
+            /* margin-left: 10px;
+            margin-right: 10px; */
         }
         .small-image-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             margin-left:5px;
+            /* margin-right:5px; */
         }
         .small-image {
             width: 300px;
@@ -116,7 +98,7 @@
         }
 
         /* 調整稍小螢幕下的顯示方式 */
-        @media screen and (max-width: 1123px) {
+        @media screen and (max-width: 1300px) {
             .main-image {
                 width: 40%;
                 height: auto;
@@ -125,7 +107,9 @@
             }
             .small-images {
                 /*flex-direction: column;*/ /* 改成垂直排列 */
-                width: 100%; /* 滿版寬度 */
+                width: 90%; /* 滿版寬度 */
+                margin-left: 10px;
+                margin-right: 10px;
             }
             .small-image-container {
                 width: 100%; /* 保持滿版寬度 */
@@ -141,10 +125,10 @@
                 aspect-ratio: 3 / 2; /* 保持圖片比例 */
             }
             button {
-                width: 80%;
+                /* width: 80%; */
                 padding: 10px;
                 font-size: 16px;
-                margin-top: 20px;
+                /* margin-top: 10px; */
             }
             .question-status {
                 font-size: 20px;
@@ -215,11 +199,6 @@
 </head>
 <body>
     <div>
-        <!-- Header section -->
-        <!--<div id="header-bar">-->
-            <!-- <a href="index.html">Home</a> -->
-            <!--<a href="https://767f-2001-b011-2003-bf38-4d58-2a3a-a2ad-6c2.ngrok-free.app/quiz" style="float: left;">VisionCare</a>-->
-        <!--</div>-->
 
         <!-- Main -->
         <section id="main" class="container">
