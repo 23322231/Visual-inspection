@@ -206,22 +206,20 @@ def myopia():
 @app.route('/next-image')
 def next_image():
     print("執行了")
-    # order=[1,3,5,7,9,11,13,15,17,19]
-
-    # if 'current_index' not in session:
-    #     session['current_index'] = 0
-
-    # current_index = session.get('current_index',None)
-
-    # if current_index >= len(order):
-    #     return jsonify({'error': 'No more images'}), 404
     
-    random_id = random.randint(1, 30)
-    session['random_id'] = random_id  #將random_id存到session中
+    if 'random_id' not in session:
+        random_id = random.randint(1, 30)
+        session['random_id'] = random_id  #將random_id存到session中
+        print("NOT")
+    else:
+        new_random_id=session['random_id']
+        if(new_random_id==29):
+            new_random_id=0
+        random_id=new_random_id+2
+        session['random_id'] = random_id
+        print("YES")
+    
 
-    # random_id = order[current_index]
-    # session['random_id'] = random_id
-    # session['current_index'] = current_index + 1  #current_index + 1存到session中 用來記錄目前是第幾題
 
     colorblind_test = db.session.query(pic).filter(pic.id == random_id).first()
     if colorblind_test:
@@ -230,6 +228,8 @@ def next_image():
         return jsonify({'nextImageUrl': next_image_url})
     else:
         return jsonify({'error': 'No image found'}), 404
+    
+    
 
 #電腦端色盲點圖功能顯示結果
 @app.route('/result_cb', methods=['POST'])
@@ -973,5 +973,5 @@ def handle_start_session(data):
 
 if __name__ == '__main__':
     # with app.app_context():
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
     # socketio.run(app,host='0.0.0.0', port=5000, debug=True)

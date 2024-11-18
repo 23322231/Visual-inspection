@@ -21,13 +21,27 @@ db = SQLAlchemy(app)
 #     image_data = Column(LargeBinary, nullable=False)
 #     answer = Column(Integer, nullable=False)
 
+# class ImageModel(db.Model):
+#     __tablename__ = 'e_chart'
+#     id = Column(Integer, primary_key=True)
+#     chart = Column(LargeBinary, nullable=False)
+
 class ImageModel(db.Model):
-    __tablename__ = 'e_chart'
+    __tablename__ = 'pic_number'
     id = Column(Integer, primary_key=True)
-    chart = Column(LargeBinary, nullable=False)
+    number = Column(Integer, nullable=False)
 
-
-
+def save_database(ids, numbers):
+    numbers = []
+    
+    for image_id, number in zip(ids, numbers):
+        new_image = ImageModel(id=image_id, number=number)
+        numbers.append(new_image)
+    
+    db.session.bulk_save_objects(numbers)
+    db.session.commit()
+    print(f"{len(numbers)} images and numbers saved to database successfully.")
+    
 def save_images_to_db(ids, image_paths):
     # if len(image_paths) != len(answers) or len(ids) != len(answers):
     #     raise ValueError("圖片數量和答案數量不匹配")
@@ -119,14 +133,15 @@ if __name__ == "__main__":
     #     "static/colorblind_image/110.jpg",
     # ]
 
-    image_paths = [
-        "static/e_chart/up.jpg",
-        "static/e_chart/down.jpg",
-        "static/e_chart/left.jpg",
-        "static/e_chart/right.jpg"
-    ]
+    # image_paths = [
+    #     "static/e_chart/up.jpg",
+    #     "static/e_chart/down.jpg",
+    #     "static/e_chart/left.jpg",
+    #     "static/e_chart/right.jpg"
+    # ]
     # answers = [2,3,5,6,7,8,12,15,16,26,29,35,42,45,57,73,74,96,97,100,101,102,103,104,105,106,107,108,109,110 ]  # 對應的答案列表 #不是數字的填100
-
+    number = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30']
     with app.app_context():
         db.create_all()  # 創建表
-        save_images_to_db(id,image_paths)
+        # save_images_to_db(id,image_paths)
+        save_database(id, number)

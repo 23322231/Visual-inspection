@@ -22,8 +22,6 @@
             line-height: 3.25em;
             font-family: 'Source Sans Pro', sans-serif;
             font-family: 'Source Sans Pro', sans-serif;
-            /*text-align: left; /* 左對齊 */
-            /* margin-bottom: 80px; */
         }
         #header-bar a {
             text-decoration: none;
@@ -33,29 +31,7 @@
             /* margin-right: 20px; */
             margin-left: 20.5px; /* 左邊微調間距 */
         }
-        /* body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #ffffff;
-            font-family: 'Arial', sans-serif;
-            color: #efefef;
-        }
-
-        .container {
-            text-align: center;
-            background-color: #faebcc;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            max-width: 800px; /* 增加寬度來容納更多圖片 */
-            /* width: 100%; */
-        /* }  */
-
+    
         body {
             margin: 0;
             padding: 0;
@@ -110,7 +86,7 @@
             font-size: 1.1rem;
             border: 1px solid #faebcc;
             border-radius: 6px;
-            text-align: center;
+            /* text-align: center; */
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
             margin-bottom: 50px;
             margin-left: 20px;
@@ -172,7 +148,7 @@
     <!-- Header section -->
     <div id="header-bar">
         <!-- <a href="index.html">Home</a> -->
-        <a href="https://767f-2001-b011-2003-bf38-4d58-2a3a-a2ad-6c2.ngrok-free.app/quiz" style="float: left;">VisionCare</a>
+        <a href="https://227b-2001-b011-2003-bf38-fdcf-bff2-2419-3418.ngrok-free.app/quiz" style="float: left;">VisionCare</a>
     </div>
 </head>
 <body>
@@ -185,7 +161,7 @@
 
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
-        var socket = io.connect('https://767f-2001-b011-2003-bf38-4d58-2a3a-a2ad-6c2.ngrok-free.app', {
+        var socket = io.connect('https://227b-2001-b011-2003-bf38-fdcf-bff2-2419-3418.ngrok-free.app', {
             pingInterval: 25000, // 25 seconds
             pingTimeout: 60000,  // 60 seconds
         });
@@ -208,10 +184,11 @@
             .then(data => {
                 if (data.error) {
                     console.error('Error:', data.error);
+                    document.getElementById('scoreDisplay').innerText = `Score: 0`;
                 } else {
                     console.log('Score:', data.score);
                     var roundedScore = parseFloat(data.score).toFixed(1);
-                    symptoms ="這是一個石原氏色盲測驗的結果，總共五題，而我的平均分數為"+String(roundedScore)+"分"; // 取得使用者輸入的症狀描述
+                    symptoms ="這是一個石原氏色盲測驗的結果，總共100分，而我的分數為"+String(roundedScore)+"分"; // 取得使用者輸入的症狀描述
                     //symptoms ="這是一個石原氏色盲測驗的結果，我的分數為滿分";//測試用
                     // Display the score on the frontend
                     document.getElementById('scoreDisplay').innerText = `Score: ${roundedScore}`;
