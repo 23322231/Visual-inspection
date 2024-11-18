@@ -125,7 +125,7 @@
 		border-bottom: dotted 1px;
 		color: #bbb;
 		text-decoration: none;
-		margin-left: 20px;
+		margin-left: 18.5px;
 	}
 
 		a:hover {
@@ -3489,9 +3489,9 @@
 				padding-top: 0;
 			}
 
-			#header {
+			/* #header {
 				display: none;
-			}
+			} */
 
 		/* Banner */
 

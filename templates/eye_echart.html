@@ -60,10 +60,10 @@
         #header-bar a {
             text-decoration: none;
             color: #bbb;
-            font-size: 17.5px;
+            /* font-size: 17.5px; */
             /* font-weight: 100; */
             /* margin-right: 20px; */
-            margin-left: 20.5px; /* 左邊微調間距 */
+            margin-left: 18px; /* 左邊微調間距 */
         }
         #referenceObject {
             border: 2px solid #af9d8f;
@@ -140,14 +140,14 @@
 <body>
     <div id="header-bar">
         <!-- <a href="index.html">Home</a> -->
-        <a href="https://a99e-2001-b011-2003-fbb8-61c0-c59-2040-22f5.ngrok-free.app/quiz" style="float: left;">VisionCare</a>
+        <a href="https://767f-2001-b011-2003-bf38-4d58-2a3a-a2ad-6c2.ngrok-free.app/quiz" style="float: left;">VisionCare</a>
     </div>
 
 
     <div class="container">
         <h1>調整E字測驗圖片大小</h1>
         <p class="instruction">
-            請將信用卡或其他長寬為85.60毫米、53.98毫米的卡片放在螢幕上框框中，並調整下方滑桿，使其與物品大小一致。
+            可使用任何標準大小的身分證、健保卡、信用卡或銀行卡，並調整下方滑桿，使其與物品大小一致。
         </p>
 
         <div id="referenceObject"></div>
@@ -165,7 +165,7 @@
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
         // 初始化 WebSocket 連接
-        var socket = io.connect('https://a99e-2001-b011-2003-fbb8-61c0-c59-2040-22f5.ngrok-free.app');
+        var socket = io.connect('https://767f-2001-b011-2003-bf38-4d58-2a3a-a2ad-6c2.ngrok-free.app');
     
         // WebSocket 連接成功時的處理
         socket.on('connect', function() {
